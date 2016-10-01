@@ -1,0 +1,19 @@
+ServerName $PRIMARY_DOMAIN
+
+# Only if secondary domains are defined
+# ServerAlias $SECONDARY_DOMAIN [, $SECONDARY_DOMAIN ...]
+
+CustomLog $LOG_DIR/$ACCOUNT/access_log combined
+
+DocumentRoot "$WEBROOT_DIR/$ACCOUNT"
+<Directory "$WEBROOT_DIR/$ACCOUNT">
+	RewriteEngine on
+	RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+	RewriteRule .* - [F]
+
+	Options -Indexes +FollowSymLinks
+	AllowOverride All
+	Require all granted
+</Directory>
+
+Include $CONFIG_DIR/$ACCOUNT/vhost_fpm.include
