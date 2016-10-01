@@ -1,0 +1,3 @@
+SSLCertificateKeyFile /etc/letsencrypt/live/Tollwerk.tools/privkey.pem
+SSLCertificateFile /etc/letsencrypt/live/Tollwerk.tools/cert.pem
+SSLCertificateChainFile /etc/letsencrypt/live/Tollwerk.tools/chain.pem

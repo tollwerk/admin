@@ -1,3 +1,0 @@
-SSLCertificateKeyFile /etc/letsencrypt/live/apparat.tools/privkey.pem
-SSLCertificateFile /etc/letsencrypt/live/apparat.tools/cert.pem
-SSLCertificateChainFile /etc/letsencrypt/live/apparat.tools/chain.pem

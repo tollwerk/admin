@@ -1,0 +1,6 @@
+<FilesMatch "\.php$">
+        SetHandler "proxy:unix://$FPM_SOCKETS/$ACCOUNT.sock|fcgi://$ACCOUNT/"
+</FilesMatch>
+
+<Proxy fcgi://$ACCOUNT/ enablereuse=on max=10>
+</Proxy>
