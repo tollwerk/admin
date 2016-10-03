@@ -1,13 +1,13 @@
 <?php
 
 /**
- * tollwerk-admin
+ * admin
  *
- * @category    Tollwerk
- * @package     Tollwerk\Admin
- * @subpackage  Tollwerk\Admin\Domain
- * @author      Joschi Kuphal <joschi@kuphal.net> / @jkphl
- * @copyright   Copyright © 2016 Joschi Kuphal <joschi@kuphal.net> / @jkphl
+ * @category    Apparat
+ * @package     Apparat\Server
+ * @subpackage  ${NAMESPACE}
+ * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
+ * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
  */
 
@@ -34,48 +34,10 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-namespace Tollwerk\Admin\Domain\Domain;
+require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
 
-/**
- * Domain
- *
- * @package Tollwerk\Admin
- * @subpackage Tollwerk\Admin\Domain
- */
-class Domain extends AbstractDomain
-{
-    /**
-     * Root domain
-     *
-     * @var DomainInterface
-     */
-    protected $rootDomain;
+use \Tollwerk\Admin\Application\Factory\AccountFactory;
+use \Tollwerk\Admin\Infrastructure\Strategy\DoctrineAccountFactoryStrategy;
 
-    /**
-     * Constructor
-     *
-     * @param string $name Domain name
-     * @param DomainInterface $rootDomain Root domain
-     * @throws \RuntimeException If the domain name is invalid
-     */
-    public function __construct($name, DomainInterface $rootDomain)
-    {
-        // If the domain name is invalid
-        if (!strlen($name) || !preg_match('%^\*|(?:[a-z\d][a-z\d\d]*)$%', $name)) {
-            throw new \RuntimeException(sprintf('Invalid domain name "%s"', $name), 1475352664);
-        }
-
-        $this->name = $name;
-        $this->rootDomain = $rootDomain;
-    }
-
-    /**
-     * Serialize as string
-     *
-     * @return string Domain
-     */
-    public function __toString()
-    {
-        return $this->name.'.'.$this->rootDomain;
-    }
-}
+$account = AccountFactory::make('test', new DoctrineAccountFactoryStrategy());
+print_r($account);

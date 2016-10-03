@@ -350,6 +350,8 @@ class Vhost implements VhostInterface
      */
     public function setRedirectUrl($redirectUrl)
     {
+        $redirectUrl = trim($redirectUrl) ?: null;
+
         // If the redirect URL is invalid
         if (($redirectUrl !== null) &&
             (!filter_var($redirectUrl, FILTER_VALIDATE_URL)

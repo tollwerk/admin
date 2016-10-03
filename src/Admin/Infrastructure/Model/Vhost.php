@@ -36,6 +36,8 @@
 
 namespace Tollwerk\Admin\Infrastructure\Model;
 
+use Tollwerk\Admin\Ports\App;
+
 /**
  * Virtual host model
  *
@@ -62,13 +64,6 @@ class Vhost
      */
     protected $active;
     /**
-     * Virtual host name
-     *
-     * @var string
-     * @Column(length=64)
-     */
-    protected $name;
-    /**
      * Account this domain is belonging to
      *
      * @var Account
@@ -86,21 +81,20 @@ class Vhost
      * Primary domain of this virtual host
      *
      * @var Domain
-     * @OneToOne(targetEntity="Tollwerk\Admin\Infrastructure\Model\Domain")
      */
-    protected $primaryDomain;
+    protected $primarydomain;
     /**
      * Document root directory
      *
      * @var string
-     * @Column(length=128)
+     * @Column(length=128,unique=true)
      */
     protected $docroot;
     /**
      * Port
      *
      * @var int
-     * @Column(type="integer", nullable=false, options={"unsigned":true, "default":1})
+     * @Column(type="integer", nullable=false, options={"unsigned":true, "default":80})
      */
     protected $port;
     /**
@@ -123,14 +117,14 @@ class Vhost
      * @var string
      * @Column(length=128)
      */
-    protected $redirectUrl;
+    protected $redirecturl;
     /**
      * Redirect status
      *
      * @var int
      * @Column(type="integer", nullable=false, options={"unsigned":true, "default":301})
      */
-    protected $redirectStatus;
+    protected $redirectstatus;
 
     /**
      * Return the vhost ID
@@ -151,28 +145,6 @@ class Vhost
     public function setId($id)
     {
         $this->id = $id;
-        return $this;
-    }
-
-    /**
-     * Return the vhost name
-     *
-     * @return string Vhost name
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Set the vhost name
-     *
-     * @param string $name Vhost name
-     * @return Vhost
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
         return $this;
     }
 
@@ -247,20 +219,26 @@ class Vhost
      *
      * @return Domain Primary domain
      */
-    public function getPrimaryDomain()
+    public function getPrimarydomain()
     {
-        return $this->primaryDomain;
+        if ($this->primarydomain === null) {
+            $entityManager = App::getEntityManager();
+            $domainRepository = $entityManager->getRepository(Domain::class);
+            $this->primarydomain = $domainRepository->findOneBy(['vhost' => $this->getId(), 'primarydomain' => 1]);
+        }
+
+        return $this->primarydomain;
     }
 
     /**
      * Set the primary domain of this virtual host
      *
-     * @param Domain $primaryDomain Primary domain
+     * @param Domain $primarydomain Primary domain
      * @return Vhost Self reference
      */
-    public function setPrimaryDomain($primaryDomain)
+    public function setPrimarydomain($primarydomain)
     {
-        $this->primaryDomain = $primaryDomain;
+        $this->primarydomain = $primarydomain;
         return $this;
     }
 
@@ -357,20 +335,20 @@ class Vhost
      *
      * @return string Redirect URL
      */
-    public function getRedirectUrl()
+    public function getRedirecturl()
     {
-        return $this->redirectUrl;
+        return $this->redirecturl;
     }
 
     /**
      * Set the redirect URL
      *
-     * @param string $redirectUrl Redirect URL
+     * @param string $redirecturl Redirect URL
      * @return Vhost Self reference
      */
-    public function setRedirectUrl($redirectUrl)
+    public function setRedirecturl($redirecturl)
     {
-        $this->redirectUrl = $redirectUrl;
+        $this->redirecturl = $redirecturl;
         return $this;
     }
 
@@ -379,20 +357,20 @@ class Vhost
      *
      * @return int Redirect status
      */
-    public function getRedirectStatus()
+    public function getRedirectstatus()
     {
-        return $this->redirectStatus;
+        return $this->redirectstatus;
     }
 
     /**
      * Set the redirect status
      *
-     * @param int $redirectStatus Redirect status
+     * @param int $redirectstatus Redirect status
      * @return Vhost Self reference
      */
-    public function setRedirectStatus($redirectStatus)
+    public function setRedirectstatus($redirectstatus)
     {
-        $this->redirectStatus = $redirectStatus;
+        $this->redirectstatus = $redirectstatus;
         return $this;
     }
 }

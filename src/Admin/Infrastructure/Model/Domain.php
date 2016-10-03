@@ -42,7 +42,7 @@ namespace Tollwerk\Admin\Infrastructure\Model;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  * @Entity
- * @Table(name="domain")
+ * @Table(name="domain",uniqueConstraints={@UniqueConstraint(name="primary_idx", columns={"vhost_id", "primarydomain"})})
  */
 class Domain
 {
@@ -82,6 +82,13 @@ class Domain
      * @ManyToOne(targetEntity="Tollwerk\Admin\Infrastructure\Model\Vhost", inversedBy="domains")
      */
     protected $vhost;
+    /**
+     * Primary domain
+     *
+     * @var boolean
+     * @Column(type="boolean", nullable=true)
+     */
+    protected $primarydomain;
     /**
      * Add the wildcard subdomain
      *
@@ -219,6 +226,28 @@ class Domain
     public function setWildcard($wildcard)
     {
         $this->wildcard = $wildcard;
+        return $this;
+    }
+
+    /**
+     * Return whether this is the primary domain of the associated virtual host
+     *
+     * @return boolean Primary domain
+     */
+    public function isPrimarydomain()
+    {
+        return $this->primarydomain;
+    }
+
+    /**
+     * Set whether this is the primary domain of the associated virtual host
+     *
+     * @param boolean $primarydomain Primary domain
+     * @return Domain Self reference
+     */
+    public function setPrimarydomain($primarydomain)
+    {
+        $this->primarydomain = $primarydomain ?: null;
         return $this;
     }
 }

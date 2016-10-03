@@ -1,13 +1,13 @@
 <?php
 
 /**
- * tollwerk-admin
+ * admin
  *
- * @category    Tollwerk
- * @package     Tollwerk\Admin
- * @subpackage  Tollwerk\Admin\Domain
- * @author      Joschi Kuphal <joschi@kuphal.net> / @jkphl
- * @copyright   Copyright © 2016 Joschi Kuphal <joschi@kuphal.net> / @jkphl
+ * @category    Apparat
+ * @package     Apparat\Server
+ * @subpackage  Tollwerk\Admin\Application\Factory
+ * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
+ * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
  */
 
@@ -34,48 +34,27 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-namespace Tollwerk\Admin\Domain\Domain;
+namespace Tollwerk\Admin\Application\Factory;
+
+use Tollwerk\Admin\Domain\Account\Account;
 
 /**
- * Domain
+ * Account factory
  *
- * @package Tollwerk\Admin
- * @subpackage Tollwerk\Admin\Domain
+ * @package Apparat\Server
+ * @subpackage Tollwerk\Admin\Application
  */
-class Domain extends AbstractDomain
+class AccountFactory
 {
     /**
-     * Root domain
+     * Instantiate and return an account
      *
-     * @var DomainInterface
+     * @param string $name Account name
+     * @param AccountFactoryStrategy $strategy Account factory strategy
+     * @return Account Account
      */
-    protected $rootDomain;
-
-    /**
-     * Constructor
-     *
-     * @param string $name Domain name
-     * @param DomainInterface $rootDomain Root domain
-     * @throws \RuntimeException If the domain name is invalid
-     */
-    public function __construct($name, DomainInterface $rootDomain)
+    public static function make($name, AccountFactoryStrategy $strategy)
     {
-        // If the domain name is invalid
-        if (!strlen($name) || !preg_match('%^\*|(?:[a-z\d][a-z\d\d]*)$%', $name)) {
-            throw new \RuntimeException(sprintf('Invalid domain name "%s"', $name), 1475352664);
-        }
-
-        $this->name = $name;
-        $this->rootDomain = $rootDomain;
-    }
-
-    /**
-     * Serialize as string
-     *
-     * @return string Domain
-     */
-    public function __toString()
-    {
-        return $this->name.'.'.$this->rootDomain;
+        return $strategy->makeAccount($name);
     }
 }
