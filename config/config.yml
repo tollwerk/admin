@@ -17,4 +17,4 @@ general:
   locale: de_DE
 shell:
   group: account
-  base: /www/web
+  base: "/root/lab/admin/tmp"

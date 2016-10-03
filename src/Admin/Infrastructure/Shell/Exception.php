@@ -5,7 +5,7 @@
  *
  * @category    Apparat
  * @package     Apparat\Server
- * @subpackage  ${NAMESPACE}
+ * @subpackage  Tollwerk\Admin\Infrastructure\Shell
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
@@ -34,9 +34,15 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
+namespace Tollwerk\Admin\Infrastructure\Shell;
 
-var_dump(\Tollwerk\Admin\Infrastructure\Shell\User::create('tester'));
-var_dump(\Tollwerk\Admin\Infrastructure\Shell\User::deleteGroup('tester', 'apache'));
-//var_dump(\Tollwerk\Admin\Infrastructure\Shell\User::rename('tester', 'hans'));
-//var_dump(\Tollwerk\Admin\Infrastructure\Shell\User::delete('tester'));
+/**
+ * Shell exception
+ *
+ * @package Apparat\Server
+ * @subpackage Tollwerk\Admin\Infrastructure
+ */
+class Exception extends \RuntimeException
+{
+
+}
