@@ -36,7 +36,6 @@
 
 namespace Tollwerk\Admin\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Tollwerk\Admin\Domain\Domain\Domain;
 use Tollwerk\Admin\Domain\Domain\TopLevelDomain;
 use Tollwerk\Admin\Domain\Factory\DomainFactory;
@@ -47,7 +46,7 @@ use Tollwerk\Admin\Domain\Factory\DomainFactory;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Tests
  */
-class DomainTests extends TestCase
+class DomainTests extends \PHPUnit_Framework_TestCase
 {
     /**
      * Test a top-level-domain

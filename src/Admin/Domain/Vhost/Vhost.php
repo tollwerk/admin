@@ -1,13 +1,13 @@
 <?php
 
 /**
- * tollwerk-admin
+ * admin
  *
  * @category    Apparat
  * @package     Apparat\Server
- * @subpackage  Apparat\Server\<Layer>
- * @author      Joschi Kuphal <joschi@kuphal.net> / @jkphl
- * @copyright   Copyright © 2016 Joschi Kuphal <joschi@kuphal.net> / @jkphl
+ * @subpackage  Tollwerk\Admin\Domain\Vhost
+ * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
+ * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
  */
 
@@ -36,6 +36,8 @@
 
 namespace Tollwerk\Admin\Domain\Vhost;
 
+use Tollwerk\Admin\Domain\Domain\DomainInterface;
+
 /**
  * Virtual host
  *
@@ -45,11 +47,23 @@ namespace Tollwerk\Admin\Domain\Vhost;
 class Vhost implements VhostInterface
 {
     /**
-     * Virtual host core
+     * Primary domain
      *
-     * @var VhostCoreInterface
+     * @var DomainInterface
      */
-    protected $core;
+    protected $primaryDomain;
+    /**
+     * Secondary domains
+     *
+     * @var DomainInterface[]
+     */
+    protected $secondaryDomains = [];
+    /**
+     * Document root
+     *
+     * @var string
+     */
+    protected $docroot;
     /**
      * Port
      *
@@ -57,38 +71,95 @@ class Vhost implements VhostInterface
      */
     protected $port;
     /**
-     * SSL account (if enabled)
+     * Active PHP version
      *
-     * @var string|null
+     * @var null|string
      */
-    protected $ssl;
+    protected $php = null;
     /**
-     * PHP version
+     * Absolute URL to redirect to
      *
-     * @var string|null
+     * @var null|string
      */
-    protected $php;
+    protected $redirectUrl = null;
+    /**
+     * Redirect status code
+     *
+     * @var int
+     */
+    protected $redirectStatus = 301;
+    /**
+     * Supported protocols
+     *
+     * @var int
+     */
+    protected $protocols = self::PROTOCOL_HTTP;
+    /**
+     * Default port for HTTP virtual hosts
+     *
+     * @var int
+     */
+    const PORT_HTTP_DEFAULT = 80;
+    /**
+     * Default port for HTTPS virtual hosts
+     *
+     * @var int
+     */
+    const PORT_HTTPS_DEFAULT = 443;
+    /**
+     * HTTP protocol
+     *
+     * @var int
+     */
+    const PROTOCOL_HTTP = 1;
+    /**
+     * HTTPS protocol
+     *
+     * @var int
+     */
+    const PROTOCOL_HTTPS = 2;
+    /**
+     * Supported protocols
+     *
+     * @var array
+     */
+    protected static $supportedProtocols = [
+        self::PROTOCOL_HTTP => 'http',
+        self::PROTOCOL_HTTPS => 'https',
+    ];
 
     /**
      * Virtual host constructor
      *
+     * @param DomainInterface $primaryDomain Primary domain
+     * @param string $docroot Document root
      * @param int $port Port
-     * @param VhostCoreInterface $core Virtual host core
      */
-    public function __construct($port, VhostCoreInterface $core)
+    public function __construct(DomainInterface $primaryDomain, $docroot, $port = self::PORT_HTTP_DEFAULT)
     {
+        $this->primaryDomain = $primaryDomain;
+        $this->docroot = $docroot;
         $this->port = $port;
-        $this->core = $core;
     }
 
     /**
-     * Return the virtual host core
+     * Return the primary domain
      *
-     * @return VhostCoreInterface Virtual host core
+     * @return DomainInterface Primary domain
      */
-    public function getCore()
+    public function getPrimaryDomain()
     {
-        return $this->core;
+        return $this->primaryDomain;
+    }
+
+    /**
+     * Return the document root
+     *
+     * @return string Document root
+     */
+    public function getDocroot()
+    {
+        return $this->docroot;
     }
 
     /**
@@ -102,29 +173,67 @@ class Vhost implements VhostInterface
     }
 
     /**
-     * Return the active SSL account
+     * Return the secondary domains
      *
-     * @return null|string SSL account
+     * @return DomainInterface[]
      */
-    public function getSsl()
+    public function getSecondaryDomains()
     {
-        return $this->ssl;
+        return array_values($this->secondaryDomains);
     }
 
     /**
-     * Set the active SSL account
+     * Set the secondary domains
      *
-     * @param null|string $ssl SSL account
+     * @param DomainInterface[] $secondaryDomains
      * @return Vhost Self reference
+     * @throws \RuntimeException If the domain is invalid
      */
-    public function setSsl($ssl)
+    public function setSecondaryDomains(array $secondaryDomains)
     {
-        $this->ssl = $ssl;
+        $this->secondaryDomains = [];
+        /** @var DomainInterface $secondaryDomain */
+        foreach ($secondaryDomains as $secondaryDomain) {
+            // If the domain is invalid
+            if (!is_object($secondaryDomain)
+                || !(new \ReflectionClass($secondaryDomain))->implementsInterface(DomainInterface::class)
+            ) {
+                throw new \RuntimeException(sprintf('Invalid secondary domain "%s"', $secondaryDomain), 1475484852);
+            }
+            $this->secondaryDomains[strval($secondaryDomain)] = $secondaryDomain;
+        }
+
         return $this;
     }
 
     /**
-     * Get the active PHP version
+     * Add a secondary domain
+     *
+     * @param DomainInterface $secondaryDomain Secondary domain
+     * @return Vhost Self reference
+     */
+    public function addSecondaryDomain(DomainInterface $secondaryDomain)
+    {
+        if (!array_key_exists(strval($secondaryDomain), $this->secondaryDomains)) {
+            $this->secondaryDomains[strval($secondaryDomain)] = $secondaryDomain;
+        }
+        return $this;
+    }
+
+    /**
+     * Remove a secondary domain
+     *
+     * @param DomainInterface $secondaryDomain Secondary domain
+     * @return Vhost Self reference
+     */
+    public function removeSecondaryDomain(DomainInterface $secondaryDomain)
+    {
+        unset($this->secondaryDomains[strval($secondaryDomain)]);
+        return $this;
+    }
+
+    /**
+     * Return the active PHP version
      *
      * @return null|string Active PHP version
      */
@@ -138,10 +247,143 @@ class Vhost implements VhostInterface
      *
      * @param null|string $php Active PHP version
      * @return Vhost Self reference
+     * @throws \RuntimeException If the PHP version is invalid
      */
     public function setPhp($php)
     {
+        // If the PHP version is invalid
+        if (($php !== null) && !preg_match('%^\d\.\d$%', $php)) {
+            throw new \RuntimeException(sprintf('Invalid PHP version "%s"', $php), 1475485163);
+        }
+
         $this->php = $php;
+        return $this;
+    }
+
+    /**
+     * Return the supported protocols
+     *
+     * @return int Supported protocols
+     */
+    public function getProtocols()
+    {
+        return $this->protocols;
+    }
+
+    /**
+     * Set the supported protocols
+     *
+     * @param int $protocols Supported protocols
+     * @return Vhost Self reference
+     * @throws \RuntimeException If the protocol is unsupported
+     */
+    public function setProtocols($protocols)
+    {
+        $protocols = $supportedProtocols = intval($protocols);
+        foreach (self::$supportedProtocols as $supportedProtocol => $supportedProtocolString) {
+            $supportedProtocols &= ~$supportedProtocol;
+        }
+        // If the protocol is unsupported
+        if (intval($supportedProtocols)) {
+            throw new \RuntimeException(sprintf('Invalid protocols "%s"', $protocols), 1475484081);
+        }
+        $this->protocols = $protocols;
+        return $this;
+    }
+
+    /**
+     * Enable a supported protocol
+     *
+     * @param int $protocol Protocol
+     * @return Vhost Self reference
+     * @throws \RuntimeException If the protocol is unsupported
+     */
+    public function enableProtocol($protocol)
+    {
+        $protocol = intval($protocol);
+
+        // If the protocol is unsupported
+        if (empty(self::$supportedProtocols[$protocol])) {
+            throw new \RuntimeException(sprintf('Invalid protocol "%s"', $protocol), 1475484081);
+        }
+
+        $this->protocols |= $protocol;
+        return $this;
+    }
+
+    /**
+     * Disable a supported protocol
+     *
+     * @param int $protocol Protocol
+     * @return Vhost Self reference
+     * @throws \RuntimeException If the protocol is unsupported
+     */
+    public function disableProtocol($protocol)
+    {
+        $protocol = intval($protocol);
+
+        // If the protocol is unsupported
+        if (empty(self::$supportedProtocols[$protocol])) {
+            throw new \RuntimeException(sprintf('Invalid protocol "%s"', $protocol), 1475484081);
+        }
+
+        $this->protocols &= ~$protocol;
+        return $this;
+    }
+
+    /**
+     * Return the redirect URL
+     *
+     * @return null|string Redirect URL
+     */
+    public function getRedirectUrl()
+    {
+        return $this->redirectUrl;
+    }
+
+    /**
+     * Set the redirect URL
+     *
+     * @param null|string $redirectUrl Redirect URL
+     * @return Vhost Self reference
+     * @throws \RuntimeException If the redirect URL is invalid
+     */
+    public function setRedirectUrl($redirectUrl)
+    {
+        // If the redirect URL is invalid
+        if (($redirectUrl !== null) &&
+            (!filter_var($redirectUrl, FILTER_VALIDATE_URL)
+                || !in_array(strtolower(parse_url($redirectUrl, PHP_URL_SCHEME)), self::$supportedProtocols))
+        ) {
+            throw new \RuntimeException(sprintf('Invalid redirect URL "%s"', $redirectUrl), 1475486589);
+        }
+
+        $this->redirectUrl = $redirectUrl;
+        return $this;
+    }
+
+    /**
+     * Return the redirect HTTP status code
+     *
+     * @return int Redirect HTTP status code
+     */
+    public function getRedirectStatus()
+    {
+        return $this->redirectStatus;
+    }
+
+    /**
+     * Set the redirect HTTP status code
+     *
+     * @param int $redirectStatus Redirect HTTP status code
+     * @return Vhost Self reference
+     */
+    public function setRedirectStatus($redirectStatus)
+    {
+        if (!is_int($redirectStatus) || (($redirectStatus < 300) || ($redirectStatus > 308))) {
+            throw new \RuntimeException(sprintf('Invalid redirect HTTP status code "%s"', $redirectStatus), 1475486679);
+        }
+        $this->redirectStatus = $redirectStatus;
         return $this;
     }
 }

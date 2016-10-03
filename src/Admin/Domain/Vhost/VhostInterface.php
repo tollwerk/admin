@@ -36,6 +36,8 @@
 
 namespace Tollwerk\Admin\Domain\Vhost;
 
+use Tollwerk\Admin\Domain\Domain\DomainInterface;
+
 /**
  * Virtual host interface
  *
@@ -47,17 +49,25 @@ interface VhostInterface
     /**
      * Virtual host constructor
      *
+     * @param DomainInterface $primaryDomain Primary domain
+     * @param string $docroot Document root
      * @param int $port Port
-     * @param VhostCoreInterface $core Virtual host core
      */
-    public function __construct($port, VhostCoreInterface $core);
+    public function __construct(DomainInterface $primaryDomain, $docroot, $port);
 
     /**
-     * Return the virtual host core
+     * Return the primary domain
      *
-     * @return VhostCoreInterface Virtual host core
+     * @return DomainInterface Primary domain
      */
-    public function getCore();
+    public function getPrimaryDomain();
+
+    /**
+     * Return the document root
+     *
+     * @return string Document root
+     */
+    public function getDocroot();
 
     /**
      * Return the port
@@ -67,22 +77,39 @@ interface VhostInterface
     public function getPort();
 
     /**
-     * Return the active SSL account
+     * Return the secondary domains
      *
-     * @return null|string SSL account
+     * @return DomainInterface[]
      */
-    public function getSsl();
+    public function getSecondaryDomains();
 
     /**
-     * Set the active SSL account
+     * Set the secondary domains
      *
-     * @param null|string $ssl SSL account
+     * @param DomainInterface[] $secondaryDomains
+     * @return Vhost Self reference
+     * @throws \RuntimeException If the domain is invalid
+     */
+    public function setSecondaryDomains(array $secondaryDomains);
+
+    /**
+     * Add a secondary domain
+     *
+     * @param DomainInterface $secondaryDomain Secondary domain
      * @return Vhost Self reference
      */
-    public function setSsl($ssl);
+    public function addSecondaryDomain(DomainInterface $secondaryDomain);
 
     /**
-     * Get the active PHP version
+     * Remove a secondary domain
+     *
+     * @param DomainInterface $secondaryDomain Secondary domain
+     * @return Vhost Self reference
+     */
+    public function removeSecondaryDomain(DomainInterface $secondaryDomain);
+
+    /**
+     * Return the active PHP version
      *
      * @return null|string Active PHP version
      */
@@ -95,4 +122,68 @@ interface VhostInterface
      * @return Vhost Self reference
      */
     public function setPhp($php);
+
+    /**
+     * Return the supported protocols
+     *
+     * @return int Supported protocols
+     */
+    public function getProtocols();
+
+    /**
+     * Set the supported protocols
+     *
+     * @param int $protocols Supported protocols
+     * @return Vhost Self reference
+     */
+    public function setProtocols($protocols);
+
+    /**
+     * Enable a supported protocol
+     *
+     * @param int $protocol Protocol
+     * @return Vhost Self reference
+     * @throws \RuntimeException If the protocol is unsupported
+     */
+    public function enableProtocol($protocol);
+
+    /**
+     * Disable a supported protocol
+     *
+     * @param int $protocol Protocol
+     * @return Vhost Self reference
+     * @throws \RuntimeException If the protocol is unsupported
+     */
+    public function disableProtocol($protocol);
+
+    /**
+     * Return the redirect URL
+     *
+     * @return null|string Redirect URL
+     */
+    public function getRedirectUrl();
+
+    /**
+     * Set the redirect URL
+     *
+     * @param null|string $redirectUrl Redirect URL
+     * @return Vhost Self reference
+     * @throws \RuntimeException If the redirect URL is invalid
+     */
+    public function setRedirectUrl($redirectUrl);
+
+    /**
+     * Return the redirect HTTP status code
+     *
+     * @return int Redirect HTTP status code
+     */
+    public function getRedirectStatus();
+
+    /**
+     * Set the redirect HTTP status code
+     *
+     * @param int $redirectStatus Redirect HTTP status code
+     * @return Vhost Self reference
+     */
+    public function setRedirectStatus($redirectStatus);
 }
