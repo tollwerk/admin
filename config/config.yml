@@ -1,0 +1,9 @@
+doctrine:
+  dbparams:
+    driver: "pdo_mysql"
+    user: "admin_01"
+    password: "3!t6nLu#"
+    dbname: "admin_01"
+    host: "localhost"
+general:
+  locale: de_DE
