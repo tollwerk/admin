@@ -36,8 +36,9 @@
 
 namespace Tollwerk\Admin\Ports\Facade;
 
+use Tollwerk\Admin\Infrastructure\App;
+use Tollwerk\Admin\Infrastructure\Shell\Exception as ShellException;
 use Tollwerk\Admin\Infrastructure\Shell\User;
-use Tollwerk\Admin\Infrastructure\Shell\Exception;
 
 /**
  * Account facade
@@ -51,15 +52,25 @@ class Account
      * Create an account
      *
      * @param string $name Account name
+     * @return boolean Success
+     * @throws \Exception If the account couldn't be created
      */
-    public static function create($name) {
+    public static function create($name)
+    {
+        User::create($name);
+
         try {
-            User::create($name);
+            $account = App::getAccountService()->create($name);
+            if (!$account instanceof \Tollwerk\Admin\Domain\Account\Account) {
+                throw new \Exception(sprintf('Couldn\'t create account "%s"', $name), 1475528906);
+            }
 
-
-        } catch (Exception $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode());
+        } catch (\Exception $e) {
+            User::delete($name);
+            throw $e;
         }
+
+        return true;
     }
 
     /**
@@ -67,9 +78,24 @@ class Account
      *
      * @param string $oldname Old account name
      * @param string $newname New account name
+     * @return boolean Success
      */
-    public static function rename($oldname, $newname) {
+    public static function rename($oldname, $newname)
+    {
+        User::rename($oldname, $newname);
 
+        try {
+            $account = App::getAccountService()->rename($oldname, $newname);
+            if (!$account instanceof \Tollwerk\Admin\Domain\Account\Account) {
+                throw new \Exception(sprintf('Couldn\'t rename account "%s" to "%s"', $oldname, $newname), 1475531002);
+            }
+
+        } catch (\Exception $e) {
+            User::rename($newname, $oldname);
+            throw $e;
+        }
+
+        return true;
     }
 
     /**
@@ -77,7 +103,56 @@ class Account
      *
      * @param string $name Account name
      */
-    public static function delete($name) {
+    public static function delete($name)
+    {
+        // If the account cannot be deleted
+        $deletedAccount = App::getAccountService()->delete($name);
+        if (!($deletedAccount instanceof \Tollwerk\Admin\Domain\Account\Account)) {
+            throw new \RuntimeException(sprintf('Couldn\'t delete account "%s"', $name), 1475532983);
+        }
 
+        try {
+            User::delete($name);
+        } catch (ShellException $e) {
+            $account = App::getAccountService()->create($name);
+            if (($account instanceof \Tollwerk\Admin\Domain\Account\Account) && $deletedAccount->isActive()) {
+                App::getAccountService()->enable($name);
+            }
+            throw new \RuntimeException($e->getMessage(), $e->getCode());
+        }
+
+        return true;
+    }
+
+    /**
+     * Enable an account
+     *
+     * @param string $name Account name
+     * @return bool Success
+     * @throws \RuntimeException If the account cannot be ensabled
+     */
+    public static function enable($name)
+    {
+        // If the account cannot be enabled
+        if (!(App::getAccountService()->enable($name) instanceof \Tollwerk\Admin\Domain\Account\Account)) {
+            throw new \RuntimeException(sprintf('Couldn\'t enable account "%s"', $name), 1475532231);
+        }
+        return true;
+    }
+
+    /**
+     * Disable an account
+     *
+     * @param string $name Account name
+     * @return bool Success
+     * @throws \RuntimeException If the account cannot be disabled
+     */
+    public static function disable($name)
+    {
+        // If the account cannot be disabled
+        if (!(App::getAccountService()->disable($name) instanceof \Tollwerk\Admin\Domain\Account\Account)) {
+            throw new \RuntimeException(sprintf('Couldn\'t disable account "%s"', $name), 1475532231);
+        }
+        return true;
     }
 }

@@ -36,12 +36,18 @@
 
 require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
 
-use \Tollwerk\Admin\Infrastructure\Strategy\DoctrineStorageAdapterStrategy;
-use \Tollwerk\Admin\Application\Service\AccountService;
-use \Tollwerk\Admin\Infrastructure\Strategy\ApachePersistenceAdapterStrategy;
+//use \Tollwerk\Admin\Infrastructure\Strategy\DoctrineStorageAdapterStrategy;
+//use \Tollwerk\Admin\Application\Service\AccountService;
+//use \Tollwerk\Admin\Infrastructure\Strategy\ApachePersistenceAdapterStrategy;
 
-$storageAdapter = new DoctrineStorageAdapterStrategy();
-$webserverAdapter = new ApachePersistenceAdapterStrategy();
-$accountService = new AccountService($storageAdapter);
-$account = $accountService->load('test');
-$accountService->persist($account, $webserverAdapter);
+//$storageAdapter = new DoctrineStorageAdapterStrategy();
+//$webserverAdapter = new ApachePersistenceAdapterStrategy();
+//$accountService = new AccountService($storageAdapter);
+//$account = $accountService->load('test');
+//$accountService->persist($account, $webserverAdapter);
+
+//\Tollwerk\Admin\Ports\Facade\Account::create('tester');
+//\Tollwerk\Admin\Ports\Facade\Account::rename('tester', 'hans');
+//\Tollwerk\Admin\Ports\Facade\Account::rename('hans', 'tester');
+//\Tollwerk\Admin\Ports\Facade\Account::disable('tester');
+\Tollwerk\Admin\Ports\Facade\Account::delete('tester');

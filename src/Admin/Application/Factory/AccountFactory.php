@@ -54,8 +54,69 @@ class AccountFactory
      * @param StorageAdapterStrategyInterface $strategy Storage adapter strategy
      * @return Account Account
      */
-    public static function create($name, StorageAdapterStrategyInterface $strategy)
+    public static function load($name, StorageAdapterStrategyInterface $strategy)
     {
         return $strategy->loadAccount($name);
+    }
+
+    /**
+     * Create and return an account
+     *
+     * @param string $name Account name
+     * @param StorageAdapterStrategyInterface $strategy Storage adapter strategy
+     * @return Account Account
+     */
+    public static function create($name, StorageAdapterStrategyInterface $strategy)
+    {
+        return $strategy->createAccount($name);
+    }
+
+    /**
+     * Delete and return an account
+     *
+     * @param string $name Account name
+     * @param StorageAdapterStrategyInterface $strategy Storage adapter strategy
+     * @return Account Account
+     */
+    public static function delete($name, StorageAdapterStrategyInterface $strategy)
+    {
+        return $strategy->deleteAccount($name);
+    }
+
+    /**
+     * Enable and return an account
+     *
+     * @param string $name Account name
+     * @param StorageAdapterStrategyInterface $strategy Storage adapter strategy
+     * @return Account Account
+     */
+    public static function enable($name, StorageAdapterStrategyInterface $strategy)
+    {
+        return $strategy->enableAccount($name);
+    }
+
+    /**
+     * Disable and return an account
+     *
+     * @param string $name Account name
+     * @param StorageAdapterStrategyInterface $strategy Storage adapter strategy
+     * @return Account Account
+     */
+    public static function disable($name, StorageAdapterStrategyInterface $strategy)
+    {
+        return $strategy->disableAccount($name);
+    }
+
+    /**
+     * Rename and return an account
+     *
+     * @param string $oldname Old account name
+     * @param string $newname New account name
+     * @param StorageAdapterStrategyInterface $strategy Storage adapter strategy
+     * @return Account Account
+     */
+    public static function rename($oldname, $newname, StorageAdapterStrategyInterface $strategy)
+    {
+        return $strategy->renameAccount($oldname, $newname);
     }
 }

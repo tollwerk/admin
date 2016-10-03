@@ -53,6 +53,12 @@ class Account implements AccountInterface
      */
     protected $name;
     /**
+     * Active account
+     *
+     * @var boolean
+     */
+    protected $active;
+    /**
      * Virtual hosts
      *
      * @var VhostInterface[]
@@ -77,6 +83,28 @@ class Account implements AccountInterface
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Return whether the account is active
+     *
+     * @return boolean Active
+     */
+    public function isActive()
+    {
+        return $this->active;
+    }
+
+    /**
+     * Set whether the account is active
+     *
+     * @param boolean $active Active
+     * @return Account Self reference
+     */
+    public function setActive($active)
+    {
+        $this->active = $active;
+        return $this;
     }
 
     /**

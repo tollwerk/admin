@@ -65,7 +65,7 @@ class Account
      * Account name
      *
      * @var string
-     * @Column(length=64)
+     * @Column(length=64,unique=true)
      */
     protected $name;
     /**
@@ -125,6 +125,15 @@ class Account
     {
         $this->name = $name;
         return $this;
+    }
+
+    /**
+     * Return whether this account is active
+     *
+     * @return bool Active account
+     */
+    public function getActive() {
+       return $this->active;
     }
 
     /**

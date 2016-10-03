@@ -142,8 +142,6 @@ class User
         $command->setCommand('userdel');
         $command->addArg($user);
 
-        echo $command->getExecCommand();
-
         return self::run($command);
     }
 

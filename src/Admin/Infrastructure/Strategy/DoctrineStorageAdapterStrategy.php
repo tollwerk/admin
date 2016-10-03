@@ -36,6 +36,7 @@
 
 namespace Tollwerk\Admin\Infrastructure\Strategy;
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
@@ -43,6 +44,7 @@ use Tollwerk\Admin\Domain\Account\Account;
 use Tollwerk\Admin\Domain\Factory\DomainFactory;
 use Tollwerk\Admin\Domain\Vhost\Vhost;
 use Tollwerk\Admin\Infrastructure\App;
+use Tollwerk\Admin\Infrastructure\Model\Account as DoctrineAccount;
 use Tollwerk\Admin\Infrastructure\Model\Domain as DoctrineDomain;
 use Tollwerk\Admin\Infrastructure\Model\Vhost as DoctrineVhost;
 
@@ -78,6 +80,153 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
     }
 
     /**
+     * Create an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     * @throws \RuntimeException If the account cannot be created
+     */
+    public function createAccount($name)
+    {
+        // Create the new account
+        $doctrineAccount = new DoctrineAccount();
+        $doctrineAccount->setName($name);
+        $doctrineAccount->setActive(false);
+
+        // Persist the new account
+        try {
+            $this->entityManager->persist($doctrineAccount);
+            $this->entityManager->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            $doctrineAccount = $this->accountRepository->findOneBy(['name' => $name]);
+
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode());
+        }
+
+        // Create and return a domain account
+        $account = new Account($doctrineAccount->getName());
+        $account->setActive($doctrineAccount->getActive());
+        return $account;
+    }
+
+    /**
+     * Enable an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     * @throws \RuntimeException If the account cannot be enabled
+     */
+    public function enableAccount($name)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $name]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $name), 1475495500);
+        }
+
+        // Enable and persist the account
+        try {
+            $doctrineAccount->setActive(true);
+            $this->entityManager->persist($doctrineAccount);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode());
+        }
+
+        return $this->loadFromDoctrineAccount($doctrineAccount);
+    }
+
+    /**
+     * Disable an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     * @throws \RuntimeException If the account cannot be disabled
+     */
+    public function disableAccount($name)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $name]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $name), 1475495500);
+        }
+
+        // Enable and persist the account
+        try {
+            $doctrineAccount->setActive(false);
+            $this->entityManager->persist($doctrineAccount);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode());
+        }
+
+        return $this->loadFromDoctrineAccount($doctrineAccount);
+    }
+
+    /**
+     * Delete an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     * @throws \RuntimeException If the account cannot be deleted
+     */
+    public function deleteAccount($name)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $name]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $name), 1475495500);
+        }
+
+        // Enable and persist the account
+        try {
+            $this->entityManager->remove($doctrineAccount);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode());
+        }
+
+        // Create and return a domain account stub
+        $account = new Account($doctrineAccount->getName());
+        $account->setActive($doctrineAccount->getActive());
+        return $account;
+    }
+
+    /**
+     * Rename and return an account
+     *
+     * @param string $oldname Old account name
+     * @param string $newname New account name
+     * @return Account Account
+     * @throws \RuntimeException If the account is unknown
+     */
+    public function renameAccount($oldname, $newname)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $oldname]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $oldname), 1475495500);
+        }
+
+        // Rename and persist the account
+        try {
+            $doctrineAccount->setName($newname);
+            $this->entityManager->persist($doctrineAccount);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode());
+        }
+
+        // Load and return the renamed account
+        return $this->loadFromDoctrineAccount($doctrineAccount);
+    }
+
+    /**
      * Instantiate an account
      *
      * @param string $name Account name
@@ -93,7 +242,18 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             throw new \RuntimeException(sprintf('Unknown account "%s"', $name), 1475495500);
         }
 
-        $account = new Account($name);
+        return $this->loadFromDoctrineAccount($doctrineAccount);
+    }
+
+    /**
+     * Create domain account from doctrine account
+     *
+     * @param DoctrineAccount $doctrineAccount Doctrine account
+     * @return Account Domain account
+     */
+    protected function loadFromDoctrineAccount(DoctrineAccount $doctrineAccount)
+    {
+        $account = new Account($doctrineAccount->getName());
 
         // Run through all virtual hosts of this account
         /** @var DoctrineVhost $doctrineVhost */

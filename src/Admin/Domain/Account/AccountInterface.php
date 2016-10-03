@@ -61,6 +61,21 @@ interface AccountInterface
     public function getName();
 
     /**
+     * Return whether the account is active
+     *
+     * @return boolean Active
+     */
+    public function isActive();
+
+    /**
+     * Set whether the account is active
+     *
+     * @param boolean $active Active
+     * @return Account Self reference
+     */
+    public function setActive($active);
+
+    /**
      * Return the virtual hosts
      *
      * @return VhostInterface[] Virtual hosts

@@ -72,7 +72,63 @@ class AccountService
      */
     public function load($name)
     {
+        return AccountFactory::load($name, $this->storageAdapterStrategy);
+    }
+
+    /**
+     * Create an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     */
+    public function create($name)
+    {
         return AccountFactory::create($name, $this->storageAdapterStrategy);
+    }
+
+    /**
+     * Delete an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     */
+    public function delete($name)
+    {
+        return AccountFactory::delete($name, $this->storageAdapterStrategy);
+    }
+
+    /**
+     * Enable an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     */
+    public function enable($name)
+    {
+        return AccountFactory::enable($name, $this->storageAdapterStrategy);
+    }
+
+    /**
+     * Disable an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     */
+    public function disable($name)
+    {
+        return AccountFactory::disable($name, $this->storageAdapterStrategy);
+    }
+
+    /**
+     * Rename an account
+     *
+     * @param string $oldname Old account name
+     * @param string $newname New account name
+     * @return Account Account
+     */
+    public function rename($oldname, $newname)
+    {
+        return AccountFactory::rename($oldname, $newname, $this->storageAdapterStrategy);
     }
 
     /**
@@ -81,7 +137,8 @@ class AccountService
      * @param Account $account Account
      * @param PersistenceAdapterStrategyInterface $persistenceAdapterStrategy Persistence adapter strategy
      */
-    public function persist(Account $account, PersistenceAdapterStrategyInterface $persistenceAdapterStrategy) {
+    public function persist(Account $account, PersistenceAdapterStrategyInterface $persistenceAdapterStrategy)
+    {
         $persistenceAdapterStrategy->persistAccount($account);
     }
 }

@@ -39,6 +39,8 @@ namespace Tollwerk\Admin\Infrastructure;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 use Symfony\Component\Yaml\Yaml;
+use Tollwerk\Admin\Application\Service\AccountService;
+use Tollwerk\Admin\Infrastructure\Strategy\DoctrineStorageAdapterStrategy;
 
 /**
  * App
@@ -72,6 +74,12 @@ class App
      * @var boolean
      */
     protected static $devMode;
+    /**
+     * Account service
+     *
+     * @var AccountService
+     */
+    protected static $accountService = null;
     /**
      * App domain
      *
@@ -179,5 +187,19 @@ class App
             throw new \RuntimeException(sprintf('Unknown template "%s"', $template), 1475503926);
         }
         return file_get_contents($templateFile);
+    }
+
+    /**
+     * Return the account service
+     *
+     * @return AccountService Account service
+     */
+    public static function getAccountService() {
+        if (self::$accountService === null) {
+            $storageAdapter = new DoctrineStorageAdapterStrategy();
+            self::$accountService = new AccountService($storageAdapter);
+        }
+
+        return self::$accountService;
     }
 }
