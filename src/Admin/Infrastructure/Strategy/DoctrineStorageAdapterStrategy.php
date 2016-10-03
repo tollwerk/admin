@@ -42,9 +42,9 @@ use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
 use Tollwerk\Admin\Domain\Account\Account;
 use Tollwerk\Admin\Domain\Factory\DomainFactory;
 use Tollwerk\Admin\Domain\Vhost\Vhost;
-use Tollwerk\Admin\Infrastructure\Model\Vhost as DoctrineVhost;
+use Tollwerk\Admin\Infrastructure\App;
 use Tollwerk\Admin\Infrastructure\Model\Domain as DoctrineDomain;
-use Tollwerk\Admin\Ports\App;
+use Tollwerk\Admin\Infrastructure\Model\Vhost as DoctrineVhost;
 
 /**
  * DoctrineAccountFactoryStrategy

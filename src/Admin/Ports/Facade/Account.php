@@ -36,6 +36,9 @@
 
 namespace Tollwerk\Admin\Ports\Facade;
 
+use Tollwerk\Admin\Infrastructure\Shell\User;
+use Tollwerk\Admin\Infrastructure\Shell\Exception;
+
 /**
  * Account facade
  *
@@ -50,7 +53,13 @@ class Account
      * @param string $name Account name
      */
     public static function create($name) {
+        try {
+            User::create($name);
 
+
+        } catch (Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode());
+        }
     }
 
     /**

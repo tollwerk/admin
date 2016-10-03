@@ -38,8 +38,8 @@ namespace Tollwerk\Admin\Infrastructure\Strategy;
 
 use Tollwerk\Admin\Application\Contract\PersistenceAdapterStrategyInterface;
 use Tollwerk\Admin\Domain\Account\Account;
+use Tollwerk\Admin\Infrastructure\App;
 use Tollwerk\Admin\Infrastructure\Persistence\Apache;
-use Tollwerk\Admin\Ports\App;
 
 /**
  * Apache persistence adapter strategy

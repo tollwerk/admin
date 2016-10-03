@@ -37,7 +37,7 @@
 namespace Tollwerk\Admin\Infrastructure\Shell;
 
 use mikehaertl\shellcommand\Command;
-use Tollwerk\Admin\Ports\App;
+use Tollwerk\Admin\Infrastructure\App;
 
 /**
  * User related commands
@@ -74,6 +74,40 @@ class User
             }
             throw $e;
         }
+    }
+
+    /**
+     * Validate a user name
+     *
+     * @param string $user User name
+     * @return string Validated user
+     * @throws \RuntimeException If the user name is invalid
+     */
+    protected static function validateUser($user)
+    {
+        $user = trim($user);
+
+        // If the user name is invalid
+        if (!strlen($user) || !preg_match('%^[a-z]+$%', $user)) {
+            throw  new \RuntimeException(sprintf('Invalid user name "%s"', $user), 1475514940);
+        }
+        return $user;
+    }
+
+    /**
+     * Run a command
+     *
+     * @param Command $command Command
+     * @return string Command output
+     * @throws Exception If the command fails
+     */
+    protected static function run(Command $command)
+    {
+        if ($command->execute()) {
+            return $command->getOutput();
+        }
+
+        throw new Exception($command->getError(), $command->getExitCode());
     }
 
     /**
@@ -159,37 +193,5 @@ class User
         $command->addArg($user);
 
         return self::run($command);
-    }
-
-    /**
-     * Run a command
-     *
-     * @param Command $command Command
-     * @return string Command output
-     * @throws Exception If the command fails
-     */
-    protected static function run(Command $command) {
-        if ($command->execute()) {
-            return $command->getOutput();
-        }
-
-        throw new Exception($command->getError(), $command->getExitCode());
-    }
-
-    /**
-     * Validate a user name
-     *
-     * @param string $user User name
-     * @return string Validated user
-     * @throws \RuntimeException If the user name is invalid
-     */
-    protected static function validateUser($user) {
-        $user = trim($user);
-
-        // If the user name is invalid
-        if (!strlen($user) || !preg_match('%^[a-z]+$%', $user)) {
-            throw  new \RuntimeException(sprintf('Invalid user name "%s"', $user), 1475514940);
-        }
-        return $user;
     }
 }

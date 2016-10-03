@@ -35,7 +35,7 @@
  ***********************************************************************************/
 
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
-use Tollwerk\Admin\Ports\App;
+use Tollwerk\Admin\Infrastructure\App;
 
 require_once dirname(__DIR__).DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'bootstrap.php';
 

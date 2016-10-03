@@ -36,7 +36,7 @@
 
 namespace Tollwerk\Admin\Infrastructure\Service;
 
-use Tollwerk\Admin\Ports\App;
+use Tollwerk\Admin\Infrastructure\App;
 
 /**
  * Template rendering service

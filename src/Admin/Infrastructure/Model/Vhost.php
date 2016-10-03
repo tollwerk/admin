@@ -36,7 +36,7 @@
 
 namespace Tollwerk\Admin\Infrastructure\Model;
 
-use Tollwerk\Admin\Ports\App;
+use Tollwerk\Admin\Infrastructure\App;
 
 /**
  * Virtual host model

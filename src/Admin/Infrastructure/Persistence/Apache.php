@@ -38,8 +38,8 @@ namespace Tollwerk\Admin\Infrastructure\Persistence;
 
 use Tollwerk\Admin\Domain\Account\Account;
 use Tollwerk\Admin\Domain\Vhost\Vhost;
+use Tollwerk\Admin\Infrastructure\App;
 use Tollwerk\Admin\Infrastructure\Service\TemplateService;
-use Tollwerk\Admin\Ports\App;
 
 /**
  * Apache persister
@@ -92,7 +92,8 @@ class Apache
      * @param string $configroot Configuration directory
      * @param string $logroot Logging root directory
      */
-    public function persist($webroot, $configroot, $logroot) {
+    public function persist($webroot, $configroot, $logroot)
+    {
         // Prepare account directories
         $directories = $this->prepareDirectories($this->account, $webroot, $configroot, $logroot);
 
@@ -114,72 +115,6 @@ class Apache
         }
 
         return $files;
-    }
-
-    /**
-     * Create a virtual host
-     *
-     * @param Vhost $vhost Virtual host
-     * @param array $files Files to create
-     * @param array $variables Templating variables
-     */
-    protected function createVirtualHost(Vhost $vhost, array &$files, array $variables)
-    {
-        $variables['primary_domain'] = strval($vhost->getPrimaryDomain());
-        $variables['secondary_domains'] = implode(', ', array_map('strval', $vhost->getSecondaryDomains()));
-        $variables['php_version'] = $vhost->getPhp();
-
-        // If the virtual host should redirect
-        if ($vhost->getRedirectUrl() !== null) {
-            // TODO: Redirect
-
-            return;
-        }
-
-        // If the virtual host should support PHP
-        if ($vhost->getPhp() !== null) {
-            $this->createPhpConfig($vhost, $files, $variables);
-        }
-
-        // Add the virtual host include
-        $this->addEntry($files, 'vhost_'.$vhost->getPrimaryDomain().'.include', TemplateService::render('vhost.include', $variables));
-
-        // If the HTTPS protocol is supported
-        if ($httpsport = $vhost->getPort(Vhost::PROTOCOL_HTTPS)) {
-
-            // Add the SSL configuration include
-            $this->addEntry($files, 'ssl_'.$vhost->getPrimaryDomain().'.include', TemplateService::render('ssl.include', $variables));
-
-            // Add the HTTPS vhost declaration
-            $variables['port'] = $httpsport;
-            $variables['ssl'] = true;
-            $this->addEntry($files, 'vhost_'.$this->account->getName().'.conf', TemplateService::render('vhost.conf', $variables));
-        }
-
-        // If the HTTP protocol is supported
-        if ($httpport = $vhost->getPort(Vhost::PROTOCOL_HTTP)) {
-
-            // Add the HTTP vhost declaration
-            $variables['port'] = $httpport;
-            $variables['ssl'] = false;
-            $this->addEntry($files, 'vhost_'.$this->account->getName().'.conf', TemplateService::render('vhost.conf', $variables));
-        }
-    }
-
-    /**
-     * Create a PHP configuration include
-     *
-     * @param Vhost $vhost Virtual host
-     * @param array $files Configuration files
-     * @param array $variables Templating variables
-     */
-    protected function createPhpConfig(Vhost $vhost, array &$files, array $variables)
-    {
-        // Add the FPM configuration
-        $this->addEntry($files, 'fpm-'.$vhost->getPhp().'.conf', TemplateService::render('fpm.conf', $variables));
-
-        // Add the FPM include
-        $this->addEntry($files, 'fmp_'.$vhost->getPrimaryDomain().'.include', TemplateService::render('fpm.include', $variables));
     }
 
     /**
@@ -217,13 +152,85 @@ class Apache
     }
 
     /**
+     * Create a virtual host
+     *
+     * @param Vhost $vhost Virtual host
+     * @param array $files Files to create
+     * @param array $variables Templating variables
+     */
+    protected function createVirtualHost(Vhost $vhost, array &$files, array $variables)
+    {
+        $variables['primary_domain'] = strval($vhost->getPrimaryDomain());
+        $variables['secondary_domains'] = implode(', ', array_map('strval', $vhost->getSecondaryDomains()));
+        $variables['php_version'] = $vhost->getPhp();
+
+        // If the virtual host should redirect
+        if ($vhost->getRedirectUrl() !== null) {
+            // TODO: Redirect
+
+            return;
+        }
+
+        // If the virtual host should support PHP
+        if ($vhost->getPhp() !== null) {
+            $this->createPhpConfig($vhost, $files, $variables);
+        }
+
+        // Add the virtual host include
+        $this->addEntry($files, 'vhost_'.$vhost->getPrimaryDomain().'.include',
+            TemplateService::render('vhost.include', $variables));
+
+        // If the HTTPS protocol is supported
+        if ($httpsport = $vhost->getPort(Vhost::PROTOCOL_HTTPS)) {
+
+            // Add the SSL configuration include
+            $this->addEntry($files, 'ssl_'.$vhost->getPrimaryDomain().'.include',
+                TemplateService::render('ssl.include', $variables));
+
+            // Add the HTTPS vhost declaration
+            $variables['port'] = $httpsport;
+            $variables['ssl'] = true;
+            $this->addEntry($files, 'vhost_'.$this->account->getName().'.conf',
+                TemplateService::render('vhost.conf', $variables));
+        }
+
+        // If the HTTP protocol is supported
+        if ($httpport = $vhost->getPort(Vhost::PROTOCOL_HTTP)) {
+
+            // Add the HTTP vhost declaration
+            $variables['port'] = $httpport;
+            $variables['ssl'] = false;
+            $this->addEntry($files, 'vhost_'.$this->account->getName().'.conf',
+                TemplateService::render('vhost.conf', $variables));
+        }
+    }
+
+    /**
+     * Create a PHP configuration include
+     *
+     * @param Vhost $vhost Virtual host
+     * @param array $files Configuration files
+     * @param array $variables Templating variables
+     */
+    protected function createPhpConfig(Vhost $vhost, array &$files, array $variables)
+    {
+        // Add the FPM configuration
+        $this->addEntry($files, 'fpm-'.$vhost->getPhp().'.conf', TemplateService::render('fpm.conf', $variables));
+
+        // Add the FPM include
+        $this->addEntry($files, 'fmp_'.$vhost->getPrimaryDomain().'.include',
+            TemplateService::render('fpm.include', $variables));
+    }
+
+    /**
      * Add a file entry
      *
      * @param array $files Files
      * @param string $name File name
      * @param string $entry entry
      */
-    protected function addEntry(&$files, $name, $entry) {
+    protected function addEntry(&$files, $name, $entry)
+    {
         if (empty($files[$name])) {
             $files[$name] = [];
         }
