@@ -17,7 +17,8 @@
     "symfony/console": "@dev",
     "symfony/yaml": "@dev",
     "mustache/mustache": "@dev",
-    "doctrine/orm": "*"
+    "doctrine/orm": "*",
+    "mikehaertl/php-shellcommand": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "^5.3"

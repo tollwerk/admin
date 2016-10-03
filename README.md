@@ -31,3 +31,40 @@ PHPMYADMIN_VHOST = /etc/apache2/vhosts.d/default_pma_vhost.include
 15. Erzeugen eines Zertifikats per Certbot (TODO)
 16. Neuschreiben des Vhosts mit SSL (TODO)
 17. Neustart von Apache
+
+## Account-Operationen
+
+### Account anlegen
+
+#### Parameter
+
+* Account-Name
+ 
+#### Operationen
+
+* Systembenutzer erzeugen
+* Datenbankeintrag erzeugen
+
+### Account umbenennen
+
+#### Parameter
+
+* Alter Account-Name
+* Neuer Account-Name
+ 
+#### Operationen
+
+* Alten Systembenutzer löschen
+* Neuen Systembenutzer anlegen
+* Alten Datenbankeintrag anpassen
+
+### Account löschen
+
+#### Parameter
+
+* Account-Name
+ 
+#### Operationen
+
+* Systembenutzer löschen
+* Datenbankeintrag und abhängige Datensätze löschen
