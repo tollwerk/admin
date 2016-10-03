@@ -36,6 +36,7 @@
 
 namespace Tollwerk\Admin\Application\Factory;
 
+use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
 use Tollwerk\Admin\Domain\Account\Account;
 
 /**
@@ -50,11 +51,11 @@ class AccountFactory
      * Instantiate and return an account
      *
      * @param string $name Account name
-     * @param AccountFactoryStrategy $strategy Account factory strategy
+     * @param StorageAdapterStrategyInterface $strategy Storage adapter strategy
      * @return Account Account
      */
-    public static function make($name, AccountFactoryStrategy $strategy)
+    public static function create($name, StorageAdapterStrategyInterface $strategy)
     {
-        return $strategy->makeAccount($name);
+        return $strategy->loadAccount($name);
     }
 }

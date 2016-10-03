@@ -51,9 +51,8 @@ interface VhostInterface
      *
      * @param DomainInterface $primaryDomain Primary domain
      * @param string $docroot Document root
-     * @param int $port Port
      */
-    public function __construct(DomainInterface $primaryDomain, $docroot, $port);
+    public function __construct(DomainInterface $primaryDomain, $docroo);
 
     /**
      * Return the primary domain
@@ -72,9 +71,10 @@ interface VhostInterface
     /**
      * Return the port
      *
-     * @return int Port
+     * @param int $protocol Protocol
+     * @return int|null Port
      */
-    public function getPort();
+    public function getPort($protocol);
 
     /**
      * Return the secondary domains
@@ -122,21 +122,6 @@ interface VhostInterface
      * @return Vhost Self reference
      */
     public function setPhp($php);
-
-    /**
-     * Return the supported protocols
-     *
-     * @return int Supported protocols
-     */
-    public function getProtocols();
-
-    /**
-     * Set the supported protocols
-     *
-     * @param int $protocols Supported protocols
-     * @return Vhost Self reference
-     */
-    public function setProtocols($protocols);
 
     /**
      * Enable a supported protocol

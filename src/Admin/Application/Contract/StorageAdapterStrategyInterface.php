@@ -34,24 +34,24 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-namespace Tollwerk\Admin\Application\Factory;
+namespace Tollwerk\Admin\Application\Contract;
 
 
 use Tollwerk\Admin\Domain\Account\Account;
 
 /**
- * Account factory strategy
+ * Storage adapter strategy interface
  *
  * @package Apparat\Server
  * @subpackage Tollwerk\Admin\Application
  */
-interface AccountFactoryStrategy
+interface StorageAdapterStrategyInterface
 {
     /**
-     * Instantiate an account
+     * Load an account
      *
      * @param string $name Account name
      * @return Account Account
      */
-    public function makeAccount($name);
+    public function loadAccount($name);
 }

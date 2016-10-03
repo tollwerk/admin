@@ -54,10 +54,10 @@ class VhostTests extends \PHPUnit_Framework_TestCase
     {
         $domain = DomainFactory::parseString('example.com');
         $vhost = new Vhost($domain, __DIR__);
-        $this->assertInstanceOf(Vhost::class, $vhost, Vhost::PORT_HTTP_DEFAULT);
+        $this->assertInstanceOf(Vhost::class, $vhost);
         $this->assertEquals($domain, $vhost->getPrimaryDomain());
         $this->assertEquals(__DIR__, $vhost->getDocroot());
-        $this->assertEquals(Vhost::PORT_HTTP_DEFAULT, $vhost->getPort());
+        $this->assertNull($vhost->getPort(Vhost::PROTOCOL_HTTP));
     }
 
     /**
@@ -70,7 +70,7 @@ class VhostTests extends \PHPUnit_Framework_TestCase
     {
         $domain = DomainFactory::parseString('example.com');
         $vhost = new Vhost($domain, __DIR__);
-        $this->assertInstanceOf(Vhost::class, $vhost, Vhost::PORT_HTTP_DEFAULT);
+        $this->assertInstanceOf(Vhost::class, $vhost);
 
         $secondaryDomainA = DomainFactory::parseString('a.example.com');
         $secondaryDomainB = DomainFactory::parseString('b.example.com');
@@ -93,7 +93,7 @@ class VhostTests extends \PHPUnit_Framework_TestCase
     {
         $domain = DomainFactory::parseString('example.com');
         $vhost = new Vhost($domain, __DIR__);
-        $this->assertInstanceOf(Vhost::class, $vhost, Vhost::PORT_HTTP_DEFAULT);
+        $this->assertInstanceOf(Vhost::class, $vhost);
 
         $this->assertNull($vhost->getPhp());
         $vhost->setPhp('5.0');
@@ -105,48 +105,23 @@ class VhostTests extends \PHPUnit_Framework_TestCase
 
     /**
      * Test the enabling / disabling of protocols
+     *
+     * @expectedException \RuntimeException
+     * @expectedExceptionCode 1475484081
      */
     public function testVirtualHostProtocol()
     {
         $domain = DomainFactory::parseString('example.com');
         $vhost = new Vhost($domain, __DIR__);
-        $this->assertInstanceOf(Vhost::class, $vhost, Vhost::PORT_HTTP_DEFAULT);
+        $this->assertInstanceOf(Vhost::class, $vhost);
 
-        $this->assertEquals(Vhost::PROTOCOL_HTTP, $vhost->getProtocols());
-        $vhost->enableProtocol(Vhost::PROTOCOL_HTTPS);
-        $this->assertEquals(Vhost::PROTOCOL_HTTP | Vhost::PROTOCOL_HTTPS, $vhost->getProtocols());
+        $vhost->enableProtocol(Vhost::PROTOCOL_HTTP);
+        $this->assertEquals(Vhost::PORT_HTTP_DEFAULT, $vhost->getPort(Vhost::PROTOCOL_HTTP));
+        $vhost->enableProtocol(Vhost::PROTOCOL_HTTP, 81);
+        $this->assertEquals(81, $vhost->getPort(Vhost::PROTOCOL_HTTP));
         $vhost->disableProtocol(Vhost::PROTOCOL_HTTP);
-        $this->assertEquals(Vhost::PROTOCOL_HTTPS, $vhost->getProtocols());
-        $vhost->setProtocols(Vhost::PROTOCOL_HTTP | Vhost::PROTOCOL_HTTPS);
-        $this->assertEquals(Vhost::PROTOCOL_HTTP | Vhost::PROTOCOL_HTTPS, $vhost->getProtocols());
-    }
-
-    /**
-     * Test the enabling / disabling invalid protocols
-     *
-     * @dataProvider invalidProtocolsDataProvider
-     * @expectedException \RuntimeException
-     * @expectedExceptionCode 1475484081
-     */
-    public function testVirtualHostInvalidProtocols($method, array $arguments)
-    {
-        $domain = DomainFactory::parseString('example.com');
-        $vhost = new Vhost($domain, __DIR__);
-        $this->assertInstanceOf(Vhost::class, $vhost, Vhost::PORT_HTTP_DEFAULT);
-
-        $vhost->$method(...$arguments);
-    }
-
-    /**
-     * Data provider for invalid protocol tests
-     */
-    public function invalidProtocolsDataProvider()
-    {
-        return [
-            ['setProtocols', [4]],
-            ['enableProtocol', [4]],
-            ['disableProtocol', [4]],
-        ];
+        $this->assertNull($vhost->getPort(Vhost::PROTOCOL_HTTP));
+        $vhost->enableProtocol(4);
     }
 
     /**
@@ -159,7 +134,7 @@ class VhostTests extends \PHPUnit_Framework_TestCase
     {
         $domain = DomainFactory::parseString('example.com');
         $vhost = new Vhost($domain, __DIR__);
-        $this->assertInstanceOf(Vhost::class, $vhost, Vhost::PORT_HTTP_DEFAULT);
+        $this->assertInstanceOf(Vhost::class, $vhost);
 
         $vhost->setRedirectUrl('http://test.com/abc');
         $this->assertEquals('http://test.com/abc', $vhost->getRedirectUrl());
@@ -178,7 +153,7 @@ class VhostTests extends \PHPUnit_Framework_TestCase
     {
         $domain = DomainFactory::parseString('example.com');
         $vhost = new Vhost($domain, __DIR__);
-        $this->assertInstanceOf(Vhost::class, $vhost, Vhost::PORT_HTTP_DEFAULT);
+        $this->assertInstanceOf(Vhost::class, $vhost);
 
         $this->assertEquals(301, $vhost->getRedirectStatus());
         $vhost->setRedirectStatus(302);

@@ -1,0 +1,5 @@
+SSLEngine on
+SSLVerifyDepth  5
+SSLCertificateKeyFile {{certroot}}/{{primary_domain}}/privkey.pem
+SSLCertificateFile {{certroot}}/{{primary_domain}}/cert.pem
+SSLCertificateChainFile {{certroot}}/{{primary_domain}}/chain.pem

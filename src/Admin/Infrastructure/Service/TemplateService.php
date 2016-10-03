@@ -5,7 +5,7 @@
  *
  * @category    Apparat
  * @package     Apparat\Server
- * @subpackage  ${NAMESPACE}
+ * @subpackage  Tollwerk\Admin\Infrastructure\Service
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
@@ -34,14 +34,28 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
+namespace Tollwerk\Admin\Infrastructure\Service;
 
-use \Tollwerk\Admin\Infrastructure\Strategy\DoctrineStorageAdapterStrategy;
-use \Tollwerk\Admin\Application\Service\AccountService;
-use \Tollwerk\Admin\Infrastructure\Strategy\ApachePersistenceAdapterStrategy;
+use Tollwerk\Admin\Ports\App;
 
-$storageAdapter = new DoctrineStorageAdapterStrategy();
-$webserverAdapter = new ApachePersistenceAdapterStrategy();
-$accountService = new AccountService($storageAdapter);
-$account = $accountService->load('test');
-$accountService->persist($account, $webserverAdapter);
+/**
+ * Template rendering service
+ *
+ * @package Apparat\Server
+ * @subpackage Tollwerk\Admin\Infrastructure
+ */
+class TemplateService
+{
+    /**
+     * Render a Mustache template
+     *
+     * @param string $template Template name
+     * @param array $variables Rendering variables
+     * @return string Rendered template
+     */
+    public static function render($template, array $variables)
+    {
+        $mustache = new \Mustache_Engine();
+        return $mustache->render(App::getTemplate($template), $variables);
+    }
+}

@@ -91,12 +91,19 @@ class Vhost
      */
     protected $docroot;
     /**
-     * Port
+     * HTTP Port
      *
-     * @var int
-     * @Column(type="integer", nullable=false, options={"unsigned":true, "default":80})
+     * @var int|null
+     * @Column(type="integer", nullable=true, options={"unsigned":true, "default":80})
      */
-    protected $port;
+    protected $httpport;
+    /**
+     * HTTPS Port
+     *
+     * @var int|null
+     * @Column(type="integer", nullable=true, options={"unsigned":true, "default":443})
+     */
+    protected $httpsport;
     /**
      * Supported PHP version
      *
@@ -104,13 +111,6 @@ class Vhost
      * @Column(type="decimal",precision=2,scale=1,nullable=true)
      */
     protected $php;
-    /**
-     * Supported protocols
-     *
-     * @var int
-     * @Column(type="integer", nullable=false, options={"unsigned":true, "default":1})
-     */
-    protected $protocols;
     /**
      * Redirect URL
      *
@@ -265,24 +265,46 @@ class Vhost
     }
 
     /**
-     * Return the port
+     * Return the HTTP port
      *
-     * @return int Port
+     * @return int|null HTTP port
      */
-    public function getPort()
+    public function getHttpport()
     {
-        return $this->port;
+        return $this->httpport;
     }
 
     /**
-     * Set the port
+     * Set the HTTP port
      *
-     * @param int $port Port
+     * @param int|null $httpport HTTP port
      * @return Vhost Self reference
      */
-    public function setPort($port)
+    public function setHttpport($httpport)
     {
-        $this->port = $port;
+        $this->httpport = $httpport;
+        return $this;
+    }
+
+    /**
+     * Return the HTTPS port
+     *
+     * @return int|null HTTPS port
+     */
+    public function getHttpsport()
+    {
+        return $this->httpsport;
+    }
+
+    /**
+     * Set the HTTPS port
+     *
+     * @param int|null $httpsport HTTPS port
+     * @return Vhost
+     */
+    public function setHttpsport($httpsport)
+    {
+        $this->httpsport = $httpsport;
         return $this;
     }
 
@@ -305,28 +327,6 @@ class Vhost
     public function setPhp($php)
     {
         $this->php = $php;
-        return $this;
-    }
-
-    /**
-     * Return the supported protocols
-     *
-     * @return int Supported protocols
-     */
-    public function getProtocols()
-    {
-        return $this->protocols;
-    }
-
-    /**
-     * Set the supported protocols
-     *
-     * @param int $protocols Supported protocols
-     * @return Vhost Self reference
-     */
-    public function setProtocols($protocols)
-    {
-        $this->protocols = $protocols;
         return $this;
     }
 

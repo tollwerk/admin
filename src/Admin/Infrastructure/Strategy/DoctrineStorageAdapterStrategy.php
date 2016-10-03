@@ -38,7 +38,7 @@ namespace Tollwerk\Admin\Infrastructure\Strategy;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
-use Tollwerk\Admin\Application\Factory\AccountFactoryStrategy;
+use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
 use Tollwerk\Admin\Domain\Account\Account;
 use Tollwerk\Admin\Domain\Factory\DomainFactory;
 use Tollwerk\Admin\Domain\Vhost\Vhost;
@@ -52,7 +52,7 @@ use Tollwerk\Admin\Ports\App;
  * @package Apparat\Server
  * @subpackage Tollwerk\Admin\Infrastructure\Strategy
  */
-class DoctrineAccountFactoryStrategy implements AccountFactoryStrategy
+class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
 {
     /**
      * Doctrine entity manager
@@ -84,7 +84,7 @@ class DoctrineAccountFactoryStrategy implements AccountFactoryStrategy
      * @return Account Account
      * @throws \RuntimeException If the account is unknown
      */
-    public function makeAccount($name)
+    public function loadAccount($name)
     {
         $doctrineAccount = $this->accountRepository->findOneBy(['name' => $name]);
 
@@ -102,11 +102,16 @@ class DoctrineAccountFactoryStrategy implements AccountFactoryStrategy
             if ($doctrinePrimaryDomain instanceof DoctrineDomain) {
                 $primaryDomain = DomainFactory::parseString($doctrinePrimaryDomain->getName());
 
-                $vhost = new Vhost($primaryDomain, $doctrineVhost->getDocroot(), $doctrineVhost->getPort());
-                $vhost->setProtocols($doctrineVhost->getProtocols());
+                $vhost = new Vhost($primaryDomain, $doctrineVhost->getDocroot());
                 $vhost->setPhp($doctrineVhost->getPhp());
                 $vhost->setRedirectUrl($doctrineVhost->getRedirecturl());
                 $vhost->setRedirectStatus($doctrineVhost->getRedirectstatus());
+                if ($doctrineVhost->getHttpport() !== null) {
+                    $vhost->enableProtocol(Vhost::PROTOCOL_HTTP, $doctrineVhost->getHttpport());
+                }
+                if ($doctrineVhost->getHttpsport() !== null) {
+                    $vhost->enableProtocol(Vhost::PROTOCOL_HTTPS, $doctrineVhost->getHttpsport());
+                }
 
                 // Add the wilcard version of the primary domain
                 if ($doctrinePrimaryDomain->isWildcard()) {

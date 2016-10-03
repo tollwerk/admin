@@ -5,7 +5,7 @@
  *
  * @category    Apparat
  * @package     Apparat\Server
- * @subpackage  ${NAMESPACE}
+ * @subpackage  Tollwerk\Admin\Application\Contract
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
@@ -34,14 +34,23 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
+namespace Tollwerk\Admin\Application\Contract;
 
-use \Tollwerk\Admin\Infrastructure\Strategy\DoctrineStorageAdapterStrategy;
-use \Tollwerk\Admin\Application\Service\AccountService;
-use \Tollwerk\Admin\Infrastructure\Strategy\ApachePersistenceAdapterStrategy;
+use Tollwerk\Admin\Domain\Account\Account;
 
-$storageAdapter = new DoctrineStorageAdapterStrategy();
-$webserverAdapter = new ApachePersistenceAdapterStrategy();
-$accountService = new AccountService($storageAdapter);
-$account = $accountService->load('test');
-$accountService->persist($account, $webserverAdapter);
+/**
+ * Persistence adapter strategy interface
+ *
+ * @package Apparat\Server
+ * @subpackage Tollwerk\Admin\Application
+ */
+interface PersistenceAdapterStrategyInterface
+{
+    /**
+     * Persist an account
+     *
+     * @param Account $account Account
+     * @return boolean Success
+     */
+    public function persistAccount(Account $account);
+}

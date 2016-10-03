@@ -5,7 +5,7 @@
  *
  * @category    Apparat
  * @package     Apparat\Server
- * @subpackage  ${NAMESPACE}
+ * @subpackage  Tollwerk\Admin\Application\Service
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
@@ -34,14 +34,54 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
+namespace Tollwerk\Admin\Application\Service;
 
-use \Tollwerk\Admin\Infrastructure\Strategy\DoctrineStorageAdapterStrategy;
-use \Tollwerk\Admin\Application\Service\AccountService;
-use \Tollwerk\Admin\Infrastructure\Strategy\ApachePersistenceAdapterStrategy;
+use Tollwerk\Admin\Application\Contract\PersistenceAdapterStrategyInterface;
+use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
+use Tollwerk\Admin\Application\Factory\AccountFactory;
+use Tollwerk\Admin\Domain\Account\Account;
 
-$storageAdapter = new DoctrineStorageAdapterStrategy();
-$webserverAdapter = new ApachePersistenceAdapterStrategy();
-$accountService = new AccountService($storageAdapter);
-$account = $accountService->load('test');
-$accountService->persist($account, $webserverAdapter);
+/**
+ * Account service
+ *
+ * @package Apparat\Server
+ * @subpackage Tollwerk\Admin\Application\Service
+ */
+class AccountService
+{
+    /**
+     * @var StorageAdapterStrategyInterface
+     */
+    protected $storageAdapterStrategy;
+
+    /**
+     * Constructor
+     *
+     * @param StorageAdapterStrategyInterface $storageAdapterStrategy Storage adapter strategy
+     */
+    public function __construct(StorageAdapterStrategyInterface $storageAdapterStrategy)
+    {
+        $this->storageAdapterStrategy = $storageAdapterStrategy;
+    }
+
+    /**
+     * Load an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     */
+    public function load($name)
+    {
+        return AccountFactory::create($name, $this->storageAdapterStrategy);
+    }
+
+    /**
+     * Persist an account
+     *
+     * @param Account $account Account
+     * @param PersistenceAdapterStrategyInterface $persistenceAdapterStrategy Persistence adapter strategy
+     */
+    public function persist(Account $account, PersistenceAdapterStrategyInterface $persistenceAdapterStrategy) {
+        $persistenceAdapterStrategy->persistAccount($account);
+    }
+}

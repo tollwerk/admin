@@ -164,4 +164,20 @@ class App
         }
         return $config;
     }
+
+    /**
+     * Return the contents of a particular template
+     *
+     * @param string $template Template name
+     * @return string template contents
+     */
+    public static function getTemplate($template)
+    {
+        $templateFile = self::$rootDirectory.'src'.DIRECTORY_SEPARATOR.'Admin'
+            .DIRECTORY_SEPARATOR.'Infrastructure'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.$template;
+        if (!file_exists($templateFile)) {
+            throw new \RuntimeException(sprintf('Unknown template "%s"', $template), 1475503926);
+        }
+        return file_get_contents($templateFile);
+    }
 }

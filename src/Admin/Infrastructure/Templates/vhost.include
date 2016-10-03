@@ -1,12 +1,11 @@
-ServerName $PRIMARY_DOMAIN
+ServerName {{primary_domain}}
+{{#secondary_domains}}
+ServerAlias {{secondary_domains}}{{/secondary_domains}}
 
-# Only if secondary domains are defined
-# ServerAlias $SECONDARY_DOMAIN [, $SECONDARY_DOMAIN ...]
+CustomLog {{logroot}}/access_log combined
 
-CustomLog $LOG_DIR/$ACCOUNT/access_log combined
-
-DocumentRoot "$WEBROOT_DIR/$ACCOUNT"
-<Directory "$WEBROOT_DIR/$ACCOUNT">
+DocumentRoot "{{webroot}}"
+<Directory "{{webroot}}">
 	RewriteEngine on
 	RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
 	RewriteRule .* - [F]
@@ -14,6 +13,6 @@ DocumentRoot "$WEBROOT_DIR/$ACCOUNT"
 	Options -Indexes +FollowSymLinks
 	AllowOverride All
 	Require all granted
-</Directory>
+</Directory>{{#php_version}}
 
-Include $CONFIG_DIR/$ACCOUNT/vhost_fpm.include
+Include {{configroot}}/fmp_{{primary_domain}}.include{{/php_version}}

@@ -65,11 +65,11 @@ class Vhost implements VhostInterface
      */
     protected $docroot;
     /**
-     * Port
+     * Ports
      *
-     * @var int
+     * @var array
      */
-    protected $port;
+    protected $ports;
     /**
      * Active PHP version
      *
@@ -88,12 +88,6 @@ class Vhost implements VhostInterface
      * @var int
      */
     protected $redirectStatus = 301;
-    /**
-     * Supported protocols
-     *
-     * @var int
-     */
-    protected $protocols = self::PROTOCOL_HTTP;
     /**
      * Default port for HTTP virtual hosts
      *
@@ -127,6 +121,15 @@ class Vhost implements VhostInterface
         self::PROTOCOL_HTTP => 'http',
         self::PROTOCOL_HTTPS => 'https',
     ];
+    /**
+     * Default protocol ports
+     *
+     * @var array
+     */
+    protected static $defaultProtocolPorts = [
+        self::PROTOCOL_HTTP => 80,
+        self::PROTOCOL_HTTPS => 443,
+    ];
 
     /**
      * Virtual host constructor
@@ -135,11 +138,10 @@ class Vhost implements VhostInterface
      * @param string $docroot Document root
      * @param int $port Port
      */
-    public function __construct(DomainInterface $primaryDomain, $docroot, $port = self::PORT_HTTP_DEFAULT)
+    public function __construct(DomainInterface $primaryDomain, $docroot)
     {
         $this->primaryDomain = $primaryDomain;
         $this->docroot = $docroot;
-        $this->port = $port;
     }
 
     /**
@@ -165,11 +167,30 @@ class Vhost implements VhostInterface
     /**
      * Return the port
      *
-     * @return int Port
+     * @param int $protocol Protocol
+     * @return int|null Port
+     * @throws \RuntimeException If the protocol is unsupported
      */
-    public function getPort()
+    public function getPort($protocol)
     {
-        return $this->port;
+        $protocol = intval($protocol);
+
+        // If the protocol is unsupported
+        if (empty(self::$supportedProtocols[$protocol])) {
+            throw new \RuntimeException(sprintf('Invalid protocol "%s"', $protocol), 1475484081);
+        }
+
+        return empty($this->ports[$protocol]) ? null : $this->ports[$protocol];
+    }
+
+    /**
+     * Return all supported protocols and corresponding ports
+     *
+     * @return array Protocols and ports
+     */
+    public function getPorts()
+    {
+        return $this->ports;
     }
 
     /**
@@ -261,44 +282,14 @@ class Vhost implements VhostInterface
     }
 
     /**
-     * Return the supported protocols
-     *
-     * @return int Supported protocols
-     */
-    public function getProtocols()
-    {
-        return $this->protocols;
-    }
-
-    /**
-     * Set the supported protocols
-     *
-     * @param int $protocols Supported protocols
-     * @return Vhost Self reference
-     * @throws \RuntimeException If the protocol is unsupported
-     */
-    public function setProtocols($protocols)
-    {
-        $protocols = $supportedProtocols = intval($protocols);
-        foreach (self::$supportedProtocols as $supportedProtocol => $supportedProtocolString) {
-            $supportedProtocols &= ~$supportedProtocol;
-        }
-        // If the protocol is unsupported
-        if (intval($supportedProtocols)) {
-            throw new \RuntimeException(sprintf('Invalid protocols "%s"', $protocols), 1475484081);
-        }
-        $this->protocols = $protocols;
-        return $this;
-    }
-
-    /**
      * Enable a supported protocol
      *
      * @param int $protocol Protocol
+     * @param int $port Port
      * @return Vhost Self reference
      * @throws \RuntimeException If the protocol is unsupported
      */
-    public function enableProtocol($protocol)
+    public function enableProtocol($protocol, $port = null)
     {
         $protocol = intval($protocol);
 
@@ -307,7 +298,12 @@ class Vhost implements VhostInterface
             throw new \RuntimeException(sprintf('Invalid protocol "%s"', $protocol), 1475484081);
         }
 
-        $this->protocols |= $protocol;
+        $port = ($port === null) ? self::$defaultProtocolPorts[$protocol] : intval($port);
+        if ($port <= 0) {
+            throw new \RuntimeException(sprintf('Invalid protocol port "%s"', $port), 1475502412);
+        }
+
+        $this->ports[$protocol] = $port;
         return $this;
     }
 
@@ -327,7 +323,7 @@ class Vhost implements VhostInterface
             throw new \RuntimeException(sprintf('Invalid protocol "%s"', $protocol), 1475484081);
         }
 
-        $this->protocols &= ~$protocol;
+        unset($this->ports[$protocol]);
         return $this;
     }
 

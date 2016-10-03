@@ -5,5 +5,13 @@ doctrine:
     password: "3!t6nLu#"
     dbname: "admin_01"
     host: "localhost"
+apache:
+  webroot: "/root/lab/admin/tmp/vhtdocs"
+  config: "/root/lab/admin/tmp/accounts"
+  logroot: "/root/lab/admin/tmp/log"
+  apache_group: "apache"
+variables:
+  fpm_sockets: "/var/run/php-fpm"
+  certroot: "/etc/letsencrypt/live"
 general:
   locale: de_DE
