@@ -6,7 +6,7 @@
     </testsuites>
 
     <php>
-        <!--<env name="VARIABLE" value="value"/>-->
+        <env name="VARIABLE" value="value"/>
     </php>
 
     <logging>
