@@ -1,0 +1,9 @@
+site_name: tollwerk/admin
+site_description: Tollwerk server account administration
+site_author: Joschi Kuphal
+repo_url: https://github.com/tollwerk/admin/
+docs_dir: doc
+pages:
+- Home: 'index.md'
+- Concept: 'concept.md'
+- To-Do: 'todo.md'
