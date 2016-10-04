@@ -104,6 +104,23 @@ class VhostTests extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test the retrieval of the port for an invalid protocol
+     *
+     * @expectedException \RuntimeException
+     * @expectedExceptionCode 1475484081
+     */
+    public function testVirtualHostInvalidPort()
+    {
+        $domain = DomainFactory::parseString('example.com');
+        $vhost = new Vhost($domain, __DIR__);
+        $this->assertInstanceOf(Vhost::class, $vhost);
+
+        $vhost->enableProtocol(Vhost::PROTOCOL_HTTP);
+        $this->assertEquals([Vhost::PROTOCOL_HTTP => Vhost::PORT_HTTP_DEFAULT], $vhost->getPorts());
+        $vhost->getPort(4);
+    }
+
+    /**
      * Test the enabling / disabling of protocols
      *
      * @expectedException \RuntimeException
@@ -122,6 +139,36 @@ class VhostTests extends \PHPUnit_Framework_TestCase
         $vhost->disableProtocol(Vhost::PROTOCOL_HTTP);
         $this->assertNull($vhost->getPort(Vhost::PROTOCOL_HTTP));
         $vhost->enableProtocol(4);
+    }
+
+    /**
+     * Test the enabling of an invalid port
+     *
+     * @expectedException \RuntimeException
+     * @expectedExceptionCode 1475502412
+     */
+    public function testVirtualHostEnableInvalidPort()
+    {
+        $domain = DomainFactory::parseString('example.com');
+        $vhost = new Vhost($domain, __DIR__);
+        $this->assertInstanceOf(Vhost::class, $vhost);
+
+        $vhost->enableProtocol(Vhost::PROTOCOL_HTTP, -1);
+    }
+
+    /**
+     * Test the disabling of an invalid protocol
+     *
+     * @expectedException \RuntimeException
+     * @expectedExceptionCode 1475484081
+     */
+    public function testVirtualHostDisableInvalidProtocol()
+    {
+        $domain = DomainFactory::parseString('example.com');
+        $vhost = new Vhost($domain, __DIR__);
+        $this->assertInstanceOf(Vhost::class, $vhost);
+
+        $vhost->disableProtocol(4);
     }
 
     /**

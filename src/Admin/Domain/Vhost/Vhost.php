@@ -69,7 +69,7 @@ class Vhost implements VhostInterface
      *
      * @var array
      */
-    protected $ports;
+    protected $ports = [];
     /**
      * Active PHP version
      *

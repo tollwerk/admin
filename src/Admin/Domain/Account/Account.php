@@ -57,7 +57,7 @@ class Account implements AccountInterface
      *
      * @var boolean
      */
-    protected $active;
+    protected $active = false;
     /**
      * Virtual hosts
      *

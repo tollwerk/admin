@@ -56,6 +56,7 @@ class AccountTests extends \PHPUnit_Framework_TestCase
         $account = new Account('test');
         $this->assertInstanceOf(Account::class, $account);
         $this->assertEquals('test', $account->getName());
+        $this->assertFalse($account->isActive());
         $this->assertEquals([], $account->getVhosts());
     }
 
@@ -73,6 +74,9 @@ class AccountTests extends \PHPUnit_Framework_TestCase
         $domain = DomainFactory::parseString('example.com');
         $vhost = new Vhost($domain, __DIR__);
         $this->assertInstanceOf(Vhost::class, $vhost, Vhost::PORT_HTTP_DEFAULT);
+
+        $account->setActive(true);
+        $this->assertTrue($account->isActive());
 
         $account->setVhosts([$vhost]);
         $this->assertEquals([$vhost], $account->getVhosts());
