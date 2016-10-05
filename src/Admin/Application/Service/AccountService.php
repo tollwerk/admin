@@ -38,7 +38,6 @@ namespace Tollwerk\Admin\Application\Service;
 
 use Tollwerk\Admin\Application\Contract\PersistenceAdapterStrategyInterface;
 use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
-use Tollwerk\Admin\Application\Factory\AccountFactory;
 use Tollwerk\Admin\Domain\Account\Account;
 
 /**
@@ -65,14 +64,14 @@ class AccountService
     }
 
     /**
-     * Load an account
+     * Load and return an account
      *
      * @param string $name Account name
      * @return Account Account
      */
     public function load($name)
     {
-        return AccountFactory::load($name, $this->storageAdapterStrategy);
+        return $this->storageAdapterStrategy->loadAccount($name);
     }
 
     /**
@@ -83,7 +82,7 @@ class AccountService
      */
     public function create($name)
     {
-        return AccountFactory::create($name, $this->storageAdapterStrategy);
+        return $this->storageAdapterStrategy->createAccount($name);
     }
 
     /**
@@ -94,7 +93,7 @@ class AccountService
      */
     public function delete($name)
     {
-        return AccountFactory::delete($name, $this->storageAdapterStrategy);
+        return $this->storageAdapterStrategy->deleteAccount($name);
     }
 
     /**
@@ -105,7 +104,7 @@ class AccountService
      */
     public function enable($name)
     {
-        return AccountFactory::enable($name, $this->storageAdapterStrategy);
+        return $this->storageAdapterStrategy->enableAccount($name);
     }
 
     /**
@@ -116,7 +115,7 @@ class AccountService
      */
     public function disable($name)
     {
-        return AccountFactory::disable($name, $this->storageAdapterStrategy);
+        return $this->storageAdapterStrategy->disableAccount($name);
     }
 
     /**
@@ -128,7 +127,7 @@ class AccountService
      */
     public function rename($oldname, $newname)
     {
-        return AccountFactory::rename($oldname, $newname, $this->storageAdapterStrategy);
+        return $this->storageAdapterStrategy->renameAccount($oldname, $newname);
     }
 
     /**

@@ -54,4 +54,50 @@ interface StorageAdapterStrategyInterface
      * @return Account Account
      */
     public function loadAccount($name);
+
+    /**
+     * Create an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     * @throws \RuntimeException If the account cannot be created
+     */
+    public function createAccount($name);
+
+    /**
+     * Enable an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     * @throws \RuntimeException If the account cannot be enabled
+     */
+    public function enableAccount($name);
+
+    /**
+     * Disable an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     * @throws \RuntimeException If the account cannot be disabled
+     */
+    public function disableAccount($name);
+
+    /**
+     * Delete an account
+     *
+     * @param string $name Account name
+     * @return Account Account
+     * @throws \RuntimeException If the account cannot be deleted
+     */
+    public function deleteAccount($name);
+
+    /**
+     * Rename and return an account
+     *
+     * @param string $oldname Old account name
+     * @param string $newname New account name
+     * @return Account Account
+     * @throws \RuntimeException If the account is unknown
+     */
+    public function renameAccount($oldname, $newname);
 }
