@@ -36,18 +36,19 @@
 
 require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
 
-//use \Tollwerk\Admin\Infrastructure\Strategy\DoctrineStorageAdapterStrategy;
-//use \Tollwerk\Admin\Application\Service\AccountService;
-//use \Tollwerk\Admin\Infrastructure\Strategy\ApachePersistenceAdapterStrategy;
+use Symfony\Component\Console\Application;
+use Tollwerk\Admin\Infrastructure\Commands\Account\CreateAccountCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Account\DeleteAccountCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Account\EnableAccountCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Account\DisableAccountCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Account\RenameAccountCommand;
 
-//$storageAdapter = new DoctrineStorageAdapterStrategy();
-//$webserverAdapter = new ApachePersistenceAdapterStrategy();
-//$accountService = new AccountService($storageAdapter);
-//$account = $accountService->load('test');
-//$accountService->persist($account, $webserverAdapter);
+$application = new Application();
 
-//\Tollwerk\Admin\Ports\Facade\Account::create('tester');
-//\Tollwerk\Admin\Ports\Facade\Account::rename('tester', 'hans');
-//\Tollwerk\Admin\Ports\Facade\Account::rename('hans', 'tester');
-//\Tollwerk\Admin\Ports\Facade\Account::disable('tester');
-//\Tollwerk\Admin\Ports\Facade\Account::delete('tester');
+$application->add(new CreateAccountCommand());
+$application->add(new DeleteAccountCommand());
+$application->add(new EnableAccountCommand());
+$application->add(new DisableAccountCommand());
+$application->add(new RenameAccountCommand());
+
+$application->run();
