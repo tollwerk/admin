@@ -65,6 +65,12 @@ class Vhost implements VhostInterface
      */
     protected $docroot;
     /**
+     * Virtual host type
+     *
+     * @var string
+     */
+    protected $type = self::TYPE_APACHE;
+    /**
      * Ports
      *
      * @var array
@@ -113,6 +119,12 @@ class Vhost implements VhostInterface
      */
     const PROTOCOL_HTTPS = 2;
     /**
+     * Apache virtual host
+     *
+     * @var string
+     */
+    const TYPE_APACHE = 'apache';
+    /**
      * Supported protocols
      *
      * @var array
@@ -136,12 +148,14 @@ class Vhost implements VhostInterface
      *
      * @param DomainInterface $primaryDomain Primary domain
      * @param string $docroot Document root
-     * @param int $port Port
+     * @param string $type Virtual host type
+     * @internal param int $port Port
      */
-    public function __construct(DomainInterface $primaryDomain, $docroot)
+    public function __construct(DomainInterface $primaryDomain, $docroot, $type = self::TYPE_APACHE)
     {
         $this->primaryDomain = $primaryDomain;
         $this->docroot = $docroot;
+        $this->type = $type;
     }
 
     /**
@@ -162,6 +176,16 @@ class Vhost implements VhostInterface
     public function getDocroot()
     {
         return $this->docroot;
+    }
+
+    /**
+     * Return the virtual host type
+     *
+     * @return string Virtual host type
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 
     /**

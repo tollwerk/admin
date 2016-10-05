@@ -36,10 +36,13 @@
 
 namespace Tollwerk\Admin\Infrastructure;
 
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 use Symfony\Component\Yaml\Yaml;
 use Tollwerk\Admin\Application\Service\AccountService;
+use Tollwerk\Admin\Infrastructure\Doctrine\EnumVhosttypeType;
+use Tollwerk\Admin\Infrastructure\Factory\PersistenceAdapterFactory;
 use Tollwerk\Admin\Infrastructure\Strategy\DoctrineStorageAdapterStrategy;
 
 /**
@@ -130,6 +133,9 @@ class App
 
         self::$entityManager = EntityManager::create($dbParams, $config);
 
+        // Register the virtual host type declaration
+        Type::addType(EnumVhosttypeType::ENUM_TYPE, EnumVhosttypeType::class);
+
         // Set the locale
         $locale = self::getConfig('general.locale');
         putenv('LC_ALL='.$locale);
@@ -194,10 +200,12 @@ class App
      *
      * @return AccountService Account service
      */
-    public static function getAccountService() {
+    public static function getAccountService()
+    {
         if (self::$accountService === null) {
             $storageAdapter = new DoctrineStorageAdapterStrategy();
-            self::$accountService = new AccountService($storageAdapter);
+            $persistenceAdapterFactory = new PersistenceAdapterFactory();
+            self::$accountService = new AccountService($storageAdapter, $persistenceAdapterFactory);
         }
 
         return self::$accountService;

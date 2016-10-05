@@ -36,9 +36,10 @@
 
 namespace Tollwerk\Admin\Application\Service;
 
-use Tollwerk\Admin\Application\Contract\PersistenceAdapterStrategyInterface;
+use Tollwerk\Admin\Application\Contract\PersistenceAdapterFactoryInterface;
 use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
 use Tollwerk\Admin\Domain\Account\Account;
+use Tollwerk\Admin\Domain\Vhost\Vhost;
 
 /**
  * Account service
@@ -49,18 +50,30 @@ use Tollwerk\Admin\Domain\Account\Account;
 class AccountService
 {
     /**
+     * Storage adapter strategy
+     *
      * @var StorageAdapterStrategyInterface
      */
     protected $storageAdapterStrategy;
+    /**
+     * Persistence adapter strategy factory
+     *
+     * @var PersistenceAdapterFactoryInterface
+     */
+    protected $persistenceAdapterFactory;
 
     /**
      * Constructor
      *
      * @param StorageAdapterStrategyInterface $storageAdapterStrategy Storage adapter strategy
+     * @param PersistenceAdapterFactoryInterface $persistenceAdapterFactory
      */
-    public function __construct(StorageAdapterStrategyInterface $storageAdapterStrategy)
-    {
+    public function __construct(
+        StorageAdapterStrategyInterface $storageAdapterStrategy,
+        PersistenceAdapterFactoryInterface $persistenceAdapterFactory
+    ) {
         $this->storageAdapterStrategy = $storageAdapterStrategy;
+        $this->persistenceAdapterFactory = $persistenceAdapterFactory;
     }
 
     /**
@@ -134,10 +147,18 @@ class AccountService
      * Persist an account
      *
      * @param Account $account Account
-     * @param PersistenceAdapterStrategyInterface $persistenceAdapterStrategy Persistence adapter strategy
      */
-    public function persist(Account $account, PersistenceAdapterStrategyInterface $persistenceAdapterStrategy)
+    public function persist(Account $account)
     {
-        $persistenceAdapterStrategy->persistAccount($account);
+        // Persist the account's virtual hosts
+        /** @var Vhost $vhost */
+        foreach ($account->getVhosts() as $vhost) {
+            $this->persistenceAdapterFactory
+                ->makeVhostPersistenceAdapterStrategy($vhost->getType())
+                ->persist($account, $vhost);
+        }
+
+        // TODO: Persist the account's mailboxes
+        // TODO: Persist the account's FTP accesses
     }
 }

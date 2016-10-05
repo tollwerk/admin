@@ -37,6 +37,7 @@
 namespace Tollwerk\Admin\Application\Contract;
 
 use Tollwerk\Admin\Domain\Account\Account;
+use Tollwerk\Admin\Domain\Vhost\Vhost;
 
 /**
  * Persistence adapter strategy interface
@@ -44,13 +45,14 @@ use Tollwerk\Admin\Domain\Account\Account;
  * @package Apparat\Server
  * @subpackage Tollwerk\Admin\Application
  */
-interface PersistenceAdapterStrategyInterface
+interface VhostPersistenceAdapterStrategyInterface
 {
     /**
-     * Persist an account
+     * Persist a virtual host
      *
      * @param Account $account Account
-     * @return boolean Success
+     * @param Vhost $vhost Virtual host
+     * @return bool Success
      */
-    public function persistAccount(Account $account);
+    public function persist(Account $account, Vhost $vhost);
 }

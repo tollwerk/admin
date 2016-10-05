@@ -51,8 +51,10 @@ interface VhostInterface
      *
      * @param DomainInterface $primaryDomain Primary domain
      * @param string $docroot Document root
+     * @param string $type Virtual host type
+     * @internal param int $port Port
      */
-    public function __construct(DomainInterface $primaryDomain, $docroo);
+    public function __construct(DomainInterface $primaryDomain, $docroot, $type);
 
     /**
      * Return the primary domain

@@ -71,6 +71,13 @@ class Vhost
      */
     protected $account;
     /**
+     * Virtual host type
+     *
+     * @var string
+     * @Column(type="enumvhosttype")
+     */
+    protected $type;
+    /**
      * List of all associated domains
      *
      * @var Domain[]
@@ -189,6 +196,28 @@ class Vhost
     public function setAccount($account)
     {
         $this->account = $account;
+        return $this;
+    }
+
+    /**
+     * Return the virtual host type
+     *
+     * @return string Virtual host type
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * Set the virtual host type
+     *
+     * @param string $type Virtual host type
+     * @return Vhost Self reference
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
         return $this;
     }
 

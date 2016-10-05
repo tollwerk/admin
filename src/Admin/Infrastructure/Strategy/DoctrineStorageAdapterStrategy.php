@@ -262,7 +262,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             if ($doctrinePrimaryDomain instanceof DoctrineDomain) {
                 $primaryDomain = DomainFactory::parseString($doctrinePrimaryDomain->getName());
 
-                $vhost = new Vhost($primaryDomain, $doctrineVhost->getDocroot());
+                $vhost = new Vhost($primaryDomain, $doctrineVhost->getDocroot(), $doctrineVhost->getType());
                 $vhost->setPhp($doctrineVhost->getPhp());
                 $vhost->setRedirectUrl($doctrineVhost->getRedirecturl());
                 $vhost->setRedirectStatus($doctrineVhost->getRedirectstatus());

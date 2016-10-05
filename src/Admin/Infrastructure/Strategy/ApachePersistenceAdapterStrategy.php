@@ -36,8 +36,9 @@
 
 namespace Tollwerk\Admin\Infrastructure\Strategy;
 
-use Tollwerk\Admin\Application\Contract\PersistenceAdapterStrategyInterface;
+use Tollwerk\Admin\Application\Contract\VhostPersistenceAdapterStrategyInterface;
 use Tollwerk\Admin\Domain\Account\Account;
+use Tollwerk\Admin\Domain\Vhost\Vhost;
 use Tollwerk\Admin\Infrastructure\App;
 use Tollwerk\Admin\Infrastructure\Persistence\Apache;
 
@@ -47,7 +48,7 @@ use Tollwerk\Admin\Infrastructure\Persistence\Apache;
  * @package Apparat\Server
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class ApachePersistenceAdapterStrategy implements PersistenceAdapterStrategyInterface
+class ApachePersistenceAdapterStrategy implements VhostPersistenceAdapterStrategyInterface
 {
     /**
      * Webroot directory
@@ -104,24 +105,26 @@ class ApachePersistenceAdapterStrategy implements PersistenceAdapterStrategyInte
     }
 
     /**
-     * Persist an account
+     * Persist a virtual host
      *
      * @param Account $account Account
-     * @return boolean Success
+     * @param Vhost $vhost Virtual host
+     * @return bool Success
      * @throws \RuntimeException If a config file couldn't be written
      */
-    public function persistAccount(Account $account)
+    public function persist(Account $account, Vhost $vhost)
     {
-        $persister = new Apache($account);
-        $entries = $persister->persist($this->webroot, $this->configroot, $this->logroot);
-
-        // Persist the file entries
-        foreach ($entries as $filename => $configParts) {
-            $configFile = $this->configroot.$account->getName().DIRECTORY_SEPARATOR.$filename;
-            if (!file_put_contents($configFile, implode(PHP_EOL.PHP_EOL, $configParts))) {
-                throw new \RuntimeException(sprintf('Couldn\'t write config file "%s"', $filename, 1475507805));
-            }
-        }
+        // TODO
+//        $persister = new Apache($account);
+//        $entries = $persister->persist($this->webroot, $this->configroot, $this->logroot);
+//
+//        // Persist the file entries
+//        foreach ($entries as $filename => $configParts) {
+//            $configFile = $this->configroot.$account->getName().DIRECTORY_SEPARATOR.$filename;
+//            if (!file_put_contents($configFile, implode(PHP_EOL.PHP_EOL, $configParts))) {
+//                throw new \RuntimeException(sprintf('Couldn\'t write config file "%s"', $filename, 1475507805));
+//            }
+//        }
 
         return true;
     }
