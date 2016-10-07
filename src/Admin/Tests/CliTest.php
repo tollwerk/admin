@@ -126,7 +126,14 @@ class CliTest extends AbstractDatabaseTest
      */
     public function testAccount()
     {
-        $this->assertTrue($this->getAdminCmd()->addArg('account:create')->addArg('test')->execute());
+        $command = $this->getAdminCmd()->addArg('account:create')->addArg('test');
+        $success = $command->execute();
+        $this->assertTrue($success);
+        if (!$success) {
+            echo $command->getOutput().' ('.$command->getExitCode().')';
+        }
+
+
         $this->assertEquals(1, $this->getConnection()->getRowCount('account'));
         $queryTable = $this->getConnection()->createQueryTable('account', 'SELECT * FROM account');
         $expectedTable = $this->createFlatXMLDataSet($this->getFixture('account_create.xml'))->getTable('account');
