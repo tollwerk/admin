@@ -80,6 +80,7 @@ class CreateAccountCommand extends Command
             Account::create($account);
             $output->writeln(sprintf('<info>Account "%s" created successfully (not enabled yet)</info>',
                 $account));
+            return 0;
         } catch (\Exception $e) {
             $output->writeln(
                 sprintf(
@@ -89,6 +90,7 @@ class CreateAccountCommand extends Command
                     $e->getCode()
                 )
             );
+            return $e->getCode();
         }
     }
 }

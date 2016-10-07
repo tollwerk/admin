@@ -88,6 +88,7 @@ class RenameAccountCommand extends Command
                     $newaccount
                 )
             );
+            return 0;
         } catch (\Exception $e) {
             $output->writeln(
                 sprintf(
@@ -98,6 +99,7 @@ class RenameAccountCommand extends Command
                     $e->getCode()
                 )
             );
+            return $e->getCode();
         }
     }
 }

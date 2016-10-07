@@ -36,55 +36,76 @@
 
 namespace Tollwerk\Admin\Tests;
 
-use PHPUnit\Framework\TestCase;
-use Tollwerk\Admin\Domain\Account\Account;
-use Tollwerk\Admin\Domain\Factory\DomainFactory;
-use Tollwerk\Admin\Domain\Vhost\Vhost;
+use Doctrine\DBAL\DriverManager;
+use PHPUnit_Extensions_Database_DB_IDatabaseConnection;
 
 /**
- * Account tests
+ * Abstract database test case
  *
- * @package Apparat\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Tests
  */
-class AccountTests extends TestCase
+abstract class AbstractDatabaseTest extends \PHPUnit_Extensions_Database_TestCase
 {
     /**
-     * Test the instatiation of an account
+     * PDO instance
+     *
+     * @var null
      */
-    public function testAccount()
+    private static $pdo = null;
+    /**
+     * DBAL instance
+     *
+     * @var null
+     */
+    private static $dbal = null;
+
+    // only instantiate PHPUnit_Extensions_Database_DB_IDatabaseConnection once per test
+    /**
+     * Connection
+     *
+     * @var PHPUnit_Extensions_Database_DB_IDatabaseConnection
+     */
+    private $conn = null;
+
+    /**
+     * Returns the test database connection.
+     *
+     * @return PHPUnit_Extensions_Database_DB_IDatabaseConnection Database connection
+     */
+    final protected function getConnection()
     {
-        $account = new Account('test');
-        $this->assertInstanceOf(Account::class, $account);
-        $this->assertEquals('test', $account->getName());
-        $this->assertFalse($account->isActive());
-        $this->assertEquals([], $account->getVhosts());
+        if ($this->conn === null) {
+            if (self::$pdo == null) {
+                self::$pdo = new \PDO($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
+            }
+            $this->conn = $this->createDefaultDBConnection(self::$pdo, $GLOBALS['DB_DBNAME']);
+        }
+
+        return $this->conn;
     }
 
     /**
-     * Test the registration of virtual hosts
+     * Return the PDO instance
      *
-     * @expectedException \RuntimeException
-     * @expectedExceptionCode 1475488477
+     * @return \PDO PDO instance
      */
-    public function testAccountVirtualHosts()
+    protected function getPdo()
     {
-        $account = new Account('test');
-        $this->assertInstanceOf(Account::class, $account);
+        return $this->getConnection()->getConnection();
+    }
 
-        $domain = DomainFactory::parseString('example.com');
-        $vhost = new Vhost($domain, __DIR__);
-        $this->assertInstanceOf(Vhost::class, $vhost, Vhost::PORT_HTTP_DEFAULT);
+    /**
+     * Return the DBAL connection
+     *
+     * @return \Doctrine\DBAL\Connection
+     */
+    protected function getDbal()
+    {
+        if (self::$dbal === null) {
+            self::$dbal = DriverManager::getConnection(array('pdo' => $this->getPdo()));
+        }
 
-        $account->setActive(true);
-        $this->assertTrue($account->isActive());
-
-        $account->setVhosts([$vhost]);
-        $this->assertEquals([$vhost], $account->getVhosts());
-        $account->removeVirtualHost($vhost);
-        $this->assertEquals([], $account->getVhosts());
-        $account->addVirtualHost($vhost);
-        $this->assertEquals([$vhost], $account->getVhosts());
-        $account->setVhosts(['test']);
+        return self::$dbal;
     }
 }

@@ -79,6 +79,7 @@ class EnableAccountCommand extends Command
         try {
             Account::enable($account);
             $output->writeln(sprintf('<info>Account "%s" enabled successfully</info>', $account));
+            return 0;
         } catch (\Exception $e) {
             $output->writeln(
                 sprintf(
@@ -88,6 +89,7 @@ class EnableAccountCommand extends Command
                     $e->getCode()
                 )
             );
+            return $e->getCode();
         }
     }
 }

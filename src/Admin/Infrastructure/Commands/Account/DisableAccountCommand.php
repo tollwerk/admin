@@ -79,6 +79,7 @@ class DisableAccountCommand extends Command
         try {
             Account::disable($account);
             $output->writeln(sprintf('<info>Account "%s" disabled successfully</info>', $account));
+            return 0;
         } catch (\Exception $e) {
             $output->writeln(
                 sprintf(
@@ -88,6 +89,7 @@ class DisableAccountCommand extends Command
                     $e->getCode()
                 )
             );
+            return $e->getCode();
         }
     }
 }

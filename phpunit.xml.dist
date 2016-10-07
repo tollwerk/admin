@@ -6,7 +6,10 @@
     </testsuites>
 
     <php>
-        <env name="VARIABLE" value="value"/>
+        <var name="DB_DSN" value="mysql:dbname=admin_test;host=localhost" />
+        <var name="DB_USER" value="admin_01" />
+        <var name="DB_PASSWD" value="3!t6nLu#" />
+        <var name="DB_DBNAME" value="admin_test" />
     </php>
 
     <logging>

@@ -80,6 +80,7 @@ class DeleteAccountCommand extends Command
             Account::delete($account);
             $output->writeln(sprintf('<info>Account "%s" deleted successfully (user data remained untouched)</info>',
                 $account));
+            return 0;
         } catch (\Exception $e) {
             $output->writeln(
                 sprintf(
@@ -89,6 +90,7 @@ class DeleteAccountCommand extends Command
                     $e->getCode()
                 )
             );
+            return $e->getCode();
         }
     }
 }

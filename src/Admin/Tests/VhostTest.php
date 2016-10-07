@@ -36,6 +36,7 @@
 
 namespace Tollwerk\Admin\Tests;
 
+use PHPUnit\Framework\TestCase;
 use Tollwerk\Admin\Domain\Factory\DomainFactory;
 use Tollwerk\Admin\Domain\Vhost\Vhost;
 
@@ -45,7 +46,7 @@ use Tollwerk\Admin\Domain\Vhost\Vhost;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Tests
  */
-class VhostTests extends \PHPUnit_Framework_TestCase
+class VhostTests extends TestCase
 {
     /**
      * Test the instantiation of a virtual host
