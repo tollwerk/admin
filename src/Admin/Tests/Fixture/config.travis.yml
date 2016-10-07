@@ -6,9 +6,9 @@ doctrine:
     dbname: "admin_test"
     host: "localhost"
 apache:
-  webroot: "/root/lab/admin/tmp/vhtdocs"
-  config: "/root/lab/admin/tmp/accounts"
-  logroot: "/root/lab/admin/tmp/log"
+  webroot: "/home/travis/build/tollwerk/admin/tmp/vhtdocs"
+  config: "/home/travis/build/tollwerk/admin/tmp/accounts"
+  logroot: "/home/travis/build/tollwerk/admin/tmp/log"
   apache_group: "apache"
 variables:
   fpm_sockets: "/var/run/php-fpm"
@@ -17,4 +17,4 @@ general:
   locale: de_DE
 shell:
   group: account
-  base: "/root/lab/admin/tmp"
+  base: "/home/travis/build/tollwerk/admin/tmp"

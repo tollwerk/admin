@@ -38,6 +38,7 @@ namespace Tollwerk\Admin\Tests;
 
 use Doctrine\DBAL\DriverManager;
 use PHPUnit_Extensions_Database_DB_IDatabaseConnection;
+use Tollwerk\Admin\Infrastructure\App;
 
 /**
  * Abstract database test case
@@ -76,10 +77,14 @@ abstract class AbstractDatabaseTest extends \PHPUnit_Extensions_Database_TestCas
     final protected function getConnection()
     {
         if ($this->conn === null) {
+            App::bootstrap();
+            $dbparams = App::getConfig('doctrine.dbparams');
+
             if (self::$pdo == null) {
-                self::$pdo = new \PDO($GLOBALS['DB_DSN'], $GLOBALS['DB_USER'], $GLOBALS['DB_PASSWD']);
+                $dsn = 'mysql:dbname='.$dbparams['dbname'].';host='.$dbparams['host'];
+                self::$pdo = new \PDO($dsn, $dbparams['user'], $dbparams['password']);
             }
-            $this->conn = $this->createDefaultDBConnection(self::$pdo, $GLOBALS['DB_DBNAME']);
+            $this->conn = $this->createDefaultDBConnection(self::$pdo, $dbparams['dbname']);
         }
 
         return $this->conn;
