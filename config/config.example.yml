@@ -1,0 +1,17 @@
+doctrine:
+  dbparams:
+    driver: "pdo_mysql"
+    user: "dbuser"
+    password: "s3cr3t"
+    dbname: "db01"
+    host: "localhost"
+apache:
+  group: "nobody"
+variables:
+  fpm_sockets: "/var/run/php-fpm"
+  certroot: "/etc/letsencrypt/live"
+general:
+  locale: de_DE
+shell:
+  group: account
+  base: "/var/www/localhost/accounts"

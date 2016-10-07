@@ -6,7 +6,10 @@ php:
   - hhvm
 
 env:
-- APP_ENV=development
+  - APP_ENV=development
+
+services:
+  - mysql
 
 matrix:
   allow_failures:
@@ -17,6 +20,10 @@ before_script:
   - travis_retry composer install --no-interaction --prefer-source --dev
   - if [ "$TRAVIS_PHP_VERSION" == "hhvm" ]; then echo 'date.timezone = Europe/Berlin' >> /etc/hhvm/php.ini; fi;
   - if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then echo 'date.timezone = Europe/Berlin' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini; fi;
+  - mysql -e "create database IF NOT EXISTS admin_test;" -uroot
+  - cp ./src/Admin/Tests/Fixture/config.travis.yml config/config.yml
+  - ./vendor/bin/doctrine orm:schema-tool:update --force
+  - pwd
 
 script:
   - bash -c 'if [ "$TRAVIS_PHP_VERSION" == "hhvm" ]; then vendor/bin/phpunit; fi;'

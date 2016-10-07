@@ -1,8 +1,8 @@
 doctrine:
   dbparams:
     driver: "pdo_mysql"
-    user: "admin_01"
-    password: "3!t6nLu#"
+    user: "root"
+    password: ""
     dbname: "admin_test"
     host: "localhost"
 apache:

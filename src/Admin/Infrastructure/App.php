@@ -132,6 +132,8 @@ class App
         $config = Setup::createAnnotationMetadataConfiguration($modelPaths, self::$devMode);
 
         self::$entityManager = EntityManager::create($dbParams, $config);
+        $platform = self::$entityManager->getConnection()->getDatabasePlatform();
+        $platform->registerDoctrineTypeMapping('enum', 'string');
 
         // Register the virtual host type declaration
         Type::addType(EnumVhosttypeType::ENUM_TYPE, EnumVhosttypeType::class);

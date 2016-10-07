@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<mysqldump xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<database name="admin_test">
+	<table_data name="account">
+	</table_data>
+	<table_data name="domain">
+	</table_data>
+	<table_data name="vhost">
+	</table_data>
+</database>
+</mysqldump>
