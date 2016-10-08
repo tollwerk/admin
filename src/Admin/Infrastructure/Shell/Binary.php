@@ -3,8 +3,8 @@
 /**
  * admin
  *
- * @category    Apparat
- * @package     Apparat\Server
+ * @category    Tollwerk
+ * @package     Tollwerk\Admin
  * @subpackage  Tollwerk\Admin\Infrastructure\Shell
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
@@ -74,5 +74,18 @@ class Binary
         }
 
         return self::$binaries[$binary];
+    }
+
+    /**
+     * Return a sudoed binary command
+     *
+     * @param string $binary Binary
+     * @return Command Sudoed command
+     */
+    public static function sudo($binary) {
+        $command = new Command();
+        $command->setCommand(self::get('sudo'));
+        $command->addArg($binary);
+        return $command;
     }
 }

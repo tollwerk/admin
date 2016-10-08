@@ -3,8 +3,8 @@
 /**
  * admin
  *
- * @category    Apparat
- * @package     Apparat\Server
+ * @category    Tollwerk
+ * @package     Tollwerk\Admin
  * @subpackage  Tollwerk\Admin\Tests
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
@@ -80,8 +80,7 @@ class CliTest extends AbstractDatabaseTest
 
         // Ensure the account system group exists
         App::bootstrap();
-        $command = new Command();
-        $command->setCommand(Binary::get('groupadd'));
+        $command = Binary::sudo('groupadd');
         $command->addArg('-f');
         $command->addArg(App::getConfig('shell.group'));
         if (!$command->execute()) {

@@ -3,8 +3,8 @@
 /**
  * admin
  *
- * @category    Apparat
- * @package     Apparat\Server
+ * @category    Tollwerk
+ * @package     Tollwerk\Admin
  * @subpackage  Tollwerk\Admin\Infrastructure\Service
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl

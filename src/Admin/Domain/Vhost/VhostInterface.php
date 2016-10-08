@@ -3,9 +3,9 @@
 /**
  * tollwerk-admin
  *
- * @category    Apparat
- * @package     Apparat\Server
- * @subpackage  Apparat\Server\<Layer>
+ * @category    Tollwerk
+ * @package     Tollwerk\Admin
+ * @subpackage  Tollwerk\Admin\Domain
  * @author      Joschi Kuphal <joschi@kuphal.net> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@kuphal.net> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)

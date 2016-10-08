@@ -3,7 +3,7 @@
 /**
  * Toggl Dashboard
  *
- * @category    Apparat
+ * @category    Tollwerk
  * @package     Tollwerk\Admin
  * @subpackage  Tollwerk\Admin\Ports
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl

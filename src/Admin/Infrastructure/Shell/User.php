@@ -3,8 +3,8 @@
 /**
  * admin
  *
- * @category    Apparat
- * @package     Apparat\Server
+ * @category    Tollwerk
+ * @package     Tollwerk\Admin
  * @subpackage  Tollwerk\Admin\Infrastructure\Shell
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
@@ -56,8 +56,7 @@ class User
     public static function create($user)
     {
         $user = self::validateUser($user);
-        $command = new Command();
-        $command->setCommand(Binary::get('useradd'));
+        $command = Binary::sudo('useradd');
         $command->addArg('--gid', App::getConfig('shell.group'));
         $command->addArg('--shell', '/bin/false');
         $command->addArg('--base-dir', App::getConfig('shell.base'));
@@ -120,8 +119,7 @@ class User
     {
         $olduser = self::validateUser($olduser);
         $newuser = self::validateUser($newuser);
-        $command = new Command();
-        $command->setCommand(Binary::get('usermod'));
+        $command = Binary::sudo('usermod');
         $command->addArg('--home', App::getConfig('shell.base').DIRECTORY_SEPARATOR.$newuser);
         $command->addArg('--move-home');
         $command->addArg('--login', $newuser);
@@ -138,8 +136,7 @@ class User
     public static function delete($user)
     {
         $user = self::validateUser($user);
-        $command = new Command();
-        $command->setCommand(Binary::get('userdel'));
+        $command = Binary::sudo('userdel');
         $command->addArg($user);
 
         return self::run($command);
@@ -155,8 +152,7 @@ class User
     {
         $user = self::validateUser($user);
         $group = self::validateUser($group);
-        $command = new Command();
-        $command->setCommand(Binary::get('usermod'));
+        $command = Binary::sudo('usermod');
         $command->addArg('--append');
         $command->addArg('--groups', $group);
         $command->addArg($user);
@@ -176,8 +172,7 @@ class User
         $group = self::validateUser($group);
 
         // Get the current user groups
-        $command = new Command();
-        $command->setCommand(Binary::get('id'));
+        $command = Binary::sudo('id');
         $command->addArg('--groups');
         $command->addArg('--name');
         $command->addArg($user);
@@ -185,8 +180,7 @@ class User
         $groups = preg_split('%[^a-z]+%', self::run($command));
         $newgroups = array_diff($groups, [$group]);
 
-        $command = new Command();
-        $command->setCommand(Binary::get('usermod'));
+        $command = Binary::sudo('usermod');
         $command->addArg('--groups', implode(',', $newgroups));
         $command->addArg($user);
 
