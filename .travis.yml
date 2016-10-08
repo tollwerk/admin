@@ -9,6 +9,8 @@ env:
 services:
   - mysql
 
+sudo: required
+
 matrix:
   allow_failures:
     - php: hhvm
