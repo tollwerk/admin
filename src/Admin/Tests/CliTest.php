@@ -37,6 +37,8 @@
 namespace Tollwerk\Admin\Tests;
 
 use mikehaertl\shellcommand\Command;
+use Tollwerk\Admin\Infrastructure\App;
+use Tollwerk\Admin\Infrastructure\Shell\Binary;
 
 /**
  * Command line tool tests
@@ -46,18 +48,6 @@ use mikehaertl\shellcommand\Command;
  */
 class CliTest extends AbstractDatabaseTest
 {
-    /**
-     * PHP binary
-     *
-     * @var string
-     */
-    protected static $phpcmd;
-    /**
-     * id command
-     *
-     * @var string
-     */
-    protected static $idcmd;
     /**
      * Admin CLI interface
      *
@@ -88,26 +78,15 @@ class CliTest extends AbstractDatabaseTest
         // TODO: Make environment dependent
         self::$homebase = dirname(dirname(dirname(__DIR__))).DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR;
 
-        // Get the PHP cli command
+        // Ensure the account system group exists
+        App::bootstrap();
         $command = new Command();
-        $command->setCommand('which');
-        $command->addArg('php');
-
+        $command->setCommand(Binary::get('groupadd'));
+        $command->addArg('-f');
+        $command->addArg(App::getConfig('shell.group'));
         if (!$command->execute()) {
-            throw new \RuntimeException($command->getError(), $command->getExitCode());
+            throw new \RuntimeException($command->getOutput(), $command->getExitCode());
         }
-        self::$phpcmd = $command->getOutput();
-
-        // Get the `id` command
-        $command = new Command();
-        $command->setCommand('which');
-        $command->addArg('id');
-        if (!$command->execute()) {
-            throw new \RuntimeException($command->getError(), $command->getExitCode());
-        }
-        self::$idcmd = $command->getOutput();
-
-        echo self::$admincli.PHP_EOL.self::$homebase.PHP_EOL.self::$phpcmd.PHP_EOL.self::$idcmd.PHP_EOL;
     }
 
     /**
@@ -194,7 +173,7 @@ class CliTest extends AbstractDatabaseTest
     protected function getAdminCmd()
     {
         $command = new Command();
-        $command->setCommand(self::$phpcmd);
+        $command->setCommand(Binary::get('php'));
         $command->addArg(self::$admincli);
         return $command;
     }
@@ -236,7 +215,7 @@ class CliTest extends AbstractDatabaseTest
     protected function assertUserExists($user)
     {
         $command = new Command();
-        $command->setCommand(self::$idcmd);
+        $command->setCommand(Binary::get('id'));
         $command->addArg($user);
         return $command->execute();
     }
@@ -249,7 +228,7 @@ class CliTest extends AbstractDatabaseTest
     protected function assertUserNotExists($user)
     {
         $command = new Command();
-        $command->setCommand(self::$idcmd);
+        $command->setCommand(Binary::get('id'));
         $command->addArg($user);
         return !$command->execute();
     }

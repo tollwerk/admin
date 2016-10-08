@@ -77,7 +77,6 @@ abstract class AbstractDatabaseTest extends \PHPUnit_Extensions_Database_TestCas
     final protected function getConnection()
     {
         if ($this->conn === null) {
-            App::bootstrap();
             $dbparams = App::getConfig('doctrine.dbparams');
 
             if (self::$pdo == null) {
