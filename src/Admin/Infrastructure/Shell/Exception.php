@@ -39,7 +39,7 @@ namespace Tollwerk\Admin\Infrastructure\Shell;
 /**
  * Shell exception
  *
- * @package Apparat\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
 class Exception extends \RuntimeException

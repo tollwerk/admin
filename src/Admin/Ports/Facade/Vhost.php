@@ -5,7 +5,7 @@
  *
  * @category    Tollwerk
  * @package     Tollwerk\Admin
- * @subpackage  Tollwerk\Admin\Infrastructure\Shell
+ * @subpackage  Tollwerk\Admin\Ports\Facade
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
@@ -34,58 +34,15 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-namespace Tollwerk\Admin\Infrastructure\Shell;
-
-use mikehaertl\shellcommand\Command;
+namespace Tollwerk\Admin\Ports\Facade;
 
 /**
- * Helper class to identify system binaries
+ * Virtual host facade
  *
  * @package Tollwerk\Admin
- * @subpackage Tollwerk\Admin\Infrastructure\Shell
+ * @subpackage Tollwerk\Admin\Ports
  */
-class Binary
+class Vhost
 {
-    /**
-     * Registered binaries
-     *
-     * @var array
-     */
-    protected static $binaries = [];
 
-    /**
-     * Identify and return a system binary
-     *
-     * @param string $binary Binary name
-     * @return string Absolute binary path
-     */
-    public static function get($binary)
-    {
-        // One time binary registration
-        if (empty(self::$binaries[$binary])) {
-            $command = new Command();
-            $command->setCommand('which');
-            $command->addArg($binary);
-
-            if (!$command->execute()) {
-                throw new \RuntimeException($command->getError(), $command->getExitCode());
-            }
-            self::$binaries[$binary] = $command->getOutput();
-        }
-
-        return self::$binaries[$binary];
-    }
-
-    /**
-     * Return a sudoed binary command
-     *
-     * @param string $binary Binary
-     * @return Command Sudoed command
-     */
-    public static function sudo($binary) {
-        $command = new Command();
-        $command->setCommand(self::get('sudo'));
-        $command->addArg(self::get($binary));
-        return $command;
-    }
 }

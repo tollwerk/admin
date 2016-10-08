@@ -41,7 +41,7 @@ use Tollwerk\Admin\Infrastructure\App;
 /**
  * Template rendering service
  *
- * @package Apparat\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
 class TemplateService

@@ -44,7 +44,7 @@ use Tollwerk\Admin\Domain\Vhost\Vhost;
 /**
  * Account tests
  *
- * @package Apparat\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Tests
  */
 class AccountTests extends TestCase

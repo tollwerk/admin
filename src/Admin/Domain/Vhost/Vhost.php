@@ -41,7 +41,7 @@ use Tollwerk\Admin\Domain\Domain\DomainInterface;
 /**
  * Virtual host
  *
- * @package Apparat\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Domain
  */
 class Vhost implements VhostInterface

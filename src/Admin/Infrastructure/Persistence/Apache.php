@@ -44,7 +44,7 @@ use Tollwerk\Admin\Infrastructure\Service\TemplateService;
 /**
  * Apache persister
  *
- * @package Apparat\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
 class Apache

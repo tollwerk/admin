@@ -44,8 +44,8 @@ use Tollwerk\Admin\Domain\Vhost\Vhost;
 /**
  * Account service
  *
- * @package Apparat\Server
- * @subpackage Tollwerk\Admin\Application\Service
+ * @package Tollwerk\Admin
+ * @subpackage Tollwerk\Admin\Application
  */
 class AccountService
 {

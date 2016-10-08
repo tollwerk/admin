@@ -43,8 +43,8 @@ use Tollwerk\Admin\Infrastructure\Shell\User;
 /**
  * Account facade
  *
- * @package Apparat\Server
- * @subpackage Tollwerk\Admin\Ports\Facade
+ * @package Tollwerk\Admin
+ * @subpackage Tollwerk\Admin\Ports
  */
 class Account
 {

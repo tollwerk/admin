@@ -51,7 +51,7 @@ use Tollwerk\Admin\Infrastructure\Model\Vhost as DoctrineVhost;
 /**
  * DoctrineAccountFactoryStrategy
  *
- * @package Apparat\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure\Strategy
  */
 class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface

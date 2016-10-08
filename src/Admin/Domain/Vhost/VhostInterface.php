@@ -41,7 +41,7 @@ use Tollwerk\Admin\Domain\Domain\DomainInterface;
 /**
  * Virtual host interface
  *
- * @package Apparat\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Domain
  */
 interface VhostInterface

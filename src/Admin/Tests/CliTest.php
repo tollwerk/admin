@@ -98,7 +98,7 @@ class CliTest extends AbstractDatabaseTest
 
         // Remove all temporary directories
         foreach (self::$tmpDirectories as $tmpDirectory) {
-            $this->deleteTree($tmpDirectory);
+            Binary::sudo('rm')->addArg('-Rf')->addArg($tmpDirectory)->execute();
         }
     }
 
@@ -187,24 +187,6 @@ class CliTest extends AbstractDatabaseTest
     protected function getFixture($fixture)
     {
         return __DIR__.DIRECTORY_SEPARATOR.'Fixture'.DIRECTORY_SEPARATOR.$fixture;
-    }
-
-    /**
-     * Recursively delete a directory
-     *
-     * @param string $dir Directory
-     * @return bool Success
-     */
-    protected function deleteTree($dir)
-    {
-        foreach (array_diff(scandir($dir), array('.', '..')) as $file) {
-            if (is_dir("$dir/$file")) {
-                $this->deleteTree("$dir/$file");
-                continue;
-            }
-            unlink("$dir/$file");
-        }
-        return rmdir($dir);
     }
 
     /**

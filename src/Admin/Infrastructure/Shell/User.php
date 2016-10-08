@@ -42,7 +42,7 @@ use Tollwerk\Admin\Infrastructure\App;
 /**
  * User related commands
  *
- * @package Apparat\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
 class User

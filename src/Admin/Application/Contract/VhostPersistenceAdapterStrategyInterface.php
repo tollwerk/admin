@@ -42,7 +42,7 @@ use Tollwerk\Admin\Domain\Vhost\Vhost;
 /**
  * Persistence adapter strategy interface
  *
- * @package Apparat\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Application
  */
 interface VhostPersistenceAdapterStrategyInterface

@@ -45,7 +45,7 @@ use Tollwerk\Admin\Infrastructure\Persistence\Apache;
 /**
  * Apache persistence adapter strategy
  *
- * @package Apparat\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
 class ApachePersistenceAdapterStrategy implements VhostPersistenceAdapterStrategyInterface

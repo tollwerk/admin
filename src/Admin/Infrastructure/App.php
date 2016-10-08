@@ -41,6 +41,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 use Symfony\Component\Yaml\Yaml;
 use Tollwerk\Admin\Application\Service\AccountService;
+use Tollwerk\Admin\Application\Service\VirtualHostService;
 use Tollwerk\Admin\Infrastructure\Doctrine\EnumVhosttypeType;
 use Tollwerk\Admin\Infrastructure\Factory\PersistenceAdapterFactory;
 use Tollwerk\Admin\Infrastructure\Strategy\DoctrineStorageAdapterStrategy;
@@ -83,6 +84,12 @@ class App
      * @var AccountService
      */
     protected static $accountService = null;
+    /**
+     * Virtual host service
+     *
+     * @var VirtualHostService
+     */
+    protected static $vhostService = null;
     /**
      * App domain
      *
@@ -211,5 +218,21 @@ class App
         }
 
         return self::$accountService;
+    }
+
+    /**
+     * Return the virtual host service
+     *
+     * @return VirtualHostService Virtual host service
+     */
+    public static function getVirtualHostService()
+    {
+        if (self::$accountService === null) {
+            $storageAdapter = new DoctrineStorageAdapterStrategy();
+            $persistenceAdapterFactory = new PersistenceAdapterFactory();
+            self::$vhostService = new VirtualHostService($storageAdapter, $persistenceAdapterFactory);
+        }
+
+        return self::$vhostService;
     }
 }
