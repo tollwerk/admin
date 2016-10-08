@@ -36,9 +36,9 @@
 
 namespace Tollwerk\Admin\Ports\Facade;
 
-use Tollwerk\Admin\Domain\Account\Account as DomainAccount;
 use \Tollwerk\Admin\Domain\Domain\Domain as DomainDomain;
 use Tollwerk\Admin\Infrastructure\App;
+use Tollwerk\Admin\Infrastructure\Facade\AbstractFacade;
 
 /**
  * Domain facade
@@ -46,7 +46,7 @@ use Tollwerk\Admin\Infrastructure\App;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Ports
  */
-class Domain
+class Domain extends AbstractFacade
 {
     /**
      * Create and add a domain to an account
@@ -63,7 +63,7 @@ class Domain
 
         // Check if the domain already exists and is unassigned
         try {
-            $domain = App::getDomainService()->loadAvailable($domain, $account);
+            $domain = App::getDomainService()->loadUnassigned($domain, $account);
 
         } catch (\RuntimeException $e) {
             // If the domain already exists but is assigned or belongs to another account: Error
@@ -131,20 +131,5 @@ class Domain
     public static function disableWildcard($name)
     {
         return App::getDomainService()->disableWildcard($name) instanceof DomainDomain;
-    }
-
-    /**
-     * Get the account to operate on
-     *
-     * @param string $name Account name
-     * @return DomainAccount Account instance
-     * @throws \Exception If the account doesn't exist
-     */
-    protected static function loadAccount($name) {
-        $account = App::getAccountService()->load($name);
-        if (!$account instanceof DomainAccount) {
-            throw new \Exception(sprintf('Account "%s" doesn\'t exist', $name), 1475915142);
-        }
-        return $account;
     }
 }

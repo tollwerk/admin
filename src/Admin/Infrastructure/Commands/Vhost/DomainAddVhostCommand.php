@@ -40,16 +40,15 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Tollwerk\Admin\Domain\Vhost\Vhost as DomainVhost;
 use Tollwerk\Admin\Ports\Facade\Vhost;
 
 /**
- * vhost:create command
+ * vhost:domain:add command
  *
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class CreateVhostCommand extends Command
+class DomainAddVhostCommand extends Command
 {
     /**
      * Configure the command
@@ -58,24 +57,22 @@ class CreateVhostCommand extends Command
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('vhost:create')
+            ->setName('vhost:domain:add')
             // the short description shown while running "php bin/console list"
-            ->setDescription('Create a new virtual host')
+            ->setDescription('Add a secondary domain')
             // the full command description shown when running the command with
             // the "--help" option
-            ->setHelp("This command allows you to create a virtual host and add it to an account")
+            ->setHelp("This command allows you to add a secondary domain to a virtual host")
             // configure the virtual host account name
             ->addArgument(
                 'account',
                 InputArgument::REQUIRED,
-                'The name of the account the virtual host should be added to'
+                'The name of the account the virtual host belongs to'
             )
-            // configure the virtual host domain name
-            ->addArgument('domain', InputArgument::REQUIRED, 'The name of the virtual hosts\'s primary domain')
+            // configure the domain to add to the virtual host
+            ->addArgument('domain', InputArgument::REQUIRED, 'The domain to add to the virtual host')
             // configure the virtual host document root
-            ->addArgument('docroot', InputArgument::OPTIONAL, 'The virtual hosts\'s document root', '')
-            // configure the virttual host type
-            ->addArgument('type', InputArgument::OPTIONAL, 'The virtual host type', DomainVhost::TYPE_APACHE);
+            ->addArgument('docroot', InputArgument::OPTIONAL, 'The virtual hosts\'s document root', '');
     }
 
     /**
@@ -88,17 +85,19 @@ class CreateVhostCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $account = $input->getArgument('account');
-        $domain = $input->getArgument('domain');
         $docroot = $input->getArgument('docroot');
-        $type = $input->getArgument('type');
+        $domain = $input->getArgument('domain');
         try {
-            Vhost::create($account, $domain, $docroot, $type);
-            $output->writeln(sprintf('<info>Virtual host "%s" created successfully</info>', $docroot ?: '/'));
+            Vhost::addDomain($account, $domain, $docroot);
+            $output->writeln(
+                sprintf('<info>Domain "%s" successfully added to virtual host "%s"</info>', $domain, $docroot ?: '/')
+            );
             return 0;
         } catch (\Exception $e) {
             $output->writeln(
                 sprintf(
-                    '<error>Error creating virtual host "%s": %s (%s)</error>',
+                    '<error>Error adding domain "%s" to virtual host "%s": %s (%s)</error>',
+                    $domain,
                     $docroot ?: '/',
                     $e->getMessage(),
                     $e->getCode()

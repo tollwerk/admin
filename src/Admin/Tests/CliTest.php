@@ -82,7 +82,7 @@ class CliTest extends AbstractDatabaseTest
         App::bootstrap();
         $command = Binary::sudo('groupadd');
         $command->addArg('-f');
-        $command->addArg(App::getConfig('shell.group'));
+        $command->addArg(App::getConfig('general.group'));
         if (!$command->execute()) {
             echo $command->getOutput().' ('.$command->getExitCode().')'.PHP_EOL;
             throw new \RuntimeException($command->getOutput(), $command->getExitCode());
@@ -151,12 +151,14 @@ class CliTest extends AbstractDatabaseTest
     /**
      * Test creating, modifying and deleting a domain
      */
-    public function testDomain() {
+    public function testDomain()
+    {
         // Create an account
         $this->assertTrue($this->getAdminCmd()->addArg('account:create')->addArg('test')->execute());
 
         // Create a domain
-        $this->assertTrue($this->getAdminCmd()->addArg('domain:create')->addArg('test')->addArg('example.com')->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('domain:create')->addArg('test')->addArg('example.com')
+            ->execute());
         $this->assertEquals(1, $this->getConnection()->getRowCount('domain'));
         $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
         $expectedTable = $this->getFixtureDataSet('domain_create.xml')->getTable('domain');
@@ -186,9 +188,99 @@ class CliTest extends AbstractDatabaseTest
         $expectedTable = $this->getFixtureDataSet('domain_create.xml')->getTable('domain');
         $this->assertTablesEqual($expectedTable, $queryTable);
 
-        // Delte the domain
+        // Delete the domain
         $this->assertTrue($this->getAdminCmd()->addArg('domain:delete')->addArg('example.com')->execute());
         $this->assertEquals(0, $this->getConnection()->getRowCount('domain'));
+
+        // Delete the account and the home directory
+        $this->assertTrue($this->getAdminCmd()->addArg('account:delete')->addArg('test')->execute());
+        $this->assertEquals(0, $this->getConnection()->getRowCount('account'));
+        $this->assertUserNotExists('test');
+        self::$tmpDirectories[] = self::$homebase.'test';
+    }
+
+    /**
+     * Test creating, modifying and deleting a virtual host
+     */
+    public function testVhost()
+    {
+        // Create an account
+        $this->assertTrue($this->getAdminCmd()->addArg('account:create')->addArg('test')->execute());
+
+        // Create two domains
+        $this->assertTrue($this->getAdminCmd()->addArg('domain:create')->addArg('test')->addArg('example.com')
+            ->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('domain:create')->addArg('test')->addArg('test.com')->execute());
+        $this->assertEquals(2, $this->getConnection()->getRowCount('domain'));
+        $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
+        $expectedTable = $this->getFixtureDataSet('vhost_create_domain.xml')->getTable('domain');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Create a virtual host
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:create')->addArg('test')->addArg('example.com')
+            ->execute());
+        $this->assertEquals(1, $this->getConnection()->getRowCount('vhost'));
+        $queryTable = $this->getConnection()->createQueryTable('vhost', 'SELECT * FROM vhost');
+        $expectedTable = $this->getFixtureDataSet('vhost_create.xml')->getTable('vhost');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+        $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
+        $expectedTable = $this->getFixtureDataSet('vhost_create.xml')->getTable('domain');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Enable the vhost
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:enable')->addArg('test')->execute());
+        $queryTable = $this->getConnection()->createQueryTable('vhost', 'SELECT * FROM vhost');
+        $expectedTable = $this->getFixtureDataSet('vhost_enable.xml')->getTable('vhost');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Disable the vhost
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:disable')->addArg('test')->execute());
+        $queryTable = $this->getConnection()->createQueryTable('vhost', 'SELECT * FROM vhost');
+        $expectedTable = $this->getFixtureDataSet('vhost_create.xml')->getTable('vhost');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Configure PHP, the HTTP and the HTTPS ports, the redirect URL and status
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:php')->addArg('test')->addArg('/')->addArg('7.0')
+            ->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:http')->addArg('test')->addArg('/')->addArg('81')
+            ->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:https')->addArg('test')->addArg('/')->addArg('444')
+            ->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:redirect')->addArg('test')->addArg('/')
+            ->addArg('http://test.com')->addArg('302')->execute());
+        $queryTable = $this->getConnection()->createQueryTable('vhost', 'SELECT * FROM vhost');
+        $expectedTable = $this->getFixtureDataSet('vhost_php_ports_redirect.xml')->getTable('vhost');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Reset PHP, the HTTP and the HTTPS ports, the redirect URL and status
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:php')->addArg('test')->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:http')->addArg('test')->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:https')->addArg('test')->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:redirect')->addArg('test')->execute());
+        $queryTable = $this->getConnection()->createQueryTable('vhost', 'SELECT * FROM vhost');
+        $expectedTable = $this->getFixtureDataSet('vhost_create.xml')->getTable('vhost');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Add a secondary domain
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:domain:add')->addArg('test')->addArg('test.com')
+            ->execute());
+        $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
+        $expectedTable = $this->getFixtureDataSet('vhost_domain_add.xml')->getTable('domain');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Remove a secondary domain
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:domain:remove')->addArg('test')->addArg('test.com')
+            ->execute());
+        $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
+        $expectedTable = $this->getFixtureDataSet('vhost_create.xml')->getTable('domain');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Delete the virtual host
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:delete')->addArg('test')->execute());
+        $this->assertEquals(0, $this->getConnection()->getRowCount('vhost'));
+        $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
+        $expectedTable = $this->getFixtureDataSet('vhost_create_domain.xml')->getTable('domain');
+        $this->assertTablesEqual($expectedTable, $queryTable);
 
         // Delete the account and the home directory
         $this->assertTrue($this->getAdminCmd()->addArg('account:delete')->addArg('test')->execute());

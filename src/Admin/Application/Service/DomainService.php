@@ -65,9 +65,22 @@ class DomainService extends AbstractService
      * @param AccountInterface $account Account name
      * @return DomainInterface Domain
      */
-    public function loadAvailable($name, AccountInterface $account)
+    public function loadUnassigned($name, AccountInterface $account)
     {
         return $this->storageAdapterStrategy->loadDomain($name, $account);
+    }
+
+    /**
+     * Load and return a domain assigned a particular virtual host
+     *
+     * @param string $name Domain name
+     * @param AccountInterface $account Account name
+     * @param string $docroot Virtual host document root
+     * @return DomainInterface Domain
+     */
+    public function loadAssigned($name, AccountInterface $account, $docroot)
+    {
+        return $this->storageAdapterStrategy->loadDomain($name, $account, $docroot);
     }
 
     /**

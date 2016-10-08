@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<dataset>
+    <domain id="1" account_id="1" vhost_id="1" active="0" name="example.com" primarydomain="1" wildcard="0"/>
+    <domain id="2" account_id="1" vhost_id="##NULL##" active="0" name="test.com" primarydomain="##NULL##" wildcard="0"/>
+    <vhost id="1" account_id="1" active="0" type="apache" docroot="" httpport="80" httpsport="443" php="##NULL##" redirecturl="##NULL##" redirectstatus="301"/>
+</dataset>

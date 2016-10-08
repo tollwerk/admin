@@ -1,4 +1,5 @@
 <?xml version="1.0" ?>
 <dataset>
     <domain id="1" account_id="1" vhost_id="##NULL##" active="0" name="example.com" primarydomain="##NULL##" wildcard="0"/>
+    <domain id="2" account_id="1" vhost_id="##NULL##" active="0" name="test.com" primarydomain="##NULL##" wildcard="0"/>
 </dataset>

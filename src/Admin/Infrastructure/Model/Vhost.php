@@ -44,7 +44,8 @@ use Tollwerk\Admin\Infrastructure\App;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  * @Entity
- * @Table(name="vhost")
+ * @HasLifecycleCallbacks
+ * @Table(name="vhost",uniqueConstraints={@UniqueConstraint(name="docroot_idx", columns={"account_id", "docroot"})})
  */
 class Vhost
 {
@@ -79,18 +80,18 @@ class Vhost
      */
     protected $type;
     /**
-     * List of all associated domains
-     *
-     * @var Domain[]
-     * @OneToMany(targetEntity="Tollwerk\Admin\Infrastructure\Model\Domain", mappedBy="account")
-     */
-    protected $domains;
-    /**
      * Primary domain of this virtual host
      *
      * @var Domain
      */
     protected $primarydomain;
+    /**
+     * List of all associated domains
+     *
+     * @var Domain[]
+     * @OneToMany(targetEntity="Tollwerk\Admin\Infrastructure\Model\Domain", mappedBy="vhost")
+     */
+    protected $domains;
     /**
      * Document root directory
      *
@@ -104,35 +105,35 @@ class Vhost
      * @var int|null
      * @Column(type="integer", nullable=true, options={"unsigned":true, "default":80})
      */
-    protected $httpport;
+    protected $httpport = 80;
     /**
      * HTTPS Port
      *
      * @var int|null
      * @Column(type="integer", nullable=true, options={"unsigned":true, "default":443})
      */
-    protected $httpsport;
+    protected $httpsport = 443;
     /**
      * Supported PHP version
      *
      * @var float|null
      * @Column(type="decimal",precision=2,scale=1,nullable=true)
      */
-    protected $php;
+    protected $php = null;
     /**
      * Redirect URL
      *
      * @var string
-     * @Column(length=128)
+     * @Column(length=128, nullable=true)
      */
-    protected $redirecturl;
+    protected $redirecturl = null;
     /**
      * Redirect status
      *
      * @var int
      * @Column(type="integer", nullable=false, options={"unsigned":true, "default":301})
      */
-    protected $redirectstatus;
+    protected $redirectstatus = \Tollwerk\Admin\Domain\Vhost\Vhost::REDIRECT_DEFAULT_STATUS;
 
     /**
      * Return the vhost ID
@@ -402,5 +403,16 @@ class Vhost
     {
         $this->redirectstatus = $redirectstatus;
         return $this;
+    }
+
+    /**
+     * Release the primary domain on deletion of this virtual host
+     *
+     * @PreRemove
+     */
+    public function releasePrimaryDomain() {
+        $this->getPrimarydomain()->setPrimarydomain(false);
+        App::getEntityManager()->persist($this->getPrimarydomain());
+        App::getEntityManager()->flush();
     }
 }

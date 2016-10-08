@@ -45,6 +45,7 @@ use Tollwerk\Admin\Domain\Account\AccountInterface;
 use Tollwerk\Admin\Domain\Domain\DomainInterface;
 use Tollwerk\Admin\Domain\Factory\DomainFactory;
 use Tollwerk\Admin\Domain\Vhost\Vhost;
+use Tollwerk\Admin\Domain\Vhost\VhostInterface;
 use Tollwerk\Admin\Infrastructure\App;
 use Tollwerk\Admin\Infrastructure\Model\Account as DoctrineAccount;
 use Tollwerk\Admin\Infrastructure\Model\Domain as DoctrineDomain;
@@ -321,12 +322,15 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
      * Load a domain (optionally: unassigned)
      *
      * @param string $name Domain name
-     * @param AccountInterface $account Optional: Account the domain must belong to while being unassigned at the same time
+     * @param AccountInterface $account Optional: Account the domain must belong to
+     * @param string $vhostDocroot Optional: Document root of the virtual host the domain must be assigned to (otherwise: unassigned)
      * @return DomainInterface Domain
      * @throws \RuntimeException If the domain is unknown
      * @throws \RuntimeException If the domain belongs to another account
+     * @throws \RuntimeException If the domain is assigned to a virtual host but should be unassigned
+     * @throws \RuntimeException If the domain is assigned to a different virtual host
      */
-    public function loadDomain($name, AccountInterface $account = null)
+    public function loadDomain($name, AccountInterface $account = null, $vhostDocroot = null)
     {
         $doctrineDomain = $this->domainRepository->findOneBy(['name' => $name]);
 
@@ -335,7 +339,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             throw new \RuntimeException(sprintf('Unknown domain "%s"', $name), 1475915909);
         }
 
-        // If only an unassigned domain should be returned
+        // If only an assigned or unassigned account domain should be returned
         if ($account instanceof Account) {
             // If the domain belongs to another account
             if ($doctrineDomain->getAccount()->getName() != $account->getName()) {
@@ -349,12 +353,26 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
                 );
             }
 
+            // Determine the virtual host the domain is assigned to
+            $doctrineVhost = $doctrineDomain->getVhost();
+
             // If the domain is already assigned to another virtual host
-            if ($doctrineDomain->getVhost() instanceof DoctrineVhost) {
-                throw new \RuntimeException(
-                    sprintf('Domain "%s" is already assigned to virtual host', $name),
-                    1475917298
-                );
+            if ($doctrineVhost instanceof DoctrineVhost) {
+                // If only an uassigned domain should be returned
+                if ($vhostDocroot === null) {
+                    throw new \RuntimeException(
+                        sprintf('Domain "%s" is already assigned to a virtual host', $name),
+                        1475917298
+                    );
+                }
+
+                // If the document route doesn't match the requested one
+                if ($doctrineVhost->getDocroot() !== $vhostDocroot) {
+                    throw new \RuntimeException(
+                        sprintf('Domain "%s" is assigned to another virtual host', $name),
+                        1475942759
+                    );
+                }
             }
         }
 
@@ -425,7 +443,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             );
         }
 
-        // Enable and persist the account
+        // Remove and persist the domain
         try {
             $this->entityManager->remove($doctrineDomain);
             $this->entityManager->flush();
@@ -558,5 +576,431 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
     protected function loadFromDoctrineDomain(DoctrineDomain $doctrineDomain)
     {
         return DomainFactory::parseString($doctrineDomain->getName());
+    }
+
+    /**
+     * Create a virtual host
+     *
+     * @param AccountInterface $account Account name
+     * @param DomainInterface $domain Domain
+     * @param string $docroot Document root
+     * @param string $type Virtual host Type
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the domain is unknown
+     */
+    public function createVhost(AccountInterface $account, DomainInterface $domain, $docroot, $type)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $account->getName()), 1475495500);
+        }
+
+        $doctrineDomain = $this->domainRepository->findOneBy(['name' => strval($domain)]);
+
+        // If the domain is unknown
+        if (!$doctrineDomain instanceof \Tollwerk\Admin\Infrastructure\Model\Domain) {
+            throw new \RuntimeException(sprintf('Unknown domain "%s"', strval($domain)), 1475921539);
+        }
+
+        // Create the new domain
+        $doctrineVhost = new DoctrineVhost();
+        $doctrineVhost->setAccount($doctrineAccount);
+        $doctrineVhost->setActive(false);
+        $doctrineVhost->setType($type);
+        $doctrineVhost->setDocroot($docroot);
+
+        // Persist the new virtual host
+        try {
+            $this->entityManager->persist($doctrineVhost);
+            $this->entityManager->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            $doctrineVhost = $this->vhostRepository->findOneBy(['docroot' => $docroot]);
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Set the primary domain
+        $doctrineDomain->setVhost($doctrineVhost);
+        $doctrineDomain->setPrimarydomain(true);
+
+        // Persist the domain
+        try {
+            $this->entityManager->persist($doctrineDomain);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Create and return a domain domain
+        return $this->loadFromDoctrineVhost($doctrineVhost);
+    }
+
+    /**
+     * Delete a virtual host
+     *
+     * @param AccountInterface $account Account name
+     * @param string $docroot Document root
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function deleteVhost(AccountInterface $account, $docroot)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $account->getName()), 1475495500);
+        }
+
+        $doctrineVhost = $this->vhostRepository->findOneBy(['account' => $doctrineAccount, 'docroot' => $docroot]);
+
+        // If the virtual host is unknown
+        if (!$doctrineVhost instanceof \Tollwerk\Admin\Infrastructure\Model\Vhost) {
+            throw new \RuntimeException(sprintf('Unknown virtual host "%s"', $docroot), 1475933194);
+        }
+
+        // Remove and persist the virtual host
+        try {
+            $this->entityManager->remove($doctrineVhost);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Create and return a domain domain
+        return $this->loadFromDoctrineVhost($doctrineVhost);
+    }
+
+    /**
+     * Enable a virtual host
+     *
+     * @param AccountInterface $account Account name
+     * @param string $docroot Document root
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function enableVhost(AccountInterface $account, $docroot)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $account->getName()), 1475495500);
+        }
+
+        $doctrineVhost = $this->vhostRepository->findOneBy(['account' => $doctrineAccount, 'docroot' => $docroot]);
+
+        // If the virtual host is unknown
+        if (!$doctrineVhost instanceof \Tollwerk\Admin\Infrastructure\Model\Vhost) {
+            throw new \RuntimeException(sprintf('Unknown virtual host "%s"', $docroot), 1475933194);
+        }
+
+        // Update and persist the virtual host
+        try {
+            $doctrineVhost->setActive(true);
+            $this->entityManager->persist($doctrineVhost);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Create and return a domain domain
+        return $this->loadFromDoctrineVhost($doctrineVhost);
+    }
+
+    /**
+     * Disable a virtual host
+     *
+     * @param AccountInterface $account Account name
+     * @param string $docroot Document root
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function disableVhost(AccountInterface $account, $docroot)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $account->getName()), 1475495500);
+        }
+
+        $doctrineVhost = $this->vhostRepository->findOneBy(['account' => $doctrineAccount, 'docroot' => $docroot]);
+
+        // If the virtual host is unknown
+        if (!$doctrineVhost instanceof \Tollwerk\Admin\Infrastructure\Model\Vhost) {
+            throw new \RuntimeException(sprintf('Unknown virtual host "%s"', $docroot), 1475933194);
+        }
+
+        // Update and persist the virtual host
+        try {
+            $doctrineVhost->setActive(false);
+            $this->entityManager->persist($doctrineVhost);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Create and return a domain domain
+        return $this->loadFromDoctrineVhost($doctrineVhost);
+    }
+
+    /**
+     * Redirect a virtual host
+     *
+     * @param AccountInterface $account Account name
+     * @param string $docroot Document root
+     * @param string|null $url Redirect URL
+     * @param int $status Redirect HTTP status
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function redirectVhost(AccountInterface $account, $docroot, $url, $status)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $account->getName()), 1475495500);
+        }
+
+        $doctrineVhost = $this->vhostRepository->findOneBy(['account' => $doctrineAccount, 'docroot' => $docroot]);
+
+        // If the virtual host is unknown
+        if (!$doctrineVhost instanceof \Tollwerk\Admin\Infrastructure\Model\Vhost) {
+            throw new \RuntimeException(sprintf('Unknown virtual host "%s"', $docroot), 1475933194);
+        }
+
+        // Update and persist the virtual host
+        try {
+            $doctrineVhost->setRedirecturl($url);
+            $doctrineVhost->setRedirectstatus($status);
+            $this->entityManager->persist($doctrineVhost);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Create and return a domain domain
+        return $this->loadFromDoctrineVhost($doctrineVhost);
+    }
+
+    /**
+     * Configure the PHP version of a virtual host
+     *
+     * @param AccountInterface $account Account name
+     * @param string $docroot Document root
+     * @param string|null $php PHP version
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function phpVhost(AccountInterface $account, $docroot, $php)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $account->getName()), 1475495500);
+        }
+
+        $doctrineVhost = $this->vhostRepository->findOneBy(['account' => $doctrineAccount, 'docroot' => $docroot]);
+
+        // If the virtual host is unknown
+        if (!$doctrineVhost instanceof \Tollwerk\Admin\Infrastructure\Model\Vhost) {
+            throw new \RuntimeException(sprintf('Unknown virtual host "%s"', $docroot), 1475933194);
+        }
+
+        // Update and persist the virtual host
+        try {
+            $doctrineVhost->setPhp($php);
+            $this->entityManager->persist($doctrineVhost);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Create and return a domain domain
+        return $this->loadFromDoctrineVhost($doctrineVhost);
+    }
+
+    /**
+     * Configure a protocol based port for a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @param int $protocol Protocol
+     * @param int $port Port
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function portVhost(AccountInterface $account, $docroot, $protocol, $port)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $account->getName()), 1475495500);
+        }
+
+        $doctrineVhost = $this->vhostRepository->findOneBy(['account' => $doctrineAccount, 'docroot' => $docroot]);
+
+        // If the virtual host is unknown
+        if (!$doctrineVhost instanceof \Tollwerk\Admin\Infrastructure\Model\Vhost) {
+            throw new \RuntimeException(sprintf('Unknown virtual host "%s"', $docroot), 1475933194);
+        }
+
+        // Update and persist the virtual host
+        try {
+            $doctrineVhost->{'set'.ucfirst(Vhost::$supportedProtocols[$protocol]).'port'}($port);
+            $this->entityManager->persist($doctrineVhost);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Create and return a domain domain
+        return $this->loadFromDoctrineVhost($doctrineVhost);
+    }
+
+    /**
+     * Add a secondary domain to a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @param DomainInterface $domain Domain
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     * @throws \RuntimeException If the domain is unknown
+     */
+    public function addVhostDomain(AccountInterface $account, $docroot, DomainInterface $domain)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $account->getName()), 1475495500);
+        }
+
+        $doctrineVhost = $this->vhostRepository->findOneBy(['account' => $doctrineAccount, 'docroot' => $docroot]);
+
+        // If the virtual host is unknown
+        if (!$doctrineVhost instanceof \Tollwerk\Admin\Infrastructure\Model\Vhost) {
+            throw new \RuntimeException(sprintf('Unknown virtual host "%s"', $docroot), 1475933194);
+        }
+
+        $doctrineDomain = $this->domainRepository->findOneBy(['name' => strval($domain)]);
+
+        // If the domain is unknown
+        if (!$doctrineDomain instanceof \Tollwerk\Admin\Infrastructure\Model\Domain) {
+            throw new \RuntimeException(sprintf('Unknown domain "%s"', strval($domain)), 1475921539);
+        }
+
+        // If the domain is already assigned to a virtual host
+        $doctrineDomainVhost = $doctrineDomain->getVhost();
+        if (($doctrineDomainVhost instanceof \Tollwerk\Admin\Infrastructure\Model\Vhost)
+            && ($doctrineDomainVhost->getId() != $doctrineVhost->getId())
+        ) {
+            throw new \RuntimeException(
+                sprintf('Domain "%s" is already assigned to a virtual host', strval($domain)),
+                1475917298
+            );
+        }
+
+        // Update and persist the virtual host
+        try {
+            $doctrineDomain->setVhost($doctrineVhost);
+            $this->entityManager->persist($doctrineDomain);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Create and return a domain domain
+        return $this->loadFromDoctrineVhost($doctrineVhost);
+    }
+
+    /**
+     * Remove a secondary domain from a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @param DomainInterface $domain Domain
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     * @throws \RuntimeException If the domain is unknown
+     */
+    public function removeVhostDomain(AccountInterface $account, $docroot, DomainInterface $domain)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $account->getName()), 1475495500);
+        }
+
+        $doctrineVhost = $this->vhostRepository->findOneBy(['account' => $doctrineAccount, 'docroot' => $docroot]);
+
+        // If the virtual host is unknown
+        if (!$doctrineVhost instanceof \Tollwerk\Admin\Infrastructure\Model\Vhost) {
+            throw new \RuntimeException(sprintf('Unknown virtual host "%s"', $docroot), 1475933194);
+        }
+
+        $doctrineDomain = $this->domainRepository->findOneBy(['name' => strval($domain)]);
+
+        // If the domain is unknown
+        if (!$doctrineDomain instanceof \Tollwerk\Admin\Infrastructure\Model\Domain) {
+            throw new \RuntimeException(sprintf('Unknown domain "%s"', strval($domain)), 1475921539);
+        }
+
+        // If the domain is not assigned to the current virtual host
+        $doctrineDomainVhost = $doctrineDomain->getVhost();
+        if (!($doctrineDomainVhost instanceof \Tollwerk\Admin\Infrastructure\Model\Vhost)
+            || ($doctrineDomainVhost->getId() != $doctrineVhost->getId())
+        ) {
+            throw new \RuntimeException(
+                sprintf('Domain "%s" is not assigned to this virtual host', strval($domain)),
+                1475942759
+            );
+        }
+
+        // Update and persist the virtual host
+        try {
+            $doctrineDomain->setVhost(null);
+            $this->entityManager->persist($doctrineDomain);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Create and return a domain domain
+        return $this->loadFromDoctrineVhost($doctrineVhost);
+    }
+
+    /**
+     * Create virtual host from a doctrine virtual host
+     *
+     * @param DoctrineVhost $doctrineVhost Doctrine virtual host
+     * @return VhostInterface Virtual host
+     */
+    protected function loadFromDoctrineVhost(DoctrineVhost $doctrineVhost)
+    {
+        $vhost = new Vhost(
+            $this->loadFromDoctrineDomain($doctrineVhost->getPrimarydomain()),
+            $doctrineVhost->getDocroot(),
+            $doctrineVhost->getType()
+        );
+
+        return $vhost;
     }
 }

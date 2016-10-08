@@ -93,7 +93,7 @@ class Vhost implements VhostInterface
      *
      * @var int
      */
-    protected $redirectStatus = 301;
+    protected $redirectStatus = self::REDIRECT_DEFAULT_STATUS;
     /**
      * Default port for HTTP virtual hosts
      *
@@ -106,6 +106,12 @@ class Vhost implements VhostInterface
      * @var int
      */
     const PORT_HTTPS_DEFAULT = 443;
+    /**
+     * Default redirect status
+     *
+     * @var int
+     */
+    const REDIRECT_DEFAULT_STATUS = 301;
     /**
      * HTTP protocol
      *
@@ -129,7 +135,7 @@ class Vhost implements VhostInterface
      *
      * @var array
      */
-    protected static $supportedProtocols = [
+    public static $supportedProtocols = [
         self::PROTOCOL_HTTP => 'http',
         self::PROTOCOL_HTTPS => 'https',
     ];
@@ -138,7 +144,7 @@ class Vhost implements VhostInterface
      *
      * @var array
      */
-    protected static $defaultProtocolPorts = [
+    public static $defaultProtocolPorts = [
         self::PROTOCOL_HTTP => 80,
         self::PROTOCOL_HTTPS => 443,
     ];
@@ -312,6 +318,7 @@ class Vhost implements VhostInterface
      * @param int $port Port
      * @return Vhost Self reference
      * @throws \RuntimeException If the protocol is unsupported
+     * @throws \RuntimeException If the protocol port is invalid
      */
     public function enableProtocol($protocol, $port = null)
     {
@@ -322,6 +329,7 @@ class Vhost implements VhostInterface
             throw new \RuntimeException(sprintf('Invalid protocol "%s"', $protocol), 1475484081);
         }
 
+        // If the protocol port is invalid
         $port = ($port === null) ? self::$defaultProtocolPorts[$protocol] : intval($port);
         if ($port <= 0) {
             throw new \RuntimeException(sprintf('Invalid protocol port "%s"', $port), 1475502412);
@@ -399,9 +407,11 @@ class Vhost implements VhostInterface
      *
      * @param int $redirectStatus Redirect HTTP status code
      * @return Vhost Self reference
+     * @throw \RuntimeException If the redirect HTTP status code is invalid
      */
     public function setRedirectStatus($redirectStatus)
     {
+        // If the redirect HTTP status code is invalid
         if (!is_int($redirectStatus) || (($redirectStatus < 300) || ($redirectStatus > 308))) {
             throw new \RuntimeException(sprintf('Invalid redirect HTTP status code "%s"', $redirectStatus), 1475486679);
         }

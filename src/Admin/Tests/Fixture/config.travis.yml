@@ -6,15 +6,11 @@ doctrine:
     dbname: "admin_test"
     host: "localhost"
 apache:
-  webroot: "/home/travis/build/tollwerk/admin/tmp/vhtdocs"
-  config: "/home/travis/build/tollwerk/admin/tmp/accounts"
-  logroot: "/home/travis/build/tollwerk/admin/tmp/log"
   apache_group: "apache"
 variables:
   fpm_sockets: "/var/run/php-fpm"
   certroot: "/etc/letsencrypt/live"
 general:
   locale: de_DE
-shell:
   group: account
-  base: "/home/travis/build/tollwerk/admin/tmp"
+  basedir: "/home/travis/build/tollwerk/admin/tmp"

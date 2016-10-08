@@ -37,6 +37,7 @@
 namespace Tollwerk\Admin\Ports\Facade;
 
 use Tollwerk\Admin\Infrastructure\App;
+use Tollwerk\Admin\Infrastructure\Facade\AbstractFacade;
 use Tollwerk\Admin\Infrastructure\Shell\Exception as ShellException;
 use Tollwerk\Admin\Infrastructure\Shell\User;
 
@@ -46,7 +47,7 @@ use Tollwerk\Admin\Infrastructure\Shell\User;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Ports
  */
-class Account
+class Account extends AbstractFacade
 {
     /**
      * Create an account

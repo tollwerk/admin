@@ -57,9 +57,9 @@ class User
     {
         $user = self::validateUser($user);
         $command = Binary::sudo('useradd');
-        $command->addArg('--gid', App::getConfig('shell.group'));
+        $command->addArg('--gid', App::getConfig('general.group'));
         $command->addArg('--shell', '/bin/false');
-        $command->addArg('--base-dir', App::getConfig('shell.base'));
+        $command->addArg('--base-dir', App::getConfig('general.basedir'));
         $command->addArg('--create-home');
         $command->addArg('--skel', dirname(__DIR__).DIRECTORY_SEPARATOR.'Skeleton');
         $command->addArg($user);
@@ -120,7 +120,7 @@ class User
         $olduser = self::validateUser($olduser);
         $newuser = self::validateUser($newuser);
         $command = Binary::sudo('usermod');
-        $command->addArg('--home', App::getConfig('shell.base').DIRECTORY_SEPARATOR.$newuser);
+        $command->addArg('--home', App::getConfig('general.basedir').DIRECTORY_SEPARATOR.$newuser);
         $command->addArg('--move-home');
         $command->addArg('--login', $newuser);
         $command->addArg($olduser);

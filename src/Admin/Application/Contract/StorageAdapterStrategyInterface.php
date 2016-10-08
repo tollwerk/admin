@@ -38,6 +38,7 @@ namespace Tollwerk\Admin\Application\Contract;
 
 use Tollwerk\Admin\Domain\Account\AccountInterface;
 use Tollwerk\Admin\Domain\Domain\DomainInterface;
+use Tollwerk\Admin\Domain\Vhost\VhostInterface;
 
 /**
  * Storage adapter strategy interface
@@ -105,11 +106,15 @@ interface StorageAdapterStrategyInterface
      * Load a domain (optionally: unassigned)
      *
      * @param string $name Domain name
-     * @param AccountInterface $account Optional: Account the domain must belong to while being unassigned at the same time
+     * @param AccountInterface $account Optional: Account the domain must belong to
+     * @param string $vhostDocroot Optional: Document root of the virtual host the domain must be assigned to (otherwise: unassigned)
      * @return DomainInterface Domain
      * @throws \RuntimeException If the domain is unknown
+     * @throws \RuntimeException If the domain belongs to another account
+     * @throws \RuntimeException If the domain is assigned to a virtual host but should be unassigned
+     * @throws \RuntimeException If the domain is assigned to a different virtual host
      */
-    public function loadDomain($name, AccountInterface $account = null);
+    public function loadDomain($name, AccountInterface $account = null, $vhostDocroot = null);
 
     /**
      * Create a domain
@@ -165,4 +170,114 @@ interface StorageAdapterStrategyInterface
      * @throws \RuntimeException If the domain cannot be disabled
      */
     public function disableDomainWildcard($name);
+
+    /**
+     * Create a virtual host
+     *
+     * @param AccountInterface $account Account name
+     * @param DomainInterface $domain Domain
+     * @param string $docroot Document root
+     * @param string $type Virtual host Type
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the domain is unknown
+     */
+    public function createVhost(AccountInterface $account, DomainInterface $domain, $docroot, $type);
+
+    /**
+     * Delete a virtual host
+     *
+     * @param AccountInterface $account Account name
+     * @param string $docroot Document root
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function deleteVhost(AccountInterface $account, $docroot);
+
+    /**
+     * Enable a virtual host
+     *
+     * @param AccountInterface $account Account name
+     * @param string $docroot Document root
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function enableVhost(AccountInterface $account, $docroot);
+
+    /**
+     * Disable a virtual host
+     *
+     * @param AccountInterface $account Account name
+     * @param string $docroot Document root
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function disableVhost(AccountInterface $account, $docroot);
+
+    /**
+     * Redirect a virtual host
+     *
+     * @param AccountInterface $account Account name
+     * @param string $docroot Document root
+     * @param string|null $url Redirect URL
+     * @param int $status Redirect HTTP status
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function redirectVhost(AccountInterface $account, $docroot, $url, $status);
+
+    /**
+     * Configure the PHP version of a virtual host
+     *
+     * @param AccountInterface $account Account name
+     * @param string $docroot Document root
+     * @param string|null $php PHP version
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function phpVhost(AccountInterface $account, $docroot, $php);
+
+    /**
+     * Configure a protocol based port for a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @param int $protocol Protocol
+     * @param int $port Port
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function portVhost(AccountInterface $account, $docroot, $protocol, $port);
+
+    /**
+     * Add a secondary domain to a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @param DomainInterface $domain Domain
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     * @throws \RuntimeException If the domain is unknown
+     */
+    public function addVhostDomain(AccountInterface $account, $docroot, DomainInterface $domain);
+
+    /**
+     * Remove a secondary domain from a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @param DomainInterface $domain Domain
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     * @throws \RuntimeException If the domain is unknown
+     */
+    public function removeVhostDomain(AccountInterface $account, $docroot, DomainInterface $domain);
 }

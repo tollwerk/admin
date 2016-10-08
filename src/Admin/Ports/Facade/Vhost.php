@@ -37,8 +37,9 @@
 namespace Tollwerk\Admin\Ports\Facade;
 
 use Tollwerk\Admin\Domain\Vhost\Vhost as DomainVhost;
-use Tollwerk\Admin\Domain\Account\Account as DomainAccount;
+use Tollwerk\Admin\Domain\Vhost\VhostInterface;
 use Tollwerk\Admin\Infrastructure\App;
+use Tollwerk\Admin\Infrastructure\Facade\AbstractFacade;
 
 /**
  * Virtual host facade
@@ -46,7 +47,7 @@ use Tollwerk\Admin\Infrastructure\App;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Ports
  */
-class Vhost
+class Vhost extends AbstractFacade
 {
     /**
      * Create and add a virtual host to an account
@@ -56,41 +57,153 @@ class Vhost
      * @param string $docroot Document root
      * @param string $type Virtual host type
      * @return boolean Success
-     * @throws \Exception If the account couldn't be created
      */
-    public static function create($account, $domain, $docroot, $type = DomainVhost::TYPE_APACHE)
+    public static function create($account, $domain, $docroot = '', $type = DomainVhost::TYPE_APACHE)
     {
         // Get the account to operate on
         $account = self::loadAccount($account);
 
-        // Check if the domain already exists and is unassigned
-        try {
-            $domain = App::getDomainService()->loadAvailable($domain, $account);
-        } catch (\RuntimeException $e) {
-            // If the domain already exists but is assigned or belongs to another account: Error
-            if ($e->getCode() != 1475915909) {
-                throw $e;
-            }
+        // Load the primary domain
+        $domain = App::getDomainService()->loadUnassigned($domain, $account);
 
-            // Create the domain
-            App::getDomainService()->create($domain, $account);
-        }
-
-        return true;
+        return App::getVirtualHostService()->create($account, $domain, $docroot, $type) instanceof VhostInterface;
     }
 
     /**
-     * Get the account to operate on
+     * Delete and remove a virtual host from an account
      *
-     * @param string $name Account name
-     * @return DomainAccount Account instance
-     * @throws \Exception If the account doesn't exist
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @return boolean Success
      */
-    protected static function loadAccount($name) {
-        $account = App::getAccountService()->load($name);
-        if (!$account instanceof DomainAccount) {
-            throw new \Exception(sprintf('Account "%s" doesn\'t exist', $name), 1475915142);
-        }
-        return $account;
+    public static function delete($account, $docroot = '')
+    {
+        // Get the account to operate on
+        $account = self::loadAccount($account);
+
+        return App::getVirtualHostService()->delete($account, $docroot) instanceof VhostInterface;
+    }
+
+    /**
+     * Enable a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @return bool Success
+     */
+    public static function enable($account, $docroot = '')
+    {
+        // Get the account to operate on
+        $account = self::loadAccount($account);
+
+        return App::getVirtualHostService()->enable($account, $docroot) instanceof VhostInterface;
+    }
+
+    /**
+     * Disable a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @return bool Success
+     */
+    public static function disable($account, $docroot = '')
+    {
+        // Get the account to operate on
+        $account = self::loadAccount($account);
+
+        return App::getVirtualHostService()->disable($account, $docroot) instanceof VhostInterface;
+    }
+
+    /**
+     * Redirect a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @param string $url Redirect URL
+     * @param int $status Redirect HTTP status
+     * @return bool Success
+     */
+    public static function redirect($account, $docroot = '', $url = '', $status = DomainVhost::REDIRECT_DEFAULT_STATUS)
+    {
+        // Get the account to operate on
+        $account = self::loadAccount($account);
+
+        return App::getVirtualHostService()
+            ->redirect($account, $docroot, $url, intval($status)) instanceof VhostInterface;
+    }
+
+    /**
+     * Configure the PHP version of a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @param string|null $php PHP version
+     * @return bool Success
+     */
+    public static function php($account, $docroot = '', $php = null)
+    {
+        // Get the account to operate on
+        $account = self::loadAccount($account);
+
+        return App::getVirtualHostService()->php($account, $docroot, $php) instanceof VhostInterface;
+    }
+
+    /**
+     * Configure a protocol based port for a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @param int $protocol Protocol
+     * @param int|null $port Port
+     * @return bool Success
+     */
+    public static function port(
+        $account,
+        $docroot = '',
+        $protocol = \Tollwerk\Admin\Domain\Vhost\Vhost::PROTOCOL_HTTP,
+        $port = null
+    ) {
+        // Get the account to operate on
+        $account = self::loadAccount($account);
+
+        return App::getVirtualHostService()->port($account, $docroot, $protocol, $port) instanceof VhostInterface;
+    }
+
+    /**
+     * Add a secondary domain to a virtual host
+     *
+     * @param string $account Account name
+     * @param string $domain Domain
+     * @param string $docroot Document root
+     * @return bool Success
+     */
+    public static function addDomain($account, $domain, $docroot = '')
+    {
+        // Get the account to operate on
+        $account = self::loadAccount($account);
+
+        // Load the primary domain
+        $domain = App::getDomainService()->loadUnassigned($domain, $account);
+
+        return App::getVirtualHostService()->addDomain($account, $domain, $docroot) instanceof VhostInterface;
+    }
+
+    /**
+     * Remove a secondary domain from a virtual host
+     *
+     * @param string $account Account name
+     * @param string $domain Domain
+     * @param string $docroot Document root
+     * @return bool Success
+     */
+    public static function removeDomain($account, $domain, $docroot = '')
+    {
+        // Get the account to operate on
+        $account = self::loadAccount($account);
+
+        // Load the primary domain
+        $domain = App::getDomainService()->loadAssigned($domain, $account, $docroot);
+
+        return App::getVirtualHostService()->removeDomain($account, $domain, $docroot) instanceof VhostInterface;
     }
 }

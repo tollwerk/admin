@@ -12,6 +12,5 @@ variables:
   certroot: "/etc/letsencrypt/live"
 general:
   locale: de_DE
-shell:
   group: account
-  base: "/var/www/localhost/accounts"
+  basedir: "/var/www/localhost/accounts"

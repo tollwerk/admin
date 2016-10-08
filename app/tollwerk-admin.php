@@ -42,13 +42,22 @@ use Tollwerk\Admin\Infrastructure\Commands\Account\DeleteAccountCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Account\EnableAccountCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Account\DisableAccountCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Account\RenameAccountCommand;
-use Tollwerk\Admin\Infrastructure\Commands\Vhost\CreateVhostCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Domain\CreateDomainCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Domain\DeleteDomainCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Domain\EnableDomainCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Domain\DisableDomainCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Domain\EnableDomainWildcardCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Domain\DisableDomainWildcardCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Vhost\CreateVhostCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Vhost\DeleteVhostCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Vhost\EnableVhostCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Vhost\DisableVhostCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Vhost\RedirectVhostCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Vhost\PhpVhostCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Vhost\PortHttpVhostCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Vhost\PortHttpsVhostCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Vhost\DomainAddVhostCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Vhost\DomainRemoveVhostCommand;
 
 $application = new Application();
 
@@ -66,8 +75,18 @@ $application->add(new EnableDomainCommand());
 $application->add(new DisableDomainCommand());
 $application->add(new EnableDomainWildcardCommand());
 $application->add(new DisableDomainWildcardCommand());
+$application->add(new DisableDomainWildcardCommand());
 
 // Virtual host commands
 $application->add(new CreateVhostCommand());
+$application->add(new DeleteVhostCommand());
+$application->add(new EnableVhostCommand());
+$application->add(new DisableVhostCommand());
+$application->add(new RedirectVhostCommand());
+$application->add(new PhpVhostCommand());
+$application->add(new PortHttpVhostCommand());
+$application->add(new PortHttpsVhostCommand());
+$application->add(new DomainAddVhostCommand());
+$application->add(new DomainRemoveVhostCommand());
 
 $application->run();
