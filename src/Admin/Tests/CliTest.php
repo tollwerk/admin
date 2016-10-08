@@ -85,6 +85,7 @@ class CliTest extends AbstractDatabaseTest
         $command->addArg('-f');
         $command->addArg(App::getConfig('shell.group'));
         if (!$command->execute()) {
+            echo $command->getOutput().' ('.$command->getExitCode().')'.PHP_EOL;
             throw new \RuntimeException($command->getOutput(), $command->getExitCode());
         }
     }
