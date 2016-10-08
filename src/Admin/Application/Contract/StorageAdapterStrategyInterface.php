@@ -36,8 +36,8 @@
 
 namespace Tollwerk\Admin\Application\Contract;
 
-
-use Tollwerk\Admin\Domain\Account\Account;
+use Tollwerk\Admin\Domain\Account\AccountInterface;
+use Tollwerk\Admin\Domain\Domain\DomainInterface;
 
 /**
  * Storage adapter strategy interface
@@ -51,7 +51,7 @@ interface StorageAdapterStrategyInterface
      * Load an account
      *
      * @param string $name Account name
-     * @return Account Account
+     * @return AccountInterface Account
      */
     public function loadAccount($name);
 
@@ -59,7 +59,7 @@ interface StorageAdapterStrategyInterface
      * Create an account
      *
      * @param string $name Account name
-     * @return Account Account
+     * @return AccountInterface Account
      * @throws \RuntimeException If the account cannot be created
      */
     public function createAccount($name);
@@ -68,7 +68,7 @@ interface StorageAdapterStrategyInterface
      * Enable an account
      *
      * @param string $name Account name
-     * @return Account Account
+     * @return AccountInterface Account
      * @throws \RuntimeException If the account cannot be enabled
      */
     public function enableAccount($name);
@@ -77,7 +77,7 @@ interface StorageAdapterStrategyInterface
      * Disable an account
      *
      * @param string $name Account name
-     * @return Account Account
+     * @return AccountInterface Account
      * @throws \RuntimeException If the account cannot be disabled
      */
     public function disableAccount($name);
@@ -86,7 +86,7 @@ interface StorageAdapterStrategyInterface
      * Delete an account
      *
      * @param string $name Account name
-     * @return Account Account
+     * @return AccountInterface Account
      * @throws \RuntimeException If the account cannot be deleted
      */
     public function deleteAccount($name);
@@ -96,8 +96,73 @@ interface StorageAdapterStrategyInterface
      *
      * @param string $oldname Old account name
      * @param string $newname New account name
-     * @return Account Account
+     * @return AccountInterface Account
      * @throws \RuntimeException If the account is unknown
      */
     public function renameAccount($oldname, $newname);
+
+    /**
+     * Load a domain (optionally: unassigned)
+     *
+     * @param string $name Domain name
+     * @param AccountInterface $account Optional: Account the domain must belong to while being unassigned at the same time
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the domain is unknown
+     */
+    public function loadDomain($name, AccountInterface $account = null);
+
+    /**
+     * Create a domain
+     *
+     * @param string $name Domain name
+     * @param AccountInterface $account Account the domain belongs to
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the account is unknown
+     */
+    public function createDomain($name, AccountInterface $account);
+
+    /**
+     * Delete a domain
+     *
+     * @param string $name Domain name
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the domain cannot be deleted
+     */
+    public function deleteDomain($name);
+
+    /**
+     * Enable a domain
+     *
+     * @param string $name Domain name
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the domain cannot be enabled
+     */
+    public function enableDomain($name);
+
+    /**
+     * Disable a domain
+     *
+     * @param string $name Domain name
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the domain cannot be disabled
+     */
+    public function disableDomain($name);
+
+    /**
+     * Enable a domain wildcard
+     *
+     * @param string $name Domain name
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the domain cannot be enabled
+     */
+    public function enableDomainWildcard($name);
+
+    /**
+     * Disable a domain
+     *
+     * @param string $name Domain name
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the domain cannot be disabled
+     */
+    public function disableDomainWildcard($name);
 }

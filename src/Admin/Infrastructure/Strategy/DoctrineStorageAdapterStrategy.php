@@ -41,6 +41,8 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
 use Tollwerk\Admin\Domain\Account\Account;
+use Tollwerk\Admin\Domain\Account\AccountInterface;
+use Tollwerk\Admin\Domain\Domain\DomainInterface;
 use Tollwerk\Admin\Domain\Factory\DomainFactory;
 use Tollwerk\Admin\Domain\Vhost\Vhost;
 use Tollwerk\Admin\Infrastructure\App;
@@ -68,6 +70,18 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
      * @var EntityRepository
      */
     protected $accountRepository;
+    /**
+     * Domain repository
+     *
+     * @var EntityRepository
+     */
+    protected $domainRepository;
+    /**
+     * Virtual host repository
+     *
+     * @var EntityRepository
+     */
+    protected $vhostRepository;
 
     /**
      * Constructor
@@ -77,13 +91,17 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
         $this->entityManager = App::getEntityManager();
         $this->accountRepository =
             $this->entityManager->getRepository(\Tollwerk\Admin\Infrastructure\Model\Account::class);
+        $this->domainRepository =
+            $this->entityManager->getRepository(\Tollwerk\Admin\Infrastructure\Model\Domain::class);
+        $this->vhostRepository =
+            $this->entityManager->getRepository(\Tollwerk\Admin\Infrastructure\Model\Vhost::class);
     }
 
     /**
      * Create an account
      *
      * @param string $name Account name
-     * @return Account Account
+     * @return AccountInterface Account
      * @throws \RuntimeException If the account cannot be created
      */
     public function createAccount($name)
@@ -99,9 +117,8 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $this->entityManager->flush();
         } catch (UniqueConstraintViolationException $e) {
             $doctrineAccount = $this->accountRepository->findOneBy(['name' => $name]);
-
         } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode());
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
         // Create and return a domain account
@@ -114,7 +131,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
      * Enable an account
      *
      * @param string $name Account name
-     * @return Account Account
+     * @return AccountInterface Account
      * @throws \RuntimeException If the account cannot be enabled
      */
     public function enableAccount($name)
@@ -132,7 +149,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $this->entityManager->persist($doctrineAccount);
             $this->entityManager->flush();
         } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode());
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
         return $this->loadFromDoctrineAccount($doctrineAccount);
@@ -142,7 +159,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
      * Disable an account
      *
      * @param string $name Account name
-     * @return Account Account
+     * @return AccountInterface Account
      * @throws \RuntimeException If the account cannot be disabled
      */
     public function disableAccount($name)
@@ -160,7 +177,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $this->entityManager->persist($doctrineAccount);
             $this->entityManager->flush();
         } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode());
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
         return $this->loadFromDoctrineAccount($doctrineAccount);
@@ -170,7 +187,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
      * Delete an account
      *
      * @param string $name Account name
-     * @return Account Account
+     * @return AccountInterface Account
      * @throws \RuntimeException If the account cannot be deleted
      */
     public function deleteAccount($name)
@@ -187,7 +204,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $this->entityManager->remove($doctrineAccount);
             $this->entityManager->flush();
         } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode());
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
         // Create and return a domain account stub
@@ -201,7 +218,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
      *
      * @param string $oldname Old account name
      * @param string $newname New account name
-     * @return Account Account
+     * @return AccountInterface Account
      * @throws \RuntimeException If the account is unknown
      */
     public function renameAccount($oldname, $newname)
@@ -219,7 +236,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $this->entityManager->persist($doctrineAccount);
             $this->entityManager->flush();
         } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode());
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
         // Load and return the renamed account
@@ -230,7 +247,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
      * Instantiate an account
      *
      * @param string $name Account name
-     * @return Account Account
+     * @return AccountInterface Account
      * @throws \RuntimeException If the account is unknown
      */
     public function loadAccount($name)
@@ -249,7 +266,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
      * Create domain account from doctrine account
      *
      * @param DoctrineAccount $doctrineAccount Doctrine account
-     * @return Account Domain account
+     * @return AccountInterface Domain account
      */
     protected function loadFromDoctrineAccount(DoctrineAccount $doctrineAccount)
     {
@@ -297,5 +314,249 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
         }
 
         return $account;
+    }
+
+
+    /**
+     * Load a domain (optionally: unassigned)
+     *
+     * @param string $name Domain name
+     * @param AccountInterface $account Optional: Account the domain must belong to while being unassigned at the same time
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the domain is unknown
+     * @throws \RuntimeException If the domain belongs to another account
+     */
+    public function loadDomain($name, AccountInterface $account = null)
+    {
+        $doctrineDomain = $this->domainRepository->findOneBy(['name' => $name]);
+
+        // If the domain is unknown
+        if (!$doctrineDomain instanceof \Tollwerk\Admin\Infrastructure\Model\Domain) {
+            throw new \RuntimeException(sprintf('Unknown domain "%s"', $name), 1475915909);
+        }
+
+        // If only an unassigned domain should be returned
+        if ($account instanceof Account) {
+            // If the domain belongs to another account
+            if ($doctrineDomain->getAccount()->getName() != $account->getName()) {
+                throw new \RuntimeException(
+                    sprintf(
+                        'Domain "%s" belongs to another account ("%s")',
+                        $name,
+                        $doctrineDomain->getAccount()->getName()
+                    ),
+                    1475917184
+                );
+            }
+
+            // If the domain is already assigned to another virtual host
+            if ($doctrineDomain->getVhost() instanceof DoctrineVhost) {
+                throw new \RuntimeException(
+                    sprintf('Domain "%s" is already assigned to virtual host', $name),
+                    1475917298
+                );
+            }
+        }
+
+        return $this->loadFromDoctrineDomain($doctrineDomain);
+    }
+
+    /**
+     * Create a domain
+     *
+     * @param string $name Domain name
+     * @param Account $account Account the domain belongs to
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the account is unknown
+     */
+    public function createDomain($name, AccountInterface $account)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $name), 1475495500);
+        }
+
+        // Create the new domain
+        $doctrineDomain = new DoctrineDomain();
+        $doctrineDomain->setAccount($doctrineAccount);
+        $doctrineDomain->setActive(false);
+        $doctrineDomain->setName($name);
+        $doctrineDomain->setWildcard(false);
+        $doctrineDomain->setPrimarydomain(false);
+
+        // Persist the new domain
+        try {
+            $this->entityManager->persist($doctrineDomain);
+            $this->entityManager->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            $doctrineDomain = $this->domainRepository->findOneBy(['name' => $name]);
+
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Create and return a domain domain
+        return $this->loadFromDoctrineDomain($doctrineDomain);
+    }
+
+    /**
+     * Delete a domain
+     *
+     * @param string $name Domain name
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the domain cannot be deleted
+     */
+    public function deleteDomain($name)
+    {
+        $doctrineDomain = $this->domainRepository->findOneBy(['name' => $name]);
+
+        // If the domain is unknown
+        if (!$doctrineDomain instanceof \Tollwerk\Admin\Infrastructure\Model\Domain) {
+            throw new \RuntimeException(sprintf('Unknown domain "%s"', $name), 1475921539);
+        }
+
+        // If the domain is assigned to a virtual host
+        if ($doctrineDomain->getVhost() instanceof \Tollwerk\Admin\Infrastructure\Model\Vhost) {
+            throw new \RuntimeException(
+                sprintf('Domain "%s" is assigned to a virtual host, please release the assignment first', $name),
+                1475921740
+            );
+        }
+
+        // Enable and persist the account
+        try {
+            $this->entityManager->remove($doctrineDomain);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Create and return a domain domain stub
+        return $this->loadFromDoctrineDomain($doctrineDomain);
+    }
+
+    /**
+     * Enable a domain
+     *
+     * @param string $name Domain name
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the domain cannot be enabled
+     */
+    public function enableDomain($name)
+    {
+        $doctrineDomain = $this->domainRepository->findOneBy(['name' => $name]);
+
+        // If the domain is unknown
+        if (!$doctrineDomain instanceof \Tollwerk\Admin\Infrastructure\Model\Domain) {
+            throw new \RuntimeException(sprintf('Unknown domain "%s"', $name), 1475921539);
+        }
+
+        // Enable and persist the account
+        try {
+            $doctrineDomain->setActive(true);
+            $this->entityManager->persist($doctrineDomain);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        return $this->loadFromDoctrineDomain($doctrineDomain);
+    }
+
+    /**
+     * Disable a domain
+     *
+     * @param string $name Domain name
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the domain cannot be disabled
+     */
+    public function disableDomain($name)
+    {
+        $doctrineDomain = $this->domainRepository->findOneBy(['name' => $name]);
+
+        // If the domain is unknown
+        if (!$doctrineDomain instanceof \Tollwerk\Admin\Infrastructure\Model\Domain) {
+            throw new \RuntimeException(sprintf('Unknown domain "%s"', $name), 1475921539);
+        }
+
+        // Enable and persist the account
+        try {
+            $doctrineDomain->setActive(false);
+            $this->entityManager->persist($doctrineDomain);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        return $this->loadFromDoctrineDomain($doctrineDomain);
+    }
+
+    /**
+     * Enable a domain wildcard
+     *
+     * @param string $name Domain name
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the domain cannot be enabled
+     */
+    public function enableDomainWildcard($name)
+    {
+        $doctrineDomain = $this->domainRepository->findOneBy(['name' => $name]);
+
+        // If the domain is unknown
+        if (!$doctrineDomain instanceof \Tollwerk\Admin\Infrastructure\Model\Domain) {
+            throw new \RuntimeException(sprintf('Unknown domain "%s"', $name), 1475921539);
+        }
+
+        // Enable and persist the account
+        try {
+            $doctrineDomain->setWildcard(true);
+            $this->entityManager->persist($doctrineDomain);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        return $this->loadFromDoctrineDomain($doctrineDomain);
+    }
+
+    /**
+     * Disable a domain wildcard
+     *
+     * @param string $name Domain name
+     * @return DomainInterface Domain
+     * @throws \RuntimeException If the domain cannot be disabled
+     */
+    public function disableDomainWildcard($name)
+    {
+        $doctrineDomain = $this->domainRepository->findOneBy(['name' => $name]);
+
+        // If the domain is unknown
+        if (!$doctrineDomain instanceof \Tollwerk\Admin\Infrastructure\Model\Domain) {
+            throw new \RuntimeException(sprintf('Unknown domain "%s"', $name), 1475921539);
+        }
+
+        // Enable and persist the account
+        try {
+            $doctrineDomain->setWildcard(false);
+            $this->entityManager->persist($doctrineDomain);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        return $this->loadFromDoctrineDomain($doctrineDomain);
+    }
+
+    /**
+     * Create domain domain from doctrine domain
+     *
+     * @param DoctrineDomain $doctrineDomain Doctrine domain
+     * @return DomainInterface Domain domain
+     */
+    protected function loadFromDoctrineDomain(DoctrineDomain $doctrineDomain)
+    {
+        return DomainFactory::parseString($doctrineDomain->getName());
     }
 }

@@ -23,6 +23,7 @@ before_script:
   - mysql -e "create database IF NOT EXISTS admin_test;" -uroot
   - cp ./src/Admin/Tests/Fixture/config.travis.yml config/config.yml
   - ./vendor/bin/doctrine orm:schema-tool:update --force
+  - ./vendor/bin/doctrine orm:generate-proxies
   - mkdir /home/travis/build/tollwerk/admin/tmp
 
 script:

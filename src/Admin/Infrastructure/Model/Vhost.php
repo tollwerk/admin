@@ -68,6 +68,7 @@ class Vhost
      *
      * @var Account
      * @ManyToOne(targetEntity="Tollwerk\Admin\Infrastructure\Model\Account", inversedBy="vhosts")
+     * @JoinColumn(name="account_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $account;
     /**

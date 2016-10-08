@@ -112,4 +112,29 @@ abstract class AbstractDatabaseTest extends \PHPUnit_Extensions_Database_TestCas
 
         return self::$dbal;
     }
+
+    /**
+     * Return the absolute path to a fixture file
+     *
+     * @param string $fixture Fixture file name
+     * @return string Absolute fixture file
+     */
+    protected function getFixture($fixture)
+    {
+        return __DIR__.DIRECTORY_SEPARATOR.'Fixture'.DIRECTORY_SEPARATOR.$fixture;
+    }
+
+    /**
+     * Create and return a dataset with certain replacements
+     *
+     * @param string $fixture Fixture file name
+     * @return \PHPUnit_Extensions_Database_DataSet_ReplacementDataSet Data set
+     */
+    protected function getFixtureDataSet($fixture)
+    {
+        $dataSet = $this->createFlatXMLDataSet($this->getFixture($fixture));
+        $replacementDataSet = new \PHPUnit_Extensions_Database_DataSet_ReplacementDataSet($dataSet);
+        $replacementDataSet->addFullReplacement('##NULL##', null);
+        return $replacementDataSet;
+    }
 }

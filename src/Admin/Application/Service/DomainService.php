@@ -37,99 +37,103 @@
 namespace Tollwerk\Admin\Application\Service;
 
 use Tollwerk\Admin\Domain\Account\AccountInterface;
-use Tollwerk\Admin\Domain\Vhost\Vhost;
+use Tollwerk\Admin\Domain\Domain\DomainInterface;
 
 /**
- * Account service
+ * Domain service
  *
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Application
  */
-class AccountService extends AbstractService
+class DomainService extends AbstractService
 {
     /**
-     * Load and return an account
+     * Load and return a domain
      *
-     * @param string $name Account name
-     * @return AccountInterface Account
+     * @param string $name Domain name
+     * @return DomainInterface Domain
      */
     public function load($name)
     {
-        return $this->storageAdapterStrategy->loadAccount($name);
+        return $this->storageAdapterStrategy->loadDomain($name);
     }
 
     /**
-     * Create an account
+     * Load and return an unassigned domain belonging to a particular account
      *
-     * @param string $name Account name
-     * @return AccountInterface Account
+     * @param string $name Domain name
+     * @param AccountInterface $account Account name
+     * @return DomainInterface Domain
      */
-    public function create($name)
+    public function loadAvailable($name, AccountInterface $account)
     {
-        return $this->storageAdapterStrategy->createAccount($name);
+        return $this->storageAdapterStrategy->loadDomain($name, $account);
     }
 
     /**
-     * Delete an account
+     * Create a domain
      *
-     * @param string $name Account name
-     * @return AccountInterface Account
+     * @param string $name Domain name
+     * @param AccountInterface $account Account name
+     * @return DomainInterface Domain
+     */
+    public function create($name, AccountInterface $account)
+    {
+        return $this->storageAdapterStrategy->createDomain($name, $account);
+    }
+
+    /**
+     * Delete a domain
+     *
+     * @param string $name Domain name
+     * @return DomainInterface Domain
      */
     public function delete($name)
     {
-        return $this->storageAdapterStrategy->deleteAccount($name);
+        return $this->storageAdapterStrategy->deleteDomain($name);
     }
 
     /**
-     * Enable an account
+     * Enable a domain
      *
-     * @param string $name Account name
-     * @return AccountInterface Account
+     * @param string $name Domain name
+     * @return DomainInterface Domain
      */
     public function enable($name)
     {
-        return $this->storageAdapterStrategy->enableAccount($name);
+        return $this->storageAdapterStrategy->enableDomain($name);
     }
 
     /**
-     * Disable an account
+     * Disable a domain
      *
-     * @param string $name Account name
-     * @return AccountInterface Account
+     * @param string $name Domain name
+     * @return DomainInterface Domain
      */
     public function disable($name)
     {
-        return $this->storageAdapterStrategy->disableAccount($name);
+        return $this->storageAdapterStrategy->disableDomain($name);
     }
 
     /**
-     * Rename an account
+     * Enable a domain wildcard
      *
-     * @param string $oldname Old account name
-     * @param string $newname New account name
-     * @return AccountInterface Account
+     * @param string $name Domain name
+     * @return DomainInterface Domain
      */
-    public function rename($oldname, $newname)
+    public function enableWildcard($name)
     {
-        return $this->storageAdapterStrategy->renameAccount($oldname, $newname);
+        return $this->storageAdapterStrategy->enableDomainWildcard($name);
     }
 
     /**
-     * Persist an account
+     * Disable a domain wildcard
      *
-     * @param AccountInterface $account Account
+     * @param string $name Domain name
+     * @return DomainInterface Domain
      */
-    public function persist(AccountInterface $account)
+    public function disableWildcard($name)
     {
-        // Persist the account's virtual hosts
-        /** @var Vhost $vhost */
-        foreach ($account->getVhosts() as $vhost) {
-            $this->persistenceAdapterFactory
-                ->makeVhostPersistenceAdapterStrategy($vhost->getType())
-                ->persist($account, $vhost);
-        }
-
-        // TODO: Persist the account's mailboxes
-        // TODO: Persist the account's FTP accesses
+        return $this->storageAdapterStrategy->disableDomainWildcard($name);
     }
 }

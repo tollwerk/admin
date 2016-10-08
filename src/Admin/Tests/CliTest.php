@@ -103,20 +103,15 @@ class CliTest extends AbstractDatabaseTest
     }
 
     /**
-     * Test creating an account
+     * Test creating, modifying and deleting an account
      */
     public function testAccount()
     {
-        $command = $this->getAdminCmd()->addArg('account:create')->addArg('test');
-        $success = $command->execute();
-        if (!$success) {
-            echo $command->getOutput().' ('.$command->getExitCode().')';
-        }
-        $this->assertTrue($success);
-
+        // Create an account
+        $this->assertTrue($this->getAdminCmd()->addArg('account:create')->addArg('test')->execute());
         $this->assertEquals(1, $this->getConnection()->getRowCount('account'));
         $queryTable = $this->getConnection()->createQueryTable('account', 'SELECT * FROM account');
-        $expectedTable = $this->createFlatXMLDataSet($this->getFixture('account_create.xml'))->getTable('account');
+        $expectedTable = $this->getFixtureDataSet('account_create.xml')->getTable('account');
         $this->assertTablesEqual($expectedTable, $queryTable);
         $this->assertDirectoryExists(self::$homebase.'test');
         $this->assertUserExists('test');
@@ -124,19 +119,19 @@ class CliTest extends AbstractDatabaseTest
         // Enable the account
         $this->assertTrue($this->getAdminCmd()->addArg('account:enable')->addArg('test')->execute());
         $queryTable = $this->getConnection()->createQueryTable('account', 'SELECT * FROM account');
-        $expectedTable = $this->createFlatXMLDataSet($this->getFixture('account_enable.xml'))->getTable('account');
+        $expectedTable = $this->getFixtureDataSet('account_enable.xml')->getTable('account');
         $this->assertTablesEqual($expectedTable, $queryTable);
 
         // Disable the account
         $this->assertTrue($this->getAdminCmd()->addArg('account:disable')->addArg('test')->execute());
         $queryTable = $this->getConnection()->createQueryTable('account', 'SELECT * FROM account');
-        $expectedTable = $this->createFlatXMLDataSet($this->getFixture('account_create.xml'))->getTable('account');
+        $expectedTable = $this->getFixtureDataSet('account_create.xml')->getTable('account');
         $this->assertTablesEqual($expectedTable, $queryTable);
 
         // Rename the account
         $this->assertTrue($this->getAdminCmd()->addArg('account:rename')->addArg('test')->addArg('renamed')->execute());
         $queryTable = $this->getConnection()->createQueryTable('account', 'SELECT * FROM account');
-        $expectedTable = $this->createFlatXMLDataSet($this->getFixture('account_rename.xml'))->getTable('account');
+        $expectedTable = $this->getFixtureDataSet('account_rename.xml')->getTable('account');
         $this->assertTablesEqual($expectedTable, $queryTable);
         $this->assertDirectoryExists(self::$homebase.'renamed');
         $this->assertDirectoryNotExists(self::$homebase.'test');
@@ -151,6 +146,55 @@ class CliTest extends AbstractDatabaseTest
 
         // Register home directory for removal
         self::$tmpDirectories[] = self::$homebase.'renamed';
+    }
+
+    /**
+     * Test creating, modifying and deleting a domain
+     */
+    public function testDomain() {
+        // Create an account
+        $this->assertTrue($this->getAdminCmd()->addArg('account:create')->addArg('test')->execute());
+
+        // Create a domain
+        $this->assertTrue($this->getAdminCmd()->addArg('domain:create')->addArg('test')->addArg('example.com')->execute());
+        $this->assertEquals(1, $this->getConnection()->getRowCount('domain'));
+        $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
+        $expectedTable = $this->getFixtureDataSet('domain_create.xml')->getTable('domain');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Enable the domain
+        $this->assertTrue($this->getAdminCmd()->addArg('domain:enable')->addArg('example.com')->execute());
+        $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
+        $expectedTable = $this->getFixtureDataSet('domain_enable.xml')->getTable('domain');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Enable the domain wildcard
+        $this->assertTrue($this->getAdminCmd()->addArg('domain:enable:wildcard')->addArg('example.com')->execute());
+        $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
+        $expectedTable = $this->getFixtureDataSet('domain_enable_wildcard.xml')->getTable('domain');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Disable the domain
+        $this->assertTrue($this->getAdminCmd()->addArg('domain:disable')->addArg('example.com')->execute());
+        $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
+        $expectedTable = $this->getFixtureDataSet('domain_disable.xml')->getTable('domain');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Disable the domain wildcard
+        $this->assertTrue($this->getAdminCmd()->addArg('domain:disable:wildcard')->addArg('example.com')->execute());
+        $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
+        $expectedTable = $this->getFixtureDataSet('domain_create.xml')->getTable('domain');
+        $this->assertTablesEqual($expectedTable, $queryTable);
+
+        // Delte the domain
+        $this->assertTrue($this->getAdminCmd()->addArg('domain:delete')->addArg('example.com')->execute());
+        $this->assertEquals(0, $this->getConnection()->getRowCount('domain'));
+
+        // Delete the account and the home directory
+        $this->assertTrue($this->getAdminCmd()->addArg('account:delete')->addArg('test')->execute());
+        $this->assertEquals(0, $this->getConnection()->getRowCount('account'));
+        $this->assertUserNotExists('test');
+        self::$tmpDirectories[] = self::$homebase.'test';
     }
 
     /**
@@ -176,17 +220,6 @@ class CliTest extends AbstractDatabaseTest
         $command->setCommand(Binary::get('php'));
         $command->addArg(self::$admincli);
         return $command;
-    }
-
-    /**
-     * Return the absolute path to a fixture file
-     *
-     * @param string $fixture Fixture file name
-     * @return string Absolute fixture file
-     */
-    protected function getFixture($fixture)
-    {
-        return __DIR__.DIRECTORY_SEPARATOR.'Fixture'.DIRECTORY_SEPARATOR.$fixture;
     }
 
     /**

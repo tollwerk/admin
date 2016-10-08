@@ -37,8 +37,8 @@
 namespace Tollwerk\Admin\Infrastructure\Strategy;
 
 use Tollwerk\Admin\Application\Contract\VhostPersistenceAdapterStrategyInterface;
-use Tollwerk\Admin\Domain\Account\Account;
-use Tollwerk\Admin\Domain\Vhost\Vhost;
+use Tollwerk\Admin\Domain\Account\AccountInterface;
+use Tollwerk\Admin\Domain\Vhost\VhostInterface;
 use Tollwerk\Admin\Infrastructure\App;
 use Tollwerk\Admin\Infrastructure\Persistence\Apache;
 
@@ -107,12 +107,12 @@ class ApachePersistenceAdapterStrategy implements VhostPersistenceAdapterStrateg
     /**
      * Persist a virtual host
      *
-     * @param Account $account Account
-     * @param Vhost $vhost Virtual host
+     * @param AccountInterface $account Account
+     * @param VhostInterface $vhost Virtual host
      * @return bool Success
      * @throws \RuntimeException If a config file couldn't be written
      */
-    public function persist(Account $account, Vhost $vhost)
+    public function persist(AccountInterface $account, VhostInterface $vhost)
     {
         // TODO
 //        $persister = new Apache($account);

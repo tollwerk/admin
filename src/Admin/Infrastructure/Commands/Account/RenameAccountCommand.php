@@ -45,7 +45,7 @@ use Tollwerk\Admin\Ports\Facade\Account;
 /**
  * account:rename command
  *
- * @package Tollwerk\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
 class RenameAccountCommand extends Command

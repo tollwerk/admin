@@ -40,7 +40,10 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 use Symfony\Component\Yaml\Yaml;
+use Tollwerk\Admin\Application\Contract\PersistenceAdapterFactoryInterface;
+use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
 use Tollwerk\Admin\Application\Service\AccountService;
+use Tollwerk\Admin\Application\Service\DomainService;
 use Tollwerk\Admin\Application\Service\VirtualHostService;
 use Tollwerk\Admin\Infrastructure\Doctrine\EnumVhosttypeType;
 use Tollwerk\Admin\Infrastructure\Factory\PersistenceAdapterFactory;
@@ -91,6 +94,24 @@ class App
      */
     protected static $vhostService = null;
     /**
+     * Domain service
+     *
+     * @var DomainService
+     */
+    protected static $domainService = null;
+    /**
+     * Active Storage adapter
+     *
+     * @var StorageAdapterStrategyInterface
+     */
+    protected static $storageAdapter;
+    /**
+     * Persistence adapter factory
+     *
+     * @var PersistenceAdapterFactoryInterface
+     */
+    protected static $persistenceAdapterFactory;
+    /**
      * App domain
      *
      * @var string
@@ -116,6 +137,10 @@ class App
 
         // Initialize doctrine
         self::initializeDoctrine();
+
+        // Register the Doctrine storage adapter and persistence adapter factory
+        self::$storageAdapter = new DoctrineStorageAdapterStrategy();
+        self::$persistenceAdapterFactory = new PersistenceAdapterFactory();
     }
 
     /**
@@ -212,9 +237,7 @@ class App
     public static function getAccountService()
     {
         if (self::$accountService === null) {
-            $storageAdapter = new DoctrineStorageAdapterStrategy();
-            $persistenceAdapterFactory = new PersistenceAdapterFactory();
-            self::$accountService = new AccountService($storageAdapter, $persistenceAdapterFactory);
+            self::$accountService = new AccountService(self::$storageAdapter, self::$persistenceAdapterFactory);
         }
 
         return self::$accountService;
@@ -227,12 +250,24 @@ class App
      */
     public static function getVirtualHostService()
     {
-        if (self::$accountService === null) {
-            $storageAdapter = new DoctrineStorageAdapterStrategy();
-            $persistenceAdapterFactory = new PersistenceAdapterFactory();
-            self::$vhostService = new VirtualHostService($storageAdapter, $persistenceAdapterFactory);
+        if (self::$vhostService === null) {
+            self::$vhostService = new VirtualHostService(self::$storageAdapter, self::$persistenceAdapterFactory);
         }
 
         return self::$vhostService;
+    }
+
+    /**
+     * Return the domain service
+     *
+     * @return DomainService Domain service
+     */
+    public static function getDomainService()
+    {
+        if (self::$domainService === null) {
+            self::$domainService = new DomainService(self::$storageAdapter, self::$persistenceAdapterFactory);
+        }
+
+        return self::$domainService;
     }
 }

@@ -42,13 +42,32 @@ use Tollwerk\Admin\Infrastructure\Commands\Account\DeleteAccountCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Account\EnableAccountCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Account\DisableAccountCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Account\RenameAccountCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Vhost\CreateVhostCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Domain\CreateDomainCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Domain\DeleteDomainCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Domain\EnableDomainCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Domain\DisableDomainCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Domain\EnableDomainWildcardCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Domain\DisableDomainWildcardCommand;
 
 $application = new Application();
 
+// Account commands
 $application->add(new CreateAccountCommand());
 $application->add(new DeleteAccountCommand());
 $application->add(new EnableAccountCommand());
 $application->add(new DisableAccountCommand());
 $application->add(new RenameAccountCommand());
+
+// Domain commands
+$application->add(new CreateDomainCommand());
+$application->add(new DeleteDomainCommand());
+$application->add(new EnableDomainCommand());
+$application->add(new DisableDomainCommand());
+$application->add(new EnableDomainWildcardCommand());
+$application->add(new DisableDomainWildcardCommand());
+
+// Virtual host commands
+$application->add(new CreateVhostCommand());
 
 $application->run();

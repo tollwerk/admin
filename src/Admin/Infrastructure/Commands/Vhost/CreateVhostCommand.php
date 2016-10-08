@@ -34,21 +34,22 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-namespace Tollwerk\Admin\Infrastructure\Commands\Account;
+namespace Tollwerk\Admin\Infrastructure\Commands\Vhost;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Tollwerk\Admin\Ports\Facade\Account;
+use Tollwerk\Admin\Domain\Vhost\Vhost as DomainVhost;
+use Tollwerk\Admin\Ports\Facade\Vhost;
 
 /**
- * account:delete command
+ * vhost:create command
  *
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class DeleteAccountCommand extends Command
+class CreateVhostCommand extends Command
 {
     /**
      * Configure the command
@@ -57,14 +58,24 @@ class DeleteAccountCommand extends Command
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('account:delete')
+            ->setName('vhost:create')
             // the short description shown while running "php bin/console list"
-            ->setDescription('Delete an account (without deleting account data)')
+            ->setDescription('Create a new virtual host')
             // the full command description shown when running the command with
             // the "--help" option
-            ->setHelp("This command allows you to delete an account without removing the account's user data")
-            // configure the account name command
-            ->addArgument('name', InputArgument::REQUIRED, 'The name of the account to delete');
+            ->setHelp("This command allows you to create a virtual host and add it to an account")
+            // configure the virtual host account name
+            ->addArgument(
+                'account',
+                InputArgument::REQUIRED,
+                'The name of the account the virtual host should be added to'
+            )
+            // configure the virtual host domain name
+            ->addArgument('domain', InputArgument::REQUIRED, 'The name of the virtual hosts\'s primary domain')
+            // configure the virtual host document root
+            ->addArgument('docroot', InputArgument::REQUIRED, 'The name of the virtual hosts\'s document root')
+            // configure the virttual host type
+            ->addArgument('type', InputArgument::OPTIONAL, 'The virtual host type', DomainVhost::TYPE_APACHE);
     }
 
     /**
@@ -75,17 +86,19 @@ class DeleteAccountCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $account = $input->getArgument('name');
+        $account = $input->getArgument('account');
+        $domain = $input->getArgument('domain');
+        $docroot = $input->getArgument('docroot');
+        $type = $input->getArgument('type');
         try {
-            Account::delete($account);
-            $output->writeln(sprintf('<info>Account "%s" deleted successfully (user data remained untouched)</info>',
-                $account));
+            Vhost::create($account, $domain, $docroot, $type);
+            $output->writeln(sprintf('<info>Virtual host "%s" created successfully</info>', $domain));
             return 0;
         } catch (\Exception $e) {
             $output->writeln(
                 sprintf(
-                    '<error>Error deleting account "%s": %s (%s)</error>',
-                    $account,
+                    '<error>Error creating virtual host "%s": %s (%s)</error>',
+                    $domain,
                     $e->getMessage(),
                     $e->getCode()
                 )

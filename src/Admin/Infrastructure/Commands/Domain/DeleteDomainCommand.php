@@ -5,7 +5,7 @@
  *
  * @category    Tollwerk
  * @package     Tollwerk\Admin
- * @subpackage  Tollwerk\Admin\Infrastructure
+ * @subpackage  Tollwerk\Admin\Infrastructure\Commands\Domain
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
@@ -34,21 +34,21 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-namespace Tollwerk\Admin\Infrastructure\Commands\Account;
+namespace Tollwerk\Admin\Infrastructure\Commands\Domain;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Tollwerk\Admin\Ports\Facade\Account;
+use Tollwerk\Admin\Ports\Facade\Domain;
 
 /**
- * account:delete command
+ * domain:delete command
  *
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class DeleteAccountCommand extends Command
+class DeleteDomainCommand extends Command
 {
     /**
      * Configure the command
@@ -57,14 +57,14 @@ class DeleteAccountCommand extends Command
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('account:delete')
+            ->setName('domain:delete')
             // the short description shown while running "php bin/console list"
-            ->setDescription('Delete an account (without deleting account data)')
+            ->setDescription('Delete an unassigned domain')
             // the full command description shown when running the command with
             // the "--help" option
-            ->setHelp("This command allows you to delete an account without removing the account's user data")
-            // configure the account name command
-            ->addArgument('name', InputArgument::REQUIRED, 'The name of the account to delete');
+            ->setHelp("This command allows you to delete an unassigned domain")
+            // configure the domain name
+            ->addArgument('domain', InputArgument::REQUIRED, 'The domain name');
     }
 
     /**
@@ -75,17 +75,16 @@ class DeleteAccountCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $account = $input->getArgument('name');
+        $domain = $input->getArgument('domain');
         try {
-            Account::delete($account);
-            $output->writeln(sprintf('<info>Account "%s" deleted successfully (user data remained untouched)</info>',
-                $account));
+            Domain::delete($domain);
+            $output->writeln(sprintf('<info>Domain "%s" deleted successfully</info>', $domain));
             return 0;
         } catch (\Exception $e) {
             $output->writeln(
                 sprintf(
-                    '<error>Error deleting account "%s": %s (%s)</error>',
-                    $account,
+                    '<error>Error deleting domain "%s": %s (%s)</error>',
+                    $domain,
                     $e->getMessage(),
                     $e->getCode()
                 )

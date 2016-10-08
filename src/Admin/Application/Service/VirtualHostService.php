@@ -42,7 +42,7 @@ namespace Tollwerk\Admin\Application\Service;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Application
  */
-class VirtualHostService
+class VirtualHostService extends AbstractService
 {
 
 }

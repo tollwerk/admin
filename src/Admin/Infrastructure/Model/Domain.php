@@ -73,6 +73,7 @@ class Domain
      *
      * @var Account
      * @ManyToOne(targetEntity="Tollwerk\Admin\Infrastructure\Model\Account", inversedBy="domains")
+     * @JoinColumn(name="account_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $account;
     /**
@@ -80,6 +81,7 @@ class Domain
      *
      * @var Vhost|null
      * @ManyToOne(targetEntity="Tollwerk\Admin\Infrastructure\Model\Vhost", inversedBy="domains")
+     * @JoinColumn(name="vhost_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $vhost;
     /**

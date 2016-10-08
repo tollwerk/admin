@@ -5,7 +5,7 @@
  *
  * @category    Tollwerk
  * @package     Tollwerk\Admin
- * @subpackage  Tollwerk\Admin\Application\Contract
+ * @subpackage  Tollwerk\Admin\Application\Service
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
@@ -34,25 +34,43 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-namespace Tollwerk\Admin\Application\Contract;
+namespace Tollwerk\Admin\Application\Service;
 
-use Tollwerk\Admin\Domain\Account\AccountInterface;
-use Tollwerk\Admin\Domain\Vhost\VhostInterface;
+use Tollwerk\Admin\Application\Contract\PersistenceAdapterFactoryInterface;
+use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
 
 /**
- * Persistence adapter strategy interface
+ * Abstract application service
  *
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Application
  */
-interface VhostPersistenceAdapterStrategyInterface
+abstract class AbstractService
 {
     /**
-     * Persist a virtual host
+     * Storage adapter strategy
      *
-     * @param AccountInterface $account Account
-     * @param VhostInterface $vhost Virtual host
-     * @return bool Success
+     * @var StorageAdapterStrategyInterface
      */
-    public function persist(AccountInterface $account, VhostInterface $vhost);
+    protected $storageAdapterStrategy;
+    /**
+     * Persistence adapter strategy factory
+     *
+     * @var PersistenceAdapterFactoryInterface
+     */
+    protected $persistenceAdapterFactory;
+
+    /**
+     * Constructor
+     *
+     * @param StorageAdapterStrategyInterface $storageAdapterStrategy Storage adapter strategy
+     * @param PersistenceAdapterFactoryInterface $persistenceAdapterFactory
+     */
+    public function __construct(
+        StorageAdapterStrategyInterface $storageAdapterStrategy,
+        PersistenceAdapterFactoryInterface $persistenceAdapterFactory
+    ) {
+        $this->storageAdapterStrategy = $storageAdapterStrategy;
+        $this->persistenceAdapterFactory = $persistenceAdapterFactory;
+    }
 }

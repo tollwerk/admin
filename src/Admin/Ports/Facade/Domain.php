@@ -36,29 +36,27 @@
 
 namespace Tollwerk\Admin\Ports\Facade;
 
-use Tollwerk\Admin\Domain\Vhost\Vhost as DomainVhost;
 use Tollwerk\Admin\Domain\Account\Account as DomainAccount;
+use \Tollwerk\Admin\Domain\Domain\Domain as DomainDomain;
 use Tollwerk\Admin\Infrastructure\App;
 
 /**
- * Virtual host facade
+ * Domain facade
  *
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Ports
  */
-class Vhost
+class Domain
 {
     /**
-     * Create and add a virtual host to an account
+     * Create and add a domain to an account
      *
      * @param string $account Account name
-     * @param string $domain Primary domain name
-     * @param string $docroot Document root
-     * @param string $type Virtual host type
+     * @param string $domain Domain name
      * @return boolean Success
-     * @throws \Exception If the account couldn't be created
+     * @throws \Exception If the domain couldn't be created
      */
-    public static function create($account, $domain, $docroot, $type = DomainVhost::TYPE_APACHE)
+    public static function create($account, $domain)
     {
         // Get the account to operate on
         $account = self::loadAccount($account);
@@ -66,6 +64,7 @@ class Vhost
         // Check if the domain already exists and is unassigned
         try {
             $domain = App::getDomainService()->loadAvailable($domain, $account);
+
         } catch (\RuntimeException $e) {
             // If the domain already exists but is assigned or belongs to another account: Error
             if ($e->getCode() != 1475915909) {
@@ -73,10 +72,65 @@ class Vhost
             }
 
             // Create the domain
-            App::getDomainService()->create($domain, $account);
+            $domain = App::getDomainService()->create($domain, $account);
         }
 
-        return true;
+        return $domain instanceof DomainDomain;
+    }
+
+    /**
+     * Delete a domain
+     *
+     * @param string $domain Domain name
+     * @return boolean Success
+     */
+    public static function delete($name)
+    {
+        return App::getDomainService()->delete($name) instanceof DomainDomain;
+    }
+
+    /**
+     * Enable a domain
+     *
+     * @param string $domain Domain name
+     * @return boolean Success
+     */
+    public static function enable($name)
+    {
+        return App::getDomainService()->enable($name) instanceof DomainDomain;
+    }
+
+    /**
+     * Disable a domain
+     *
+     * @param string $domain Domain name
+     * @return boolean Success
+     */
+    public static function disable($name)
+    {
+        return App::getDomainService()->disable($name) instanceof DomainDomain;
+    }
+
+    /**
+     * Enable a domain wildcard
+     *
+     * @param string $domain Domain name
+     * @return boolean Success
+     */
+    public static function enableWildcard($name)
+    {
+        return App::getDomainService()->enableWildcard($name) instanceof DomainDomain;
+    }
+
+    /**
+     * Disable a domain wildcard
+     *
+     * @param string $domain Domain name
+     * @return boolean Success
+     */
+    public static function disableWildcard($name)
+    {
+        return App::getDomainService()->disableWildcard($name) instanceof DomainDomain;
     }
 
     /**

@@ -45,7 +45,7 @@ use Tollwerk\Admin\Ports\Facade\Account;
 /**
  * account:disable command
  *
- * @package Tollwerk\Server
+ * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
 class DisableAccountCommand extends Command
