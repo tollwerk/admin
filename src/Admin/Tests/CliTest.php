@@ -106,6 +106,8 @@ class CliTest extends AbstractDatabaseTest
             throw new \RuntimeException($command->getError(), $command->getExitCode());
         }
         self::$idcmd = $command->getOutput();
+
+        echo self::$admincli.PHP_EOL.self::$homebase.PHP_EOL.self::$phpcmd.PHP_EOL.self::$idcmd.PHP_EOL;
     }
 
     /**
@@ -128,11 +130,10 @@ class CliTest extends AbstractDatabaseTest
     {
         $command = $this->getAdminCmd()->addArg('account:create')->addArg('test');
         $success = $command->execute();
-        $this->assertTrue($success);
         if (!$success) {
             echo $command->getOutput().' ('.$command->getExitCode().')';
         }
-
+        $this->assertTrue($success);
 
         $this->assertEquals(1, $this->getConnection()->getRowCount('account'));
         $queryTable = $this->getConnection()->createQueryTable('account', 'SELECT * FROM account');
