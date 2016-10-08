@@ -81,7 +81,8 @@ class CliTest extends AbstractDatabaseTest
         // Ensure the account system group exists
         App::bootstrap();
         $command = new Command();
-        $command->setCommand(Binary::get('groupadd'));
+        $command->setCommand(Binary::get('sudo'));
+        $command->addArg(Binary::get('groupadd'));
         $command->addArg('-f');
         $command->addArg(App::getConfig('shell.group'));
         if (!$command->execute()) {
