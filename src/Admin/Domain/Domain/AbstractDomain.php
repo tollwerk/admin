@@ -50,4 +50,14 @@ abstract class AbstractDomain implements DomainInterface
      * @var string
      */
     protected $name;
+
+    /**
+     * Return whether this is a wildcard domain
+     *
+     * @return boolean Is wildcard domain
+     */
+    public function isWildcard()
+    {
+        return $this->name == '*';
+    }
 }

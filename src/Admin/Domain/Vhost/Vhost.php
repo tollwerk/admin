@@ -47,6 +47,12 @@ use Tollwerk\Admin\Domain\Domain\DomainInterface;
 class Vhost implements VhostInterface
 {
     /**
+     * Active account
+     *
+     * @var boolean
+     */
+    protected $active = false;
+    /**
      * Primary domain
      *
      * @var DomainInterface
@@ -165,6 +171,28 @@ class Vhost implements VhostInterface
     }
 
     /**
+     * Return whether the account is active
+     *
+     * @return boolean Active
+     */
+    public function isActive()
+    {
+        return $this->active;
+    }
+
+    /**
+     * Set whether the account is active
+     *
+     * @param boolean $active Active
+     * @return VhostInterface Self reference
+     */
+    public function setActive($active)
+    {
+        $this->active = $active;
+        return $this;
+    }
+
+    /**
      * Return the primary domain
      *
      * @return DomainInterface Primary domain
@@ -226,11 +254,17 @@ class Vhost implements VhostInterface
     /**
      * Return the secondary domains
      *
-     * @return DomainInterface[]
+     * @param bool $excludeWildcards Exclude wildcard domains
+     * @return DomainInterface[] Secondary domains
      */
-    public function getSecondaryDomains()
+    public function getSecondaryDomains($excludeWildcards = false)
     {
-        return array_values($this->secondaryDomains);
+        $secondaryDomains = array_values($this->secondaryDomains);
+        return $excludeWildcards ?
+            array_filter($secondaryDomains, function (DomainInterface $domain) {
+                return !$domain->isWildcard();
+            }) :
+            $secondaryDomains;
     }
 
     /**

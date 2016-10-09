@@ -50,4 +50,11 @@ interface DomainInterface
      * @return string Domain
      */
     public function __toString();
+
+    /**
+     * Return whether this is a wildcard domain
+     *
+     * @return boolean Is wildcard domain
+     */
+    public function isWildcard();
 }

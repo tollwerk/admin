@@ -36,9 +36,9 @@
 
 namespace Tollwerk\Admin\Infrastructure\Persistence;
 
-use Tollwerk\Admin\Domain\Account\Account;
+use Tollwerk\Admin\Domain\Account\AccountInterface;
 use Tollwerk\Admin\Domain\Vhost\Vhost;
-use Tollwerk\Admin\Infrastructure\App;
+use Tollwerk\Admin\Domain\Vhost\VhostInterface;
 use Tollwerk\Admin\Infrastructure\Service\TemplateService;
 
 /**
@@ -52,123 +52,66 @@ class Apache
     /**
      * Account
      *
-     * @var Account
+     * @var AccountInterface
      */
     protected $account;
     /**
-     * Webroot directory
+     * Configuration
      *
-     * @var string
+     * @var array
      */
-    protected $webroot;
+    protected $config;
     /**
-     * Configuration root directory
+     * Account helper
      *
-     * @var
+     * @var AccountHelper
      */
-    protected $configroot;
-    /**
-     * Logging root directory
-     *
-     * @var
-     */
-    protected $logroot;
+    protected $helper;
 
     /**
      * Constructor
      *
-     * @param Account $account Account
+     * @param AccountInterface $account Account
+     * @param array $config Configuration
      */
-    public function __construct(Account $account)
+    public function __construct(AccountInterface $account, array $config)
     {
         $this->account = $account;
+        $this->config = $config;
+        $this->helper = new AccountHelper($this->account);
+
+        // Add some directory names
+        $this->config['dataroot'] = $this->helper->directory('data');
+        $this->config['vhostroot'] = $this->helper->directory('config'.DIRECTORY_SEPARATOR.'vhosts-available');
+        $this->config['logdir'] = $this->helper->directory('log');
+        $this->config['account'] = $this->account->getName();
     }
 
     /**
-     * Create the persistence files
+     * Persist a virtual host
      *
-     * @return array
-     * @param string $webroot Webroot directory
-     * @param string $configroot Configuration directory
-     * @param string $logroot Logging root directory
+     * @param VhostInterface $vhost Virtual host
+     * @return array Files
      */
-    public function persist($webroot, $configroot, $logroot)
+    public function __invoke(VhostInterface $vhost)
     {
-        // Prepare account directories
-        $directories = $this->prepareDirectories($this->account, $webroot, $configroot, $logroot);
-
-        // Prepare account templating variables
-        $variables = array_merge(
-            (array)App::getConfig('variables'),
-            (array)App::getConfig('apache'),
-            $directories,
-            ['account' => $this->account->getName()]
-        );
-
-        // Prepare a list of files and virtual hosts to create / update
         $files = [];
 
-        // Run through all account virtual hosts
-        /** @var Vhost $vhost */
-        foreach ($this->account->getVhosts() as $vhost) {
-            $this->createVirtualHost($vhost, $files, $variables);
-        }
-
-        return $files;
-    }
-
-    /**
-     * Prepare account directories
-     *
-     * @param Account $account
-     * @return array Account directories
-     * @param string $webroot Webroot directory
-     * @param string $configroot Configuration directory
-     * @param string $logroot Logging root directory
-     * @throws \RuntimeException If the account webroot cannot be created
-     */
-    protected function prepareDirectories(Account $account, $webroot, $configroot, $logroot)
-    {
-        // If the account webroot cannot be created
-        $this->webroot = $webroot.$account->getName();
-        if (!is_dir($this->webroot) && !mkdir($this->webroot, 0777)) {
-            throw new \RuntimeException(sprintf('Couldn\'t create account webroot "%s"', $this->webroot, 1475501235));
-        }
-
-        // If the account webroot cannot be created
-        $this->configroot = $configroot.$account->getName();
-        if (!is_dir($this->configroot) && !mkdir($this->configroot, 0777)) {
-            throw new \RuntimeException(sprintf('Couldn\'t create account config root "%s"', $this->configroot,
-                1475501282));
-        }
-
-        // If the account logroot cannot be created
-        $this->logroot = $logroot.$account->getName();
-        if (!is_dir($this->logroot) && !mkdir($this->logroot, 0777)) {
-            throw new \RuntimeException(sprintf('Couldn\'t create account logroot "%s"', $this->logroot, 1475501235));
-        }
-
-        return ['webroot' => $this->webroot, 'configroot' => $this->configroot, 'logroot' => $this->logroot];
-    }
-
-    /**
-     * Create a virtual host
-     *
-     * @param Vhost $vhost Virtual host
-     * @param array $files Files to create
-     * @param array $variables Templating variables
-     */
-    protected function createVirtualHost(Vhost $vhost, array &$files, array $variables)
-    {
+        $variables = $this->config;
         $variables['primary_domain'] = strval($vhost->getPrimaryDomain());
         $variables['secondary_domains'] = implode(', ', array_map('strval', $vhost->getSecondaryDomains()));
+        $variables['secondary_domains_without_wildcards'] =
+            implode(', ', array_map('strval', $vhost->getSecondaryDomains(true)));
+        $variables['docroot'] =
+            rtrim($this->config['dataroot'].DIRECTORY_SEPARATOR.$vhost->getDocroot(), DIRECTORY_SEPARATOR);
+        $variables['configroot'] = $this->config['vhostroot'].DIRECTORY_SEPARATOR.$variables['primary_domain'];
         $variables['php_version'] = $vhost->getPhp();
 
         // If the virtual host should redirect
         if ($vhost->getRedirectUrl() !== null) {
             // TODO: Redirect
 
-            return;
+            return $files;
         }
 
         // If the virtual host should support PHP
@@ -177,21 +120,25 @@ class Apache
         }
 
         // Add the virtual host include
-        $this->addEntry($files, 'vhost_'.$vhost->getPrimaryDomain().'.include',
-            TemplateService::render('vhost.include', $variables));
+        $this->addEntry($files, 'apache_vhost.include',
+            TemplateService::render('apache_vhost.include', $variables));
 
         // If the HTTPS protocol is supported
         if ($httpsport = $vhost->getPort(Vhost::PROTOCOL_HTTPS)) {
 
             // Add the SSL configuration include
-            $this->addEntry($files, 'ssl_'.$vhost->getPrimaryDomain().'.include',
-                TemplateService::render('ssl.include', $variables));
+            $this->addEntry($files, 'apache_ssl.include',
+                TemplateService::render('apache_ssl.include', $variables));
 
             // Add the HTTPS vhost declaration
             $variables['port'] = $httpsport;
             $variables['ssl'] = true;
-            $this->addEntry($files, 'vhost_'.$this->account->getName().'.conf',
-                TemplateService::render('vhost.conf', $variables));
+            $this->addEntry($files, 'apache_vhost.conf',
+                TemplateService::render('apache_vhost.conf', $variables));
+
+            // Add the Certbot configuration
+            $this->addEntry($files, 'certbot.ini',
+                TemplateService::render('certbot.ini', $variables));
         }
 
         // If the HTTP protocol is supported
@@ -200,26 +147,33 @@ class Apache
             // Add the HTTP vhost declaration
             $variables['port'] = $httpport;
             $variables['ssl'] = false;
-            $this->addEntry($files, 'vhost_'.$this->account->getName().'.conf',
-                TemplateService::render('vhost.conf', $variables));
+            $this->addEntry($files, 'apache_vhost.conf',
+                TemplateService::render('apache_vhost.conf', $variables));
         }
+
+        $absoluteFiles = [];
+        foreach ($files as $relativeFile => $fileContent) {
+            $absoluteFiles[$this->helper->vhostDirectory($vhost).DIRECTORY_SEPARATOR.$relativeFile] =
+                implode(PHP_EOL, (array)$fileContent);
+        }
+        return $absoluteFiles;
     }
 
     /**
      * Create a PHP configuration include
      *
-     * @param Vhost $vhost Virtual host
+     * @param VhostInterface $vhost Virtual host
      * @param array $files Configuration files
      * @param array $variables Templating variables
      */
-    protected function createPhpConfig(Vhost $vhost, array &$files, array $variables)
+    protected function createPhpConfig(VhostInterface $vhost, array &$files, array $variables)
     {
         // Add the FPM configuration
         $this->addEntry($files, 'fpm-'.$vhost->getPhp().'.conf', TemplateService::render('fpm.conf', $variables));
 
         // Add the FPM include
-        $this->addEntry($files, 'fmp_'.$vhost->getPrimaryDomain().'.include',
-            TemplateService::render('fpm.include', $variables));
+        $this->addEntry($files, 'apache_fmp.include',
+            TemplateService::render('apache_fpm.include', $variables));
     }
 
     /**

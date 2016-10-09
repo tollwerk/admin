@@ -57,6 +57,21 @@ interface VhostInterface
     public function __construct(DomainInterface $primaryDomain, $docroot, $type);
 
     /**
+     * Return whether the account is active
+     *
+     * @return boolean Active
+     */
+    public function isActive();
+
+    /**
+     * Set whether the account is active
+     *
+     * @param boolean $active Active
+     * @return VhostInterface Self reference
+     */
+    public function setActive($active);
+
+    /**
      * Return the primary domain
      *
      * @return DomainInterface Primary domain
@@ -71,6 +86,13 @@ interface VhostInterface
     public function getDocroot();
 
     /**
+     * Return the virtual host type
+     *
+     * @return string Virtual host type
+     */
+    public function getType();
+
+    /**
      * Return the port
      *
      * @param int $protocol Protocol
@@ -81,9 +103,10 @@ interface VhostInterface
     /**
      * Return the secondary domains
      *
-     * @return DomainInterface[]
+     * @param bool $excludeWildcards Exclude wildcard domains
+     * @return DomainInterface[] Secondary domains
      */
-    public function getSecondaryDomains();
+    public function getSecondaryDomains($excludeWildcards = false);
 
     /**
      * Set the secondary domains

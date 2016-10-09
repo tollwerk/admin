@@ -6,11 +6,11 @@ doctrine:
     dbname: "admin_test"
     host: "localhost"
 apache:
-  apache_group: "apache"
-variables:
-  fpm_sockets: "/var/run/php-fpm"
-  certroot: "/etc/letsencrypt/live"
+  group: "apache"
 general:
   locale: de_DE
   group: account
   basedir: "/home/travis/build/tollwerk/admin/tmp"
+  fpmdir: "/var/run/php-fpm"
+  certdir: "/etc/letsencrypt/live"
+  certemail: "cert@example.com"

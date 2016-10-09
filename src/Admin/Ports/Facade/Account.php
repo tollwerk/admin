@@ -40,6 +40,7 @@ use Tollwerk\Admin\Infrastructure\App;
 use Tollwerk\Admin\Infrastructure\Facade\AbstractFacade;
 use Tollwerk\Admin\Infrastructure\Shell\Exception as ShellException;
 use Tollwerk\Admin\Infrastructure\Shell\User;
+use Tollwerk\Admin\Domain\Account\Account as DomainAccount;
 
 /**
  * Account facade
@@ -62,7 +63,7 @@ class Account extends AbstractFacade
 
         try {
             $account = App::getAccountService()->create($name);
-            if (!$account instanceof \Tollwerk\Admin\Domain\Account\Account) {
+            if (!$account instanceof DomainAccount) {
                 throw new \Exception(sprintf('Couldn\'t create account "%s"', $name), 1475528906);
             }
 
@@ -87,7 +88,7 @@ class Account extends AbstractFacade
 
         try {
             $account = App::getAccountService()->rename($oldname, $newname);
-            if (!$account instanceof \Tollwerk\Admin\Domain\Account\Account) {
+            if (!$account instanceof DomainAccount) {
                 throw new \Exception(sprintf('Couldn\'t rename account "%s" to "%s"', $oldname, $newname), 1475531002);
             }
 
@@ -108,7 +109,7 @@ class Account extends AbstractFacade
     {
         // If the account cannot be deleted
         $deletedAccount = App::getAccountService()->delete($name);
-        if (!($deletedAccount instanceof \Tollwerk\Admin\Domain\Account\Account)) {
+        if (!($deletedAccount instanceof DomainAccount)) {
             throw new \RuntimeException(sprintf('Couldn\'t delete account "%s"', $name), 1475532983);
         }
 
@@ -116,7 +117,7 @@ class Account extends AbstractFacade
             User::delete($name);
         } catch (ShellException $e) {
             $account = App::getAccountService()->create($name);
-            if (($account instanceof \Tollwerk\Admin\Domain\Account\Account) && $deletedAccount->isActive()) {
+            if (($account instanceof DomainAccount) && $deletedAccount->isActive()) {
                 App::getAccountService()->enable($name);
             }
             throw new \RuntimeException($e->getMessage(), $e->getCode());
@@ -135,7 +136,7 @@ class Account extends AbstractFacade
     public static function enable($name)
     {
         // If the account cannot be enabled
-        if (!(App::getAccountService()->enable($name) instanceof \Tollwerk\Admin\Domain\Account\Account)) {
+        if (!(App::getAccountService()->enable($name) instanceof DomainAccount)) {
             throw new \RuntimeException(sprintf('Couldn\'t enable account "%s"', $name), 1475532231);
         }
         return true;
@@ -151,7 +152,7 @@ class Account extends AbstractFacade
     public static function disable($name)
     {
         // If the account cannot be disabled
-        if (!(App::getAccountService()->disable($name) instanceof \Tollwerk\Admin\Domain\Account\Account)) {
+        if (!(App::getAccountService()->disable($name) instanceof DomainAccount)) {
             throw new \RuntimeException(sprintf('Couldn\'t disable account "%s"', $name), 1475532231);
         }
         return true;

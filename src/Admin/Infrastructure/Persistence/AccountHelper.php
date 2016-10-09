@@ -5,7 +5,7 @@
  *
  * @category    Tollwerk
  * @package     Tollwerk\Admin
- * @subpackage  Tollwerk\Admin\Application\Service
+ * @subpackage  Tollwerk\Admin\Infrastructure\Persistence
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
@@ -34,43 +34,63 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-namespace Tollwerk\Admin\Application\Service;
+namespace Tollwerk\Admin\Infrastructure\Persistence;
 
-use Tollwerk\Admin\Application\Contract\PersistenceServiceInterface;
-use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
+use Tollwerk\Admin\Domain\Account\AccountInterface;
+use Tollwerk\Admin\Domain\Vhost\VhostInterface;
+use Tollwerk\Admin\Infrastructure\App;
 
 /**
- * Abstract application service
+ * Account persistence helper
  *
  * @package Tollwerk\Admin
- * @subpackage Tollwerk\Admin\Application
+ * @subpackage Tollwerk\Admin\Infrastructure
  */
-abstract class AbstractService
+class AccountHelper
 {
     /**
-     * Storage adapter strategy
+     * Account
      *
-     * @var StorageAdapterStrategyInterface
+     * @var AccountInterface
      */
-    protected $storageAdapterStrategy;
-    /**
-     * Persistence service
-     *
-     * @var PersistenceServiceInterface
-     */
-    protected $persistenceService;
+    protected $account;
 
     /**
      * Constructor
      *
-     * @param StorageAdapterStrategyInterface $storageAdapterStrategy Storage adapter strategy
-     * @param PersistenceServiceInterface $persistenceService
+     * @param AccountInterface $account
      */
-    public function __construct(
-        StorageAdapterStrategyInterface $storageAdapterStrategy,
-        PersistenceServiceInterface $persistenceService
-    ) {
-        $this->storageAdapterStrategy = $storageAdapterStrategy;
-        $this->persistenceService = $persistenceService;
+    public function __construct(AccountInterface $account)
+    {
+        $this->account = $account;
+    }
+
+    /**
+     * Return an account specific directory
+     *
+     * @param string|null $path Optional: sub directory
+     * @return string Directory path
+     */
+    public function directory($path = null)
+    {
+        $directory = rtrim(App::getConfig('general.basedir'), DIRECTORY_SEPARATOR).
+            DIRECTORY_SEPARATOR.$this->account->getName();
+        $path = trim($path, DIRECTORY_SEPARATOR);
+        return $directory.(strlen($path) ? DIRECTORY_SEPARATOR.$path : '');
+    }
+
+    /**
+     * Return a virtual host directory
+     *
+     * @param VhostInterface $vhost Virtual host
+     * @param bool $enabled Enabled virtual host
+     * @return string Virtual host directory
+     */
+    public function vhostDirectory(VhostInterface $vhost, $enabled = false)
+    {
+        return $this->directory(
+            'config'.DIRECTORY_SEPARATOR.'vhosts-'.($enabled ? 'enabled' : 'available').DIRECTORY_SEPARATOR.
+            strval($vhost->getPrimaryDomain())
+        );
     }
 }

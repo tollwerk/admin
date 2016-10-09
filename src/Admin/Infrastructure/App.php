@@ -41,12 +41,14 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 use Symfony\Component\Yaml\Yaml;
 use Tollwerk\Admin\Application\Contract\PersistenceAdapterFactoryInterface;
+use Tollwerk\Admin\Application\Contract\PersistenceServiceInterface;
 use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
 use Tollwerk\Admin\Application\Service\AccountService;
 use Tollwerk\Admin\Application\Service\DomainService;
 use Tollwerk\Admin\Application\Service\VirtualHostService;
 use Tollwerk\Admin\Infrastructure\Doctrine\EnumVhosttypeType;
 use Tollwerk\Admin\Infrastructure\Factory\PersistenceAdapterFactory;
+use Tollwerk\Admin\Infrastructure\Service\PersistenceService;
 use Tollwerk\Admin\Infrastructure\Strategy\DoctrineStorageAdapterStrategy;
 
 /**
@@ -112,6 +114,12 @@ class App
      */
     protected static $persistenceAdapterFactory;
     /**
+     * Persistence service
+     *
+     * @var PersistenceServiceInterface
+     */
+    protected static $persistenceService;
+    /**
      * App domain
      *
      * @var string
@@ -141,6 +149,7 @@ class App
         // Register the Doctrine storage adapter and persistence adapter factory
         self::$storageAdapter = new DoctrineStorageAdapterStrategy();
         self::$persistenceAdapterFactory = new PersistenceAdapterFactory();
+        self::$persistenceService = new PersistenceService(self::$persistenceAdapterFactory);
     }
 
     /**
@@ -237,7 +246,7 @@ class App
     public static function getAccountService()
     {
         if (self::$accountService === null) {
-            self::$accountService = new AccountService(self::$storageAdapter, self::$persistenceAdapterFactory);
+            self::$accountService = new AccountService(self::$storageAdapter, self::$persistenceService);
         }
 
         return self::$accountService;
@@ -251,7 +260,7 @@ class App
     public static function getVirtualHostService()
     {
         if (self::$vhostService === null) {
-            self::$vhostService = new VirtualHostService(self::$storageAdapter, self::$persistenceAdapterFactory);
+            self::$vhostService = new VirtualHostService(self::$storageAdapter, self::$persistenceService);
         }
 
         return self::$vhostService;
@@ -265,7 +274,7 @@ class App
     public static function getDomainService()
     {
         if (self::$domainService === null) {
-            self::$domainService = new DomainService(self::$storageAdapter, self::$persistenceAdapterFactory);
+            self::$domainService = new DomainService(self::$storageAdapter, self::$persistenceService);
         }
 
         return self::$domainService;

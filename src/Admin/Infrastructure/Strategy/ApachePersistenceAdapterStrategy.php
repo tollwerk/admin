@@ -51,30 +51,16 @@ use Tollwerk\Admin\Infrastructure\Persistence\Apache;
 class ApachePersistenceAdapterStrategy implements VhostPersistenceAdapterStrategyInterface
 {
     /**
-     * Webroot directory
+     * Configuration
      *
-     * @var string
+     * @var array
      */
-    protected $webroot;
-    /**
-     * Configuration root directory
-     *
-     * @var
-     */
-    protected $configroot;
-    /**
-     * Logging root directory
-     *
-     * @var
-     */
-    protected $logroot;
+    protected $config = [];
 
     /**
      * Constructor
      *
      * @throws \RuntimeException If the adapter configuration is invalid
-     * @throws \RuntimeException If the Apache webroot configuration is invalid
-     * @throws \RuntimeException If the Apache config root configuration is invalid
      */
     public function __construct()
     {
@@ -85,23 +71,7 @@ class ApachePersistenceAdapterStrategy implements VhostPersistenceAdapterStrateg
             throw new \RuntimeException('Invalid apache adapter strategy configuration', 1475500531);
         }
 
-        // If the Apache webroot configuration is invalid
-        if (empty($apacheConfig['webroot']) || !is_dir($apacheConfig['webroot'])) {
-            throw new \RuntimeException(sprintf('Invalid apache webroot configuration', 1475500605));
-        }
-        $this->webroot = rtrim($apacheConfig['webroot'], DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
-
-        // If the Apache config root configuration is invalid
-        if (empty($apacheConfig['config']) || !is_dir($apacheConfig['config'])) {
-            throw new \RuntimeException(sprintf('Invalid apache config root configuration', 1475500666));
-        }
-        $this->configroot = rtrim($apacheConfig['config'], DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
-
-        // If the Apache log root configuration is invalid
-        if (empty($apacheConfig['logroot']) || !is_dir($apacheConfig['logroot'])) {
-            throw new \RuntimeException(sprintf('Invalid apache logging root configuration', 1475506107));
-        }
-        $this->logroot = rtrim($apacheConfig['logroot'], DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+        $this->config = array_merge((array)App::getConfig('general'), $apacheConfig);
     }
 
     /**
@@ -114,17 +84,15 @@ class ApachePersistenceAdapterStrategy implements VhostPersistenceAdapterStrateg
      */
     public function persist(AccountInterface $account, VhostInterface $vhost)
     {
-        // TODO
-//        $persister = new Apache($account);
-//        $entries = $persister->persist($this->webroot, $this->configroot, $this->logroot);
-//
-//        // Persist the file entries
-//        foreach ($entries as $filename => $configParts) {
-//            $configFile = $this->configroot.$account->getName().DIRECTORY_SEPARATOR.$filename;
-//            if (!file_put_contents($configFile, implode(PHP_EOL.PHP_EOL, $configParts))) {
-//                throw new \RuntimeException(sprintf('Couldn\'t write config file "%s"', $filename, 1475507805));
-//            }
-//        }
+        $persister = new Apache($account, $this->config);
+        $entries = $persister($vhost);
+
+        // Persist the file entries
+        foreach ($entries as $filename => $filecontent) {
+            if (!file_put_contents($filename, $filecontent)) {
+                throw new \RuntimeException(sprintf('Couldn\'t write config file "%s"', $filename, 1475507805));
+            }
+        }
 
         return true;
     }

@@ -37,7 +37,6 @@
 namespace Tollwerk\Admin\Application\Service;
 
 use Tollwerk\Admin\Domain\Account\AccountInterface;
-use Tollwerk\Admin\Domain\Vhost\Vhost;
 
 /**
  * Account service
@@ -66,7 +65,9 @@ class AccountService extends AbstractService
      */
     public function create($name)
     {
-        return $this->storageAdapterStrategy->createAccount($name);
+        $account = $this->storageAdapterStrategy->createAccount($name);
+        $this->persistenceService->createAccount($account);
+        return $account;
     }
 
     /**
@@ -77,7 +78,9 @@ class AccountService extends AbstractService
      */
     public function delete($name)
     {
-        return $this->storageAdapterStrategy->deleteAccount($name);
+        $account = $this->storageAdapterStrategy->deleteAccount($name);
+        $this->persistenceService->deleteAccount($account);
+        return $account;
     }
 
     /**
@@ -88,7 +91,9 @@ class AccountService extends AbstractService
      */
     public function enable($name)
     {
-        return $this->storageAdapterStrategy->enableAccount($name);
+        $account = $this->storageAdapterStrategy->enableAccount($name);
+        $this->persistenceService->enableAccount($account);
+        return $account;
     }
 
     /**
@@ -99,7 +104,9 @@ class AccountService extends AbstractService
      */
     public function disable($name)
     {
-        return $this->storageAdapterStrategy->disableAccount($name);
+        $account = $this->storageAdapterStrategy->disableAccount($name);
+        $this->persistenceService->disableAccount($account);
+        return $account;
     }
 
     /**
@@ -111,25 +118,8 @@ class AccountService extends AbstractService
      */
     public function rename($oldname, $newname)
     {
-        return $this->storageAdapterStrategy->renameAccount($oldname, $newname);
-    }
-
-    /**
-     * Persist an account
-     *
-     * @param AccountInterface $account Account
-     */
-    public function persist(AccountInterface $account)
-    {
-        // Persist the account's virtual hosts
-        /** @var Vhost $vhost */
-        foreach ($account->getVhosts() as $vhost) {
-            $this->persistenceAdapterFactory
-                ->makeVhostPersistenceAdapterStrategy($vhost->getType())
-                ->persist($account, $vhost);
-        }
-
-        // TODO: Persist the account's mailboxes
-        // TODO: Persist the account's FTP accesses
+        $account = $this->storageAdapterStrategy->renameAccount($oldname, $newname);
+        $this->persistenceService->renameAccount($account);
+        return $account;
     }
 }

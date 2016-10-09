@@ -65,12 +65,14 @@ class VirtualHostService extends AbstractService
         $docroot = '',
         $type = Vhost::TYPE_APACHE
     ) {
-        return $this->storageAdapterStrategy->createVhost(
+        $vhost = $this->storageAdapterStrategy->createVhost(
             $account,
             $domain,
             $this->validateDocroot($account, $docroot),
             $type
         );
+        $this->persistenceService->createVhost($account, $vhost);
+        return $vhost;
     }
 
     /**
@@ -82,7 +84,9 @@ class VirtualHostService extends AbstractService
      */
     public function delete(AccountInterface $account, $docroot = '')
     {
-        return $this->storageAdapterStrategy->deleteVhost($account, $this->validateDocroot($account, $docroot));
+        $vhost = $this->storageAdapterStrategy->deleteVhost($account, $this->validateDocroot($account, $docroot));
+        $this->persistenceService->deleteVhost($account, $vhost);
+        return $vhost;
     }
 
     /**
@@ -94,7 +98,9 @@ class VirtualHostService extends AbstractService
      */
     public function enable(AccountInterface $account, $docroot = '')
     {
-        return $this->storageAdapterStrategy->enableVhost($account, $this->validateDocroot($account, $docroot));
+        $vhost = $this->storageAdapterStrategy->enableVhost($account, $this->validateDocroot($account, $docroot));
+        $this->persistenceService->enableVhost($account, $vhost);
+        return $vhost;
     }
 
     /**
@@ -106,7 +112,9 @@ class VirtualHostService extends AbstractService
      */
     public function disable(AccountInterface $account, $docroot = '')
     {
-        return $this->storageAdapterStrategy->disableVhost($account, $this->validateDocroot($account, $docroot));
+        $vhost = $this->storageAdapterStrategy->disableVhost($account, $this->validateDocroot($account, $docroot));
+        $this->persistenceService->disableVhost($account, $vhost);
+        return $vhost;
     }
 
     /**
@@ -141,12 +149,14 @@ class VirtualHostService extends AbstractService
             throw new \RuntimeException(sprintf('Invalid redirect HTTP status code "%s"', $status), 1475486679);
         }
 
-        return $this->storageAdapterStrategy->redirectVhost(
+        $vhost = $this->storageAdapterStrategy->redirectVhost(
             $account,
             $this->validateDocroot($account, $docroot),
             $url,
             $status
         );
+        $this->persistenceService->redirectVhost($account, $vhost);
+        return $vhost;
     }
 
     /**
@@ -168,7 +178,9 @@ class VirtualHostService extends AbstractService
             throw new \RuntimeException(sprintf('Invalid PHP version "%s"', $php), 1475937755);
         }
 
-        return $this->storageAdapterStrategy->phpVhost($account, $this->validateDocroot($account, $docroot), $php);
+        $vhost = $this->storageAdapterStrategy->phpVhost($account, $this->validateDocroot($account, $docroot), $php);
+        $this->persistenceService->phpVhost($account, $vhost);
+        return $vhost;
     }
 
     /**
@@ -199,12 +211,14 @@ class VirtualHostService extends AbstractService
             throw new \RuntimeException(sprintf('Invalid protocol port "%s"', $port), 1475502412);
         }
 
-        return $this->storageAdapterStrategy->portVhost(
+        $vhost = $this->storageAdapterStrategy->portVhost(
             $account,
             $this->validateDocroot($account, $docroot),
             $protocol,
             $port
         );
+        $this->persistenceService->portVhost($account, $vhost);
+        return $vhost;
     }
 
     /**
@@ -217,11 +231,13 @@ class VirtualHostService extends AbstractService
      */
     public function addDomain(AccountInterface $account, DomainInterface $domain, $docroot = '')
     {
-        return $this->storageAdapterStrategy->addVhostDomain(
+        $vhost = $this->storageAdapterStrategy->addVhostDomain(
             $account,
             $this->validateDocroot($account, $docroot),
             $domain
         );
+        $this->persistenceService->domainVhost($account, $vhost);
+        return $vhost;
     }
 
     /**
@@ -234,11 +250,13 @@ class VirtualHostService extends AbstractService
      */
     public function removeDomain(AccountInterface $account, DomainInterface $domain, $docroot = '')
     {
-        return $this->storageAdapterStrategy->removeVhostDomain(
+        $vhost = $this->storageAdapterStrategy->removeVhostDomain(
             $account,
             $this->validateDocroot($account, $docroot),
             $domain
         );
+        $this->persistenceService->domainVhost($account, $vhost);
+        return $vhost;
     }
 
     /**

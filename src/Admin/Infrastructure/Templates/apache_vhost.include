@@ -1,11 +1,10 @@
-ServerName {{primary_domain}}
-{{#secondary_domains}}
+ServerName {{primary_domain}}{{#secondary_domains}}
 ServerAlias {{secondary_domains}}{{/secondary_domains}}
 
-CustomLog {{logroot}}/access_log combined
+CustomLog {{logdir}}/access_{{primary_domain}}_log combined
 
-DocumentRoot "{{webroot}}"
-<Directory "{{webroot}}">
+DocumentRoot "{{docroot}}"
+<Directory "{{docroot}}">
 	RewriteEngine on
 	RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
 	RewriteRule .* - [F]
@@ -15,4 +14,4 @@ DocumentRoot "{{webroot}}"
 	Require all granted
 </Directory>{{#php_version}}
 
-Include {{configroot}}/fmp_{{primary_domain}}.include{{/php_version}}
+Include {{configroot}}/apache_fmp.include{{/php_version}}

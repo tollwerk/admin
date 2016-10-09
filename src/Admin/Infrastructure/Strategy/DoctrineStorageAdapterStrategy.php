@@ -272,43 +272,14 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
     protected function loadFromDoctrineAccount(DoctrineAccount $doctrineAccount)
     {
         $account = new Account($doctrineAccount->getName());
+        $account->setActive($doctrineAccount->isActive());
 
         // Run through all virtual hosts of this account
         /** @var DoctrineVhost $doctrineVhost */
         foreach ($doctrineAccount->getVhosts() as $doctrineVhost) {
             $doctrinePrimaryDomain = $doctrineVhost->getPrimarydomain();
             if ($doctrinePrimaryDomain instanceof DoctrineDomain) {
-                $primaryDomain = DomainFactory::parseString($doctrinePrimaryDomain->getName());
-
-                $vhost = new Vhost($primaryDomain, $doctrineVhost->getDocroot(), $doctrineVhost->getType());
-                $vhost->setPhp($doctrineVhost->getPhp());
-                $vhost->setRedirectUrl($doctrineVhost->getRedirecturl());
-                $vhost->setRedirectStatus($doctrineVhost->getRedirectstatus());
-                if ($doctrineVhost->getHttpport() !== null) {
-                    $vhost->enableProtocol(Vhost::PROTOCOL_HTTP, $doctrineVhost->getHttpport());
-                }
-                if ($doctrineVhost->getHttpsport() !== null) {
-                    $vhost->enableProtocol(Vhost::PROTOCOL_HTTPS, $doctrineVhost->getHttpsport());
-                }
-
-                // Add the wilcard version of the primary domain
-                if ($doctrinePrimaryDomain->isWildcard()) {
-                    $vhost->addSecondaryDomain(DomainFactory::parseString('*.'.$primaryDomain));
-                }
-
-                // Add all secondary domains
-                /** @var DoctrineDomain $doctrineDomain */
-                foreach ($doctrineVhost->getDomains() as $doctrineDomain) {
-                    if ($doctrineDomain->getName() != $doctrinePrimaryDomain->getName()) {
-                        $vhost->addSecondaryDomain(DomainFactory::parseString($doctrineDomain->getName()));
-
-                        if ($doctrineDomain->isWildcard()) {
-                            $vhost->addSecondaryDomain(DomainFactory::parseString('*.'.$doctrineDomain->getName()));
-                        }
-                    }
-                }
-
-                $account->addVirtualHost($vhost);
+                $account->addVirtualHost($this->loadFromDoctrineVhost($doctrineVhost));
             } else {
                 trigger_error('Skipping virtual host due to missing primary domain', E_USER_NOTICE);
             }
@@ -316,7 +287,6 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
 
         return $account;
     }
-
 
     /**
      * Load a domain (optionally: unassigned)
@@ -995,11 +965,37 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
      */
     protected function loadFromDoctrineVhost(DoctrineVhost $doctrineVhost)
     {
-        $vhost = new Vhost(
-            $this->loadFromDoctrineDomain($doctrineVhost->getPrimarydomain()),
-            $doctrineVhost->getDocroot(),
-            $doctrineVhost->getType()
-        );
+        $doctrinePrimaryDomain = $doctrineVhost->getPrimarydomain();
+        $primaryDomain = $this->loadFromDoctrineDomain($doctrinePrimaryDomain);
+
+        $vhost = new Vhost($primaryDomain, $doctrineVhost->getDocroot(), $doctrineVhost->getType());
+        $vhost->setActive($doctrineVhost->isActive());
+        $vhost->setPhp($doctrineVhost->getPhp());
+        $vhost->setRedirectUrl($doctrineVhost->getRedirecturl());
+        $vhost->setRedirectStatus($doctrineVhost->getRedirectstatus());
+        if ($doctrineVhost->getHttpport() !== null) {
+            $vhost->enableProtocol(Vhost::PROTOCOL_HTTP, $doctrineVhost->getHttpport());
+        }
+        if ($doctrineVhost->getHttpsport() !== null) {
+            $vhost->enableProtocol(Vhost::PROTOCOL_HTTPS, $doctrineVhost->getHttpsport());
+        }
+
+        // Add the wilcard version of the primary domain
+        if ($doctrinePrimaryDomain->isWildcard()) {
+            $vhost->addSecondaryDomain(DomainFactory::parseString('*.'.$primaryDomain));
+        }
+
+        // Add all secondary domains
+        /** @var DoctrineDomain $doctrineDomain */
+        foreach ($doctrineVhost->getDomains() as $doctrineDomain) {
+            if ($doctrineDomain->getName() != $doctrinePrimaryDomain->getName()) {
+                $vhost->addSecondaryDomain(DomainFactory::parseString($doctrineDomain->getName()));
+
+                if ($doctrineDomain->isWildcard()) {
+                    $vhost->addSecondaryDomain(DomainFactory::parseString('*.'.$doctrineDomain->getName()));
+                }
+            }
+        }
 
         return $vhost;
     }

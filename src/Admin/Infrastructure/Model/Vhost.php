@@ -91,7 +91,7 @@ class Vhost
      * @var Domain[]
      * @OneToMany(targetEntity="Tollwerk\Admin\Infrastructure\Model\Domain", mappedBy="vhost")
      */
-    protected $domains;
+    protected $domains = [];
     /**
      * Document root directory
      *
@@ -239,7 +239,7 @@ class Vhost
      * @param Domain[] $domains Associated domains
      * @return Vhost Self reference
      */
-    public function setDomains($domains)
+    public function setDomains(array $domains)
     {
         $this->domains = $domains;
         return $this;
