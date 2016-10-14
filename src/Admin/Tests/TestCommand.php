@@ -56,8 +56,8 @@ class TestCommand extends Command
     {
         $success = parent::execute();
         if (!$success) {
-            echo 'ERROR('.$this->getExitCode().'): '.($this->getOutput() ?: '--').' // '.($this->getError() ?: '--').
-                PHP_EOL;
+            echo PHP_EOL.'ERROR('.$this->getExitCode().'): '.$this->getExecCommand().PHP_EOL.
+                ($this->getOutput() ?: '--').' // '.($this->getError() ?: '--').PHP_EOL;
         }
         return $success;
     }

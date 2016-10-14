@@ -40,7 +40,9 @@ use Tollwerk\Admin\Application\Contract\PersistenceAdapterFactoryInterface;
 use Tollwerk\Admin\Application\Contract\PersistenceServiceInterface;
 use Tollwerk\Admin\Domain\Account\AccountInterface;
 use Tollwerk\Admin\Domain\Vhost\VhostInterface;
+use Tollwerk\Admin\Infrastructure\App;
 use Tollwerk\Admin\Infrastructure\Persistence\AccountHelper;
+use Tollwerk\Admin\Infrastructure\Shell\Directory;
 
 /**
  * Persistence service
@@ -165,7 +167,7 @@ class PersistenceService implements PersistenceServiceInterface
         }
 
         // Prepare the virtual host directory
-        $this->prepareDirectory($availableVhost);
+        $this->prepareDirectory($availableVhost, $account->getName(), App::getConfig('general.group'));
 
         // Persist the virtual host
         $this->persistVhost($account, $vhost);
@@ -215,7 +217,7 @@ class PersistenceService implements PersistenceServiceInterface
             }
 
             $enabledVhost = $accountHelper->vhostDirectory($vhost, true);
-            $this->prepareDirectory(dirname($enabledVhost));
+            $this->prepareDirectory(dirname($enabledVhost), $account->getName(), App::getConfig('general.group'));
 
             // If the virtual host is already enabled but cannot be renewed
             if (file_exists($enabledVhost) && !unlink($enabledVhost)) {
@@ -368,11 +370,13 @@ class PersistenceService implements PersistenceServiceInterface
      * Prepare a directory
      *
      * @param string $directory Directory
+     * @param string $user Owner user
+     * @param string $group Owner group
      * @return string Prepared directory
      */
-    protected function prepareDirectory($directory)
+    protected function prepareDirectory($directory, $user, $group)
     {
-        if (!is_dir($directory) && !mkdir($directory, 0777, true)) {
+        if (!is_dir($directory) && !Directory::create($directory, $user, $group)) {
             throw new \RuntimeException(sprintf('Could not prepare directory "%s"', $directory), 1476014854);
         }
         return $directory;

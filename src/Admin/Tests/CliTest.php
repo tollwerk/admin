@@ -286,7 +286,7 @@ class CliTest extends AbstractDatabaseTest
         $this->assertTrue($this->getAdminCmd()->addArg('account:delete')->addArg('test')->execute());
         $this->assertEquals(0, $this->getConnection()->getRowCount('account'));
         $this->assertUserNotExists('test');
-        self::$tmpDirectories[] = self::$homebase.'test';
+//        self::$tmpDirectories[] = self::$homebase.'test';
     }
 
     /**

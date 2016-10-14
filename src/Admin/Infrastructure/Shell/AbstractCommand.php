@@ -39,65 +39,26 @@ namespace Tollwerk\Admin\Infrastructure\Shell;
 use mikehaertl\shellcommand\Command;
 
 /**
- * Helper class to identify system binaries
+ * Abstract shell command
  *
  * @package Tollwerk\Admin
- * @subpackage Tollwerk\Admin\Infrastructure\Shell
+ * @subpackage Tollwerk\Admin\Infrastructure
  */
-class Binary
+abstract class AbstractCommand
 {
     /**
-     * Registered binaries
+     * Run a command
      *
-     * @var array
+     * @param Command $command Command
+     * @return string Command output
+     * @throws Exception If the command fails
      */
-    protected static $binaries = [];
-
-    /**
-     * Identify and return a system binary
-     *
-     * @param string $binary Binary name
-     * @return string Absolute binary path
-     */
-    public static function get($binary)
+    protected static function run(Command $command)
     {
-        // One time binary registration
-        if (empty(self::$binaries[$binary])) {
-            $command = new Command();
-            $command->setCommand('which');
-            $command->addArg($binary);
-
-            if (!$command->execute()) {
-                throw new \RuntimeException($command->getError(), $command->getExitCode());
-            }
-            self::$binaries[$binary] = $command->getOutput();
+        if ($command->execute()) {
+            return $command->getOutput();
         }
 
-        return self::$binaries[$binary];
-    }
-
-    /**
-     * Return a sudoed binary command
-     *
-     * @param string $binary Binary
-     * @return Command Sudoed command
-     */
-    public static function sudo($binary, $user = null, $group = null)
-    {
-        $command = new Command();
-        $command->setCommand(self::get('sudo'));
-
-        // Add a user
-        if (strlen(trim($user))) {
-            $command->addArg('-u', trim($user));
-        }
-
-        // Add a group
-        if (strlen(trim($group))) {
-            $command->addArg('-g', trim($group));
-        }
-
-        $command->addArg(self::get($binary));
-        return $command;
+        throw new Exception($command->getError(), $command->getExitCode());
     }
 }

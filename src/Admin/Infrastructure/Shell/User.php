@@ -36,7 +36,6 @@
 
 namespace Tollwerk\Admin\Infrastructure\Shell;
 
-use mikehaertl\shellcommand\Command;
 use Tollwerk\Admin\Infrastructure\App;
 
 /**
@@ -45,7 +44,7 @@ use Tollwerk\Admin\Infrastructure\App;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class User
+class User extends AbstractCommand
 {
     /**
      * Create a new system user
@@ -91,22 +90,6 @@ class User
             throw  new \RuntimeException(sprintf('Invalid user name "%s"', $user), 1475514940);
         }
         return $user;
-    }
-
-    /**
-     * Run a command
-     *
-     * @param Command $command Command
-     * @return string Command output
-     * @throws Exception If the command fails
-     */
-    protected static function run(Command $command)
-    {
-        if ($command->execute()) {
-            return $command->getOutput();
-        }
-
-        throw new Exception($command->getError(), $command->getExitCode());
     }
 
     /**

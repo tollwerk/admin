@@ -36,68 +36,30 @@
 
 namespace Tollwerk\Admin\Infrastructure\Shell;
 
-use mikehaertl\shellcommand\Command;
-
 /**
- * Helper class to identify system binaries
+ * Directory related commands
  *
  * @package Tollwerk\Admin
- * @subpackage Tollwerk\Admin\Infrastructure\Shell
+ * @subpackage Tollwerk\Admin\Infrastructure
  */
-class Binary
+class Directory extends AbstractCommand
 {
     /**
-     * Registered binaries
+     * Recursively create a directory
      *
-     * @var array
+     * @param string $path Directory path
+     * @param string $user User name
+     * @param string $group Group name
+     * @param int $mode File mode
+     * @return string Output
      */
-    protected static $binaries = [];
-
-    /**
-     * Identify and return a system binary
-     *
-     * @param string $binary Binary name
-     * @return string Absolute binary path
-     */
-    public static function get($binary)
+    public static function create($path, $user, $group, $mode = 0775)
     {
-        // One time binary registration
-        if (empty(self::$binaries[$binary])) {
-            $command = new Command();
-            $command->setCommand('which');
-            $command->addArg($binary);
-
-            if (!$command->execute()) {
-                throw new \RuntimeException($command->getError(), $command->getExitCode());
-            }
-            self::$binaries[$binary] = $command->getOutput();
-        }
-
-        return self::$binaries[$binary];
-    }
-
-    /**
-     * Return a sudoed binary command
-     *
-     * @param string $binary Binary
-     * @return Command Sudoed command
-     */
-    public static function sudo($binary, $user = null, $group = null)
-    {
-        $command = new Command();
-        $command->setCommand(self::get('sudo'));
-
-        // Add a user
-        if (strlen(trim($user))) {
-            $command->addArg('-u', trim($user));
-        }
-
-        // Add a group
-        if (strlen(trim($group))) {
-            $command->addArg('-g', trim($group));
-        }
-
-        $command->addArg(self::get($binary));
-        return $command;
+        $command = Binary::sudo('mkdir', $user, $group);
+        $command->addArg('--parents');
+        $command->addArg('--mode', decoct($mode));
+        $command->addArg($path);
+        self::run($command);
+        return true;
     }
 }
