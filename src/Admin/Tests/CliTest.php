@@ -308,7 +308,7 @@ class CliTest extends AbstractDatabaseTest
      */
     protected function getAdminCmd()
     {
-        $command = new Command();
+        $command = new TestCommand();
         $command->setCommand(Binary::get('php'));
         $command->addArg(self::$admincli);
         return $command;
