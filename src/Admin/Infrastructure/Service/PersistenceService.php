@@ -188,7 +188,7 @@ class PersistenceService implements PersistenceServiceInterface
         $accountHelper = new AccountHelper($account);
         $availableVhost = $accountHelper->vhostDirectory($vhost, false);
         if (is_dir($availableVhost)) {
-            $this->deleteDirectory($availableVhost);
+            $this->deleteDirectory($availableVhost, $account->getName(), App::getConfig('general.group'));
         }
     }
 
@@ -386,15 +386,17 @@ class PersistenceService implements PersistenceServiceInterface
      * Recursively delete a directory
      *
      * @param string $directory Directory
+     * @param string $user Owner user
+     * @param string $group Owner group
      * @throws \RuntimeException If a file or directory cannot be deleted
      */
-    protected function deleteDirectory($directory)
+    protected function deleteDirectory($directory, $user, $group)
     {
         $files = array_diff(scandir($directory), array('.', '..'));
         foreach ($files as $file) {
             // Recursive call if it's a directory
             if (is_dir($directory.DIRECTORY_SEPARATOR.$file)) {
-                $this->deleteDirectory($directory.DIRECTORY_SEPARATOR.$file);
+                $this->deleteDirectory($directory.DIRECTORY_SEPARATOR.$file, $user, $group);
                 continue;
             }
 
@@ -408,7 +410,7 @@ class PersistenceService implements PersistenceServiceInterface
         }
 
         // Delete the directory
-        if (!rmdir($directory)) {
+        if (!Directory::delete($directory, $user, $group)) {
             throw new \RuntimeException(sprintf('Could not delete directory "%s"', $directory), 1476017747);
         }
     }

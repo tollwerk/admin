@@ -62,4 +62,28 @@ class Directory extends AbstractCommand
         self::run($command);
         return true;
     }
+
+    /**
+     * Recursively delete a directory
+     *
+     * @param string $path Directory path
+     * @param string $user User name
+     * @param string $group Group name
+     * @param bool $recursive Rekursiv
+     * @return string Output
+     */
+    public static function delete($path, $user, $group, $recursive = false)
+    {
+        if ($recursive) {
+            $command = Binary::sudo('rm', $user, $group);
+            $command->addArg('--force');
+            $command->addArg('--recursive');
+        } else {
+            $command = Binary::sudo('rmdir', $user, $group);
+        }
+
+        $command->addArg($path);
+        self::run($command);
+        return true;
+    }
 }
