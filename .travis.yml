@@ -22,6 +22,7 @@ before_script:
   - sudo apt-get install -y --force-yes apache2 libapache2-mod-fastcgi make
   - sudo apt-get install -y --force-yes php5-dev php-pear php5-mysql php5-curl php5-gd php5-json php5-sqlite php5-pgsql
   # Prepare directories & files
+  - ls -la /etc/apache2
   - sudo mkdir /var/run/php-fpm
   - mkdir --parents /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled/admin.test
   - cp ./src/Admin/Tests/Fixture/fpm.travis.conf /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled/admin.test/fpm-$(phpenv version-name).conf
@@ -29,6 +30,7 @@ before_script:
   - cp ./src/Admin/Tests/Fixture/config.travis.yml config/config.yml
   - sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place config/config.yml
   - sed -e "s?%PHPENV_VERSION_NAME%?$(phpenv version-name)?g" --in-place config/config.yml
+  - echo "127.0.0.1    example.com" | sudo tee -a /etc/hosts
   # Configure PHP / FPM
   - cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - echo "include=/home/travis/build/tollwerk/admin/tmp/*/config/vhosts-enabled/*/fpm-$(phpenv version-name).conf" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
@@ -42,7 +44,7 @@ before_script:
   - ./vendor/bin/doctrine orm:schema-tool:update --force
   - ./vendor/bin/doctrine orm:generate-proxies
   # Restart services
-  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - sudo ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
   - sudo service apache2 restart
 
 script:
