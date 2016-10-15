@@ -36,8 +36,10 @@
 
 namespace Tollwerk\Admin\Infrastructure\Commands;
 
+use Psr\Log\LogLevel;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
+use Tollwerk\Admin\Infrastructure\App;
 
 /**
  * Abstract command
@@ -48,12 +50,35 @@ use Symfony\Component\Console\Output\OutputInterface;
 abstract class AbstractCommand extends Command
 {
     /**
+     * Decorator mappings
+     *
+     * @var array
+     */
+    protected static $decorators = [
+        LogLevel::EMERGENCY => 'error',
+        LogLevel::ALERT => 'error',
+        LogLevel::CRITICAL => 'error',
+        LogLevel::ERROR => 'error',
+        LogLevel::WARNING => 'error',
+        LogLevel::NOTICE => 'comment',
+        LogLevel::INFO => 'info',
+        LogLevel::DEBUG => 'comment'
+    ];
+
+    /**
      * Print all application level messages
      *
      * @param OutputInterface $output
      */
-    protected function printMessages(OutputInterface $output)
-    {
-
+    protected
+    function printMessages(
+        OutputInterface $output
+    ) {
+        // Run through all application level messages
+        foreach (App::getMessages() as $appMessage) {
+            list($message, $level) = $appMessage;
+            $level = empty(self::$decorators[$level]) ? 'info' : self::$decorators[$level];
+            $output->writeln("<$level>$message</$level>");
+        }
     }
 }

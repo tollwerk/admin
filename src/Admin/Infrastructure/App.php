@@ -39,6 +39,7 @@ namespace Tollwerk\Admin\Infrastructure;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
+use Psr\Log\LogLevel;
 use Symfony\Component\Yaml\Yaml;
 use Tollwerk\Admin\Application\Contract\PersistenceAdapterFactoryInterface;
 use Tollwerk\Admin\Application\Contract\PersistenceServiceInterface;
@@ -127,6 +128,12 @@ class App
      * @var ServiceServiceInterface
      */
     protected static $serviceService;
+    /**
+     * Application level messages
+     *
+     * @var array
+     */
+    protected static $messages = [];
     /**
      * App domain
      *
@@ -235,14 +242,20 @@ class App
      * Return the contents of a particular template
      *
      * @param string $template Template name
+     * @param bool $useDefault Use a default template
      * @return string template contents
      */
-    public static function getTemplate($template)
+    public static function getTemplate($template, $useDefault = false)
     {
-        $templateFile = self::$rootDirectory.'src'.DIRECTORY_SEPARATOR.'Admin'
-            .DIRECTORY_SEPARATOR.'Infrastructure'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.$template;
+        $templateFile = self::$rootDirectory;
+        $templateFile .= $useDefault ? 'config' :
+            'src'.DIRECTORY_SEPARATOR.'Admin'.DIRECTORY_SEPARATOR.'Infrastructure'.DIRECTORY_SEPARATOR.'Templates';
+        $templateFile .= DIRECTORY_SEPARATOR.$template;
         if (!file_exists($templateFile)) {
-            throw new \RuntimeException(sprintf('Unknown template "%s"', $template), 1475503926);
+            throw new \RuntimeException(
+                sprintf('Unknown '.($useDefault ? 'default ' : '').'template "%s"', $template),
+                1475503926
+            );
         }
         return file_get_contents($templateFile);
     }
@@ -297,5 +310,29 @@ class App
     public static function getServiceService()
     {
         return self::$serviceService;
+    }
+
+    /**
+     * Add an application level message
+     *
+     * @param string $message Message
+     * @param string $level Log level
+     */
+    public static function addMessage($message, $level = LogLevel::INFO)
+    {
+        $message = trim($message);
+        if (strlen($message)) {
+            self::$messages[] = [$message, $level];
+        }
+    }
+
+    /**
+     * Return all application level messages
+     *
+     * @return array Messages
+     */
+    public static function getMessages()
+    {
+        return self::$messages;
     }
 }
