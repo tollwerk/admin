@@ -21,23 +21,32 @@ before_script:
   - sudo apt-get update
   - sudo apt-get install -y --force-yes apache2 libapache2-mod-fastcgi make
   - sudo apt-get install -y --force-yes php5-dev php-pear php5-mysql php5-curl php5-gd php5-json php5-sqlite php5-pgsql
+  - id apache
+  - id nobody
+  # Prepare directories & files
+  - mkdir --parents /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled
+  - cp ./src/Admin/Tests/Fixture/fpm.travis.conf /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled/fpm-$(phpenv version-name).conf
+  - sed -e "s?%PHPENV_VERSION_NAME%?$(phpenv version-name)?g" --in-place /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled/fpm-$(phpenv version-name).conf
+  - cat /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled/fpm-$(phpenv version-name).conf
+  - cp ./src/Admin/Tests/Fixture/config.travis.yml config/config.yml
+  - sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place config/config.yml
+  - sed -e "s?%PHPENV_VERSION_NAME%?$(phpenv version-name)?g" --in-place config/config.yml
+  - cat config/config.yml
   # Configure PHP / FPM
   - cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - echo "include=/home/travis/build/tollwerk/admin/tmp/*/config/vhosts-enabled/*/fpm-$(phpenv version-name).conf" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - cat ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - echo 'date.timezone = Europe/Berlin' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
   - sudo a2enmod rewrite actions fastcgi alias
-  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
-  # Create a test database
-  - mysql -e "create database IF NOT EXISTS admin_test;" -uroot
   # Update and install composer dependencies
   - travis_retry composer self-update
   - travis_retry composer install --no-interaction --prefer-source
-  - cp ./src/Admin/Tests/Fixture/config.travis.yml config/config.yml
+  # Create and prepare a test database
+  - mysql -e "create database IF NOT EXISTS admin_test;" -uroot
   - ./vendor/bin/doctrine orm:schema-tool:update --force
   - ./vendor/bin/doctrine orm:generate-proxies
-  - mkdir /home/travis/build/tollwerk/admin/tmp
   # Restart services
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
   - sudo service apache2 restart
 
 script:

@@ -11,7 +11,7 @@ apache:
   reload: ["apache2", "graceful"]
   restart: ["apache2", "restart"]
 php:
-  service: "/etc/init.d/php-fpm-php%s"
+  service: "%TRAVIS_BUILD_DIR%/.phpenv/versions/%PHPENV_VERSION_NAME%/sbin/php-fpm"
   reload: ["restart"]
   restart: ["restart"]
 general:
