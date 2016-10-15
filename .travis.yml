@@ -22,11 +22,12 @@ before_script:
   - sudo apt-get install -y --force-yes apache2 libapache2-mod-fastcgi make
   - sudo apt-get install -y --force-yes php5-dev php-pear php5-mysql php5-curl php5-gd php5-json php5-sqlite php5-pgsql
   # Configure PHP / FPM
-  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-  - sudo echo 'include=/home/travis/build/tollwerk/admin/tmp/*/config/vhosts-enabled/*/fpm-$(phpenv version-name).conf' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-  - sudo cat ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - cat ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - echo 'include=/home/travis/build/tollwerk/admin/tmp/*/config/vhosts-enabled/*/fpm-$(phpenv version-name).conf' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - echo 'date.timezone = Europe/Berlin' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
   - sudo a2enmod rewrite actions fastcgi alias
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
   # Create a test database
   - mysql -e "create database IF NOT EXISTS admin_test;" -uroot
   # Update and install composer dependencies
