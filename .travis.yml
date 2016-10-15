@@ -23,8 +23,8 @@ before_script:
   - sudo apt-get install -y --force-yes php5-dev php-pear php5-mysql php5-curl php5-gd php5-json php5-sqlite php5-pgsql
   # Configure PHP / FPM
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-  - echo 'include=/home/travis/build/tollwerk/admin/tmp/*/config/vhosts-enabled/*/fpm-$(phpenv version-name).conf' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-  - cat ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - sudo echo 'include=/home/travis/build/tollwerk/admin/tmp/*/config/vhosts-enabled/*/fpm-$(phpenv version-name).conf' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - sudo cat ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - echo 'date.timezone = Europe/Berlin' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
   - sudo a2enmod rewrite actions fastcgi alias
   # Create a test database
