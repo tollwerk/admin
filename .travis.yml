@@ -17,17 +17,27 @@ matrix:
     - php: hhvm
 
 before_script:
-  - sudo apt-get install apache2
+  # Update and install base system
+  - sudo apt-get update
+  - sudo apt-get install -y --force-yes apache2 libapache2-mod-fastcgi make
+  - sudo apt-get install -y --force-yes php5-dev php-pear php5-mysql php5-curl php5-gd php5-json php5-sqlite php5-pgsql
+  # Configure PHP / FPM
+  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - echo 'include=/home/travis/build/tollwerk/admin/tmp/*/config/vhosts-enabled/*/fpm-$(phpenv version-name).conf' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - cat ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - echo 'date.timezone = Europe/Berlin' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+  - sudo a2enmod rewrite actions fastcgi alias
+  # Create a test database
+  - mysql -e "create database IF NOT EXISTS admin_test;" -uroot
+  # Update and install composer dependencies
   - travis_retry composer self-update
   - travis_retry composer install --no-interaction --prefer-source
-  - if [ "$TRAVIS_PHP_VERSION" == "hhvm" ]; then echo 'date.timezone = Europe/Berlin' >> /etc/hhvm/php.ini; fi;
-  - if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then echo 'date.timezone = Europe/Berlin' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini; fi;
-  - sudo service apache2 restart
-  - mysql -e "create database IF NOT EXISTS admin_test;" -uroot
   - cp ./src/Admin/Tests/Fixture/config.travis.yml config/config.yml
   - ./vendor/bin/doctrine orm:schema-tool:update --force
   - ./vendor/bin/doctrine orm:generate-proxies
   - mkdir /home/travis/build/tollwerk/admin/tmp
+  # Restart services
+  - sudo service apache2 restart
 
 script:
   - bash -c 'if [ "$TRAVIS_PHP_VERSION" == "hhvm" ]; then vendor/bin/phpunit; fi;'
