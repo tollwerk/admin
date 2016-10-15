@@ -5,7 +5,7 @@
  *
  * @category    Tollwerk
  * @package     Tollwerk\Admin
- * @subpackage  Tollwerk\Admin\Infrastructure\Service
+ * @subpackage  Tollwerk\Admin\Infrastructure\Factory
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
@@ -34,29 +34,29 @@
  *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ***********************************************************************************/
 
-namespace Tollwerk\Admin\Infrastructure\Service;
+namespace Tollwerk\Admin\Infrastructure\Factory;
 
 use Tollwerk\Admin\Infrastructure\App;
+use Tollwerk\Admin\Infrastructure\Service\CertbotService;
 
 /**
- * Template rendering service
+ * Certbot service factory
  *
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class TemplateService
+class CertbotServiceFactory
 {
     /**
-     * Render a Mustache template
+     * Create a Certbot service instance
      *
-     * @param string $template Template name
-     * @param array $variables Rendering variables
-     * @param bool $useDefault Use a default template
-     * @return string Rendered template
+     * @return CertbotService Certbot service
      */
-    public static function render($template, array $variables, $useDefault = false)
+    public static function create()
     {
-        $mustache = new \Mustache_Engine();
-        return $mustache->render(App::getTemplate($template, $useDefault), $variables);
+        $config = App::getConfig('certbot');
+        $config['certdir'] = App::getConfig('general.certdir');
+        $config['certemail'] = App::getConfig('general.certemail');
+        return new CertbotService($config);
     }
 }

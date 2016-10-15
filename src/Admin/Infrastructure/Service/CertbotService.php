@@ -36,27 +36,44 @@
 
 namespace Tollwerk\Admin\Infrastructure\Service;
 
-use Tollwerk\Admin\Infrastructure\App;
-
 /**
- * Template rendering service
+ * Certbot service
  *
  * @package Tollwerk\Admin
- * @subpackage Tollwerk\Admin\Infrastructure
+ * @subpackage Tollwerk\Admin\Infrastructure\Service
  */
-class TemplateService
+class CertbotService extends AbstractShellService
 {
     /**
-     * Render a Mustache template
+     * Restart the service
      *
-     * @param string $template Template name
-     * @param array $variables Rendering variables
-     * @param bool $useDefault Use a default template
-     * @return string Rendered template
+     * @return boolean Success
      */
-    public static function render($template, array $variables, $useDefault = false)
+    public function restart()
     {
-        $mustache = new \Mustache_Engine();
-        return $mustache->render(App::getTemplate($template, $useDefault), $variables);
+        // TODO: Implement restart() method.
+        return false;
+    }
+
+    /**
+     * Reload the service
+     *
+     * @return boolean Success
+     */
+    public function reload()
+    {
+        // TODO: Implement reload() method.
+        return false;
+    }
+
+    /**
+     * Return whether a particular domain is generally certified
+     *
+     * @param string $domain Domain name
+     * @return bool Is certified
+     */
+    public function isCertified($domain)
+    {
+        return is_dir(rtrim($this->config['certdir'], DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$domain);
     }
 }

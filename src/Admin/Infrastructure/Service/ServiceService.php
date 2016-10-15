@@ -37,6 +37,8 @@
 namespace Tollwerk\Admin\Infrastructure\Service;
 
 use Tollwerk\Admin\Application\Contract\ServiceServiceInterface;
+use Tollwerk\Admin\Domain\Account\AccountInterface;
+use Tollwerk\Admin\Domain\Vhost\VhostInterface;
 use Tollwerk\Admin\Infrastructure\Factory\PhpFpmServiceFactory;
 use Tollwerk\Admin\Infrastructure\Factory\WebserverServiceFactory;
 
@@ -95,5 +97,15 @@ class ServiceService implements ServiceServiceInterface
     public function reloadPhp($version)
     {
         $this->php[$version] = true;
+    }
+
+    /**
+     * Renew a SSL certificate
+     *
+     * @param AccountInterface $account Account
+     * @param VhostInterface $vhost Virtual host
+     */
+    public function renewCertificate(AccountInterface $account, VhostInterface $vhost) {
+
     }
 }

@@ -1,0 +1,4 @@
+SSLEngine on
+SSLVerifyDepth  5
+SSLCertificateKeyFile /path/to/server.default.key
+SSLCertificateFile /path/to/server.default.crt

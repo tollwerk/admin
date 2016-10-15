@@ -36,9 +36,12 @@
 
 namespace Tollwerk\Admin\Infrastructure\Persistence;
 
+use Psr\Log\LogLevel;
 use Tollwerk\Admin\Domain\Account\AccountInterface;
 use Tollwerk\Admin\Domain\Vhost\Vhost;
 use Tollwerk\Admin\Domain\Vhost\VhostInterface;
+use Tollwerk\Admin\Infrastructure\App;
+use Tollwerk\Admin\Infrastructure\Factory\CertbotServiceFactory;
 use Tollwerk\Admin\Infrastructure\Service\TemplateService;
 
 /**
@@ -125,10 +128,15 @@ class Apache
 
         // If the HTTPS protocol is supported
         if ($httpsport = $vhost->getPort(Vhost::PROTOCOL_HTTPS)) {
+            $certbotService = CertbotServiceFactory::create();
+            $primaryDomainIsCertified = $certbotService->isCertified($variables['primary_domain']);
 
             // Add the SSL configuration include
-            $this->addEntry($files, 'apache_ssl.include',
-                TemplateService::render('apache_ssl.include', $variables));
+            $this->addEntry(
+                $files,
+                'apache_ssl.include',
+                TemplateService::render('apache_ssl.include', $variables, !$primaryDomainIsCertified)
+            );
 
             // Add the HTTPS vhost declaration
             $variables['port'] = $httpsport;
@@ -139,6 +147,17 @@ class Apache
             // Add the Certbot configuration
             $this->addEntry($files, 'certbot.ini',
                 TemplateService::render('certbot.ini', $variables));
+
+            // Output a hint if the primary domain isn't certified
+            if (!$primaryDomainIsCertified) {
+                App::addMessage(
+                    sprintf(
+                        'The virtual host primary domain "%s" should be properly certified!',
+                        $variables['primary_domain']
+                    ),
+                    LogLevel::NOTICE
+                );
+            }
         }
 
         // If the HTTP protocol is supported
