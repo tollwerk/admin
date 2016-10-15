@@ -19,7 +19,7 @@ matrix:
 before_script:
   # Update and install base system
   - sudo apt-get update
-  - sudo apt-get install -y --force-yes apache2 libapache2-mod-fastcgi make
+  - sudo apt-get install -y --force-yes apache2 libapache2-mod-fastcgi libapache2-mod-perl2 make
   - sudo apt-get install -y --force-yes php5-dev php-pear php5-mysql php5-curl php5-gd php5-json php5-sqlite php5-pgsql
   # Prepare directories & files
   - sudo cp -f ./src/Admin/Tests/Fixture/apache2.travis.include /etc/apache2/sites-enabled/default
@@ -35,7 +35,7 @@ before_script:
   - cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - echo "include=/home/travis/build/tollwerk/admin/tmp/*/config/vhosts-enabled/*/fpm-$(phpenv version-name).conf" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
   - echo 'date.timezone = Europe/Berlin' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
-  - sudo a2enmod rewrite actions fastcgi alias
+  - sudo a2enmod rewrite actions fastcgi alias perl
   # Update and install composer dependencies
   - travis_retry composer self-update
   - travis_retry composer install --no-interaction --prefer-source
@@ -44,7 +44,7 @@ before_script:
   - ./vendor/bin/doctrine orm:schema-tool:update --force
   - ./vendor/bin/doctrine orm:generate-proxies
   # Restart services
-  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - sudo ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
   - sudo service apache2 restart
 
 script:

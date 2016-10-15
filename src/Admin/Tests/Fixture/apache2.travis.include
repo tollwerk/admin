@@ -1,1 +1,5 @@
-IncludeOptional /home/travis/build/tollwerk/admin/tmp/*/config/vhosts-enabled/*/apache_vhost.conf
+<Perl>
+    foreach $file (glob '/home/travis/build/tollwerk/admin/tmp/*/config/vhosts-enabled/*/apache_vhost.conf') {
+        push @Include, $file;
+    }
+</Perl>
