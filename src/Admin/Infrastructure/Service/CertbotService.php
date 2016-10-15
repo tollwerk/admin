@@ -51,18 +51,22 @@ class CertbotService extends AbstractShellService
      */
     public function restart()
     {
-        // TODO: Implement restart() method.
-        return false;
+        return $this->reload();
     }
 
     /**
      * Reload the service
      *
      * @return boolean Success
+     * @todo Implement
      */
     public function reload()
     {
-        // TODO: Implement reload() method.
+        $command = $this->serviceCommand((array)$this->config['reload']);
+        $command->addArg('-c', $this->config['certconfig']);
+        echo $command->getExecCommand().PHP_EOL;
+//        $output = self::run($command);
+//        echo trim($output).PHP_EOL;
         return false;
     }
 

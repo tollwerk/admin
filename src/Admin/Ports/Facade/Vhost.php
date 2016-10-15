@@ -206,4 +206,19 @@ class Vhost extends AbstractFacade
 
         return App::getVirtualHostService()->removeDomain($account, $domain, $docroot) instanceof VhostInterface;
     }
+
+    /**
+     * Certify a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @return boolean Success
+     */
+    public static function certify($account, $docroot = '')
+    {
+        // Get the account to operate on
+        $account = self::loadAccount($account);
+
+        return App::getVirtualHostService()->certify($account, $docroot) instanceof VhostInterface;
+    }
 }

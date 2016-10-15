@@ -62,4 +62,11 @@ interface ServiceServiceInterface
      * Run all scheduled operations
      */
     public function runSchedule();
+
+    /**
+     * Create an SSL certificate
+     *
+     * @param string $config Configuration file
+     */
+    public function certify($config);
 }

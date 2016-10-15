@@ -287,4 +287,18 @@ class VirtualHostService extends AbstractService
         $accountDirectorySvc = new DirectoryService($account);
         return $accountDirectorySvc->getDataDirectory($docroot, false);
     }
+
+    /**
+     * Certify a virtual host
+     *
+     * @param AccountInterface $account Account
+     * @param string $docroot Document root
+     * @return VhostInterface Virtual host
+     */
+    public function certify(AccountInterface $account, $docroot = '')
+    {
+        $vhost = $this->load($account, $docroot);
+        $this->persistenceService->certifyVhost($account, $vhost);
+        return $vhost;
+    }
 }

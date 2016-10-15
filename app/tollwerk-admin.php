@@ -61,6 +61,7 @@ use Tollwerk\Admin\Infrastructure\Commands\Vhost\PortHttpVhostCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Vhost\PortHttpsVhostCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Vhost\DomainAddVhostCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Vhost\DomainRemoveVhostCommand;
+use Tollwerk\Admin\Infrastructure\Commands\Vhost\CertifyVhostCommand;
 
 $dispatcher = new EventDispatcher();
 $dispatcher->addListener(ConsoleEvents::TERMINATE, function (/*ConsoleTerminateEvent $event*/) {
@@ -98,5 +99,6 @@ $application->add(new PortHttpVhostCommand());
 $application->add(new PortHttpsVhostCommand());
 $application->add(new DomainAddVhostCommand());
 $application->add(new DomainRemoveVhostCommand());
+$application->add(new CertifyVhostCommand());
 
 $application->run();

@@ -50,13 +50,15 @@ class CertbotServiceFactory
     /**
      * Create a Certbot service instance
      *
+     * @param string $configFile Certbot configuration file
      * @return CertbotService Certbot service
      */
-    public static function create()
+    public static function create($configFile)
     {
         $config = App::getConfig('certbot');
         $config['certdir'] = App::getConfig('general.certdir');
         $config['certemail'] = App::getConfig('general.certemail');
+        $config['certconfig'] = $configFile;
         return new CertbotService($config);
     }
 }

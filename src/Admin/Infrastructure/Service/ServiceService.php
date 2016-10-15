@@ -37,8 +37,7 @@
 namespace Tollwerk\Admin\Infrastructure\Service;
 
 use Tollwerk\Admin\Application\Contract\ServiceServiceInterface;
-use Tollwerk\Admin\Domain\Account\AccountInterface;
-use Tollwerk\Admin\Domain\Vhost\VhostInterface;
+use Tollwerk\Admin\Infrastructure\Factory\CertbotServiceFactory;
 use Tollwerk\Admin\Infrastructure\Factory\PhpFpmServiceFactory;
 use Tollwerk\Admin\Infrastructure\Factory\WebserverServiceFactory;
 
@@ -62,12 +61,23 @@ class ServiceService implements ServiceServiceInterface
      * @var array
      */
     protected $php = [];
+    /**
+     * Issue SSL certificates
+     *
+     * @var array
+     */
+    protected $certificates = [];
 
     /**
      * Run all scheduled operations
      */
     public function runSchedule()
     {
+        // Run through all configuration files for SSL certificates to be issued
+        foreach (array_keys($this->certificates) as $config) {
+            CertbotServiceFactory::create($config)->reload();
+        }
+
         // Run through all PHP versions and reload the according FPM pool
         foreach (array_keys($this->php) as $php) {
             PhpFpmServiceFactory::create($php)->reload();
@@ -100,12 +110,11 @@ class ServiceService implements ServiceServiceInterface
     }
 
     /**
-     * Renew a SSL certificate
+     * Create an SSL certificate
      *
-     * @param AccountInterface $account Account
-     * @param VhostInterface $vhost Virtual host
+     * @param string $config Configuration file
      */
-    public function renewCertificate(AccountInterface $account, VhostInterface $vhost) {
-
+    public function certify($config) {
+        $this->certificates[$config] = true;
     }
 }

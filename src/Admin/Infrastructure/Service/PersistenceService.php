@@ -382,6 +382,24 @@ class PersistenceService implements PersistenceServiceInterface
     }
 
     /**
+     * Certifiy a virtual host
+     *
+     * @param AccountInterface $account Account
+     * @param VhostInterface $vhost Virtual host
+     * @return void
+     */
+    public function certifyVhost(AccountInterface $account, VhostInterface $vhost) {
+        // Issue an SSL certificate
+        $accountHelper = new AccountHelper($account);
+        $certificateConfig = $accountHelper->vhostDirectory($vhost).DIRECTORY_SEPARATOR.'certbot.ini';
+
+        $this->serviceService->certify($certificateConfig);
+
+        // Reload apache
+        $this->serviceService->reloadWebserver($vhost->getType());
+    }
+
+    /**
      * Prepare a directory
      *
      * @param string $directory Directory

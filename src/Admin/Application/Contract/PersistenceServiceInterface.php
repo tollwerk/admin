@@ -170,4 +170,13 @@ interface PersistenceServiceInterface
      * @return void
      */
     public function domainVhost(AccountInterface $account, VhostInterface $vhost);
+
+    /**
+     * Certifiy a virtual host
+     *
+     * @param AccountInterface $account Account
+     * @param VhostInterface $vhost Virtual host
+     * @return void
+     */
+    public function certifyVhost(AccountInterface $account, VhostInterface $vhost);
 }
