@@ -51,8 +51,12 @@ interface PersistenceServiceInterface
      * Constructor
      *
      * @param PersistenceAdapterFactoryInterface $persistenceAdapterFactory Persistence adapter factory
+     * @param ServiceServiceInterface $serviceService Service service
      */
-    public function __construct(PersistenceAdapterFactoryInterface $persistenceAdapterFactory);
+    public function __construct(
+        PersistenceAdapterFactoryInterface $persistenceAdapterFactory,
+        ServiceServiceInterface $serviceService
+    );
 
     /**
      * Create an account

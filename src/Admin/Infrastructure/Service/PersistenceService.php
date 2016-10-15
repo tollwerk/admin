@@ -38,6 +38,7 @@ namespace Tollwerk\Admin\Infrastructure\Service;
 
 use Tollwerk\Admin\Application\Contract\PersistenceAdapterFactoryInterface;
 use Tollwerk\Admin\Application\Contract\PersistenceServiceInterface;
+use Tollwerk\Admin\Application\Contract\ServiceServiceInterface;
 use Tollwerk\Admin\Domain\Account\AccountInterface;
 use Tollwerk\Admin\Domain\Vhost\VhostInterface;
 use Tollwerk\Admin\Infrastructure\App;
@@ -70,15 +71,25 @@ class PersistenceService implements PersistenceServiceInterface
      * @var array
      */
     protected $reloadPhp = [];
+    /**
+     * Service service
+     *
+     * @var ServiceServiceInterface
+     */
+    protected $serviceService;
 
     /**
      * Constructor
      *
      * @param PersistenceAdapterFactoryInterface $persistenceAdapterFactory Persistence adapter factory
+     * @param ServiceServiceInterface $serviceService Service service
      */
-    public function __construct(PersistenceAdapterFactoryInterface $persistenceAdapterFactory)
-    {
+    public function __construct(
+        PersistenceAdapterFactoryInterface $persistenceAdapterFactory,
+        ServiceServiceInterface $serviceService
+    ){
         $this->persistenceAdapterFactory = $persistenceAdapterFactory;
+        $this->serviceService = $serviceService;
     }
 
     /**
@@ -234,7 +245,7 @@ class PersistenceService implements PersistenceServiceInterface
             symlink($relativeEnabledVhost, $enabledVhost);
 
             // Reload apache
-            $this->registerWebserverReload($vhost->getType());
+            $this->serviceService->reloadWebserver($vhost->getType());
         }
     }
 
@@ -259,7 +270,7 @@ class PersistenceService implements PersistenceServiceInterface
         }
 
         // Reload apache
-        $this->registerWebserverReload($vhost->getType());
+        $this->serviceService->reloadWebserver($vhost->getType());
     }
 
     /**
@@ -275,7 +286,7 @@ class PersistenceService implements PersistenceServiceInterface
         $this->persistVhost($account, $vhost);
 
         // Reload apache
-        $this->registerWebserverReload($vhost->getType());
+        $this->serviceService->reloadWebserver($vhost->getType());
     }
 
     /**
@@ -306,22 +317,22 @@ class PersistenceService implements PersistenceServiceInterface
         // Re-persist the virtual host
         $this->persistVhost($account, $vhost);
 
-        // Reload apache
-        $this->registerWebserverReload($vhost->getType());
-
         // Reload PHP
         $newPhpVersion = $vhost->getPhp();
         if ($oldPhpVersion !== $newPhpVersion) {
             // If the old PHP version needs to be disabled
             if ($oldPhpVersion !== null) {
-                $this->registerPhpReload($oldPhpVersion);
+                $this->serviceService->reloadPhp($oldPhpVersion);
             }
 
             // If the new PHP version needs to be enabled
             if ($newPhpVersion !== null) {
-                $this->registerPhpReload($newPhpVersion);
+                $this->serviceService->reloadPhp($newPhpVersion);
             }
         }
+
+        // Reload apache
+        $this->serviceService->reloadWebserver($vhost->getType());
     }
 
     /**
@@ -339,7 +350,7 @@ class PersistenceService implements PersistenceServiceInterface
         // TODO: Issue SSL certificate if needed
 
         // Reload apache
-        $this->registerWebserverReload($vhost->getType());
+        $this->serviceService->reloadWebserver($vhost->getType());
     }
 
     /**
@@ -357,25 +368,7 @@ class PersistenceService implements PersistenceServiceInterface
         // TODO: Re-issue SSL certificate in case of domain changes
 
         // Reload apache
-        $this->registerWebserverReload($vhost->getType());
-    }
-
-    /**
-     * Register a webserver reload
-     *
-     * @param string $type Webserver type
-     */
-    protected function registerWebserverReload($type)
-    {
-        $this->reloadWebserver[$type] = true;
-    }
-
-    /**
-     * Flag PHP for reloading
-     */
-    protected function registerPhpReload($version)
-    {
-        $this->reloadPhp[$version] = true;
+        $this->serviceService->reloadWebserver($vhost->getType());
     }
 
     /**

@@ -42,6 +42,7 @@ use Doctrine\ORM\Tools\Setup;
 use Symfony\Component\Yaml\Yaml;
 use Tollwerk\Admin\Application\Contract\PersistenceAdapterFactoryInterface;
 use Tollwerk\Admin\Application\Contract\PersistenceServiceInterface;
+use Tollwerk\Admin\Application\Contract\ServiceServiceInterface;
 use Tollwerk\Admin\Application\Contract\StorageAdapterStrategyInterface;
 use Tollwerk\Admin\Application\Service\AccountService;
 use Tollwerk\Admin\Application\Service\DomainService;
@@ -49,6 +50,7 @@ use Tollwerk\Admin\Application\Service\VirtualHostService;
 use Tollwerk\Admin\Infrastructure\Doctrine\EnumVhosttypeType;
 use Tollwerk\Admin\Infrastructure\Factory\PersistenceAdapterFactory;
 use Tollwerk\Admin\Infrastructure\Service\PersistenceService;
+use Tollwerk\Admin\Infrastructure\Service\ServiceService;
 use Tollwerk\Admin\Infrastructure\Strategy\DoctrineStorageAdapterStrategy;
 
 /**
@@ -120,6 +122,12 @@ class App
      */
     protected static $persistenceService;
     /**
+     * Service service
+     *
+     * @var ServiceServiceInterface
+     */
+    protected static $serviceService;
+    /**
      * App domain
      *
      * @var string
@@ -149,7 +157,8 @@ class App
         // Register the Doctrine storage adapter and persistence adapter factory
         self::$storageAdapter = new DoctrineStorageAdapterStrategy();
         self::$persistenceAdapterFactory = new PersistenceAdapterFactory();
-        self::$persistenceService = new PersistenceService(self::$persistenceAdapterFactory);
+        self::$serviceService = new ServiceService();
+        self::$persistenceService = new PersistenceService(self::$persistenceAdapterFactory, self::$serviceService);
     }
 
     /**
@@ -278,5 +287,15 @@ class App
         }
 
         return self::$domainService;
+    }
+
+    /**
+     * Return the shell service service
+     *
+     * @return ServiceServiceInterface Service service
+     */
+    public static function getServiceService()
+    {
+        return self::$serviceService;
     }
 }

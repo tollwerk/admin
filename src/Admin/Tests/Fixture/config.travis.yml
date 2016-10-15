@@ -7,6 +7,11 @@ doctrine:
     host: "localhost"
 apache:
   group: "apache"
+  reload: "/etc/init.d/apache2 graceful"
+php:
+  service: "/etc/init.d/php-fpm-php%s"
+  reload: ["restart"]
+  restart: ["restart"]
 general:
   locale: de_DE
   group: account

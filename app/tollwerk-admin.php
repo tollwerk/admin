@@ -36,7 +36,10 @@
 
 require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
 
+use Tollwerk\Admin\Infrastructure\App;
 use Symfony\Component\Console\Application;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Console\ConsoleEvents;
 use Tollwerk\Admin\Infrastructure\Commands\Account\CreateAccountCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Account\DeleteAccountCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Account\EnableAccountCommand;
@@ -59,7 +62,14 @@ use Tollwerk\Admin\Infrastructure\Commands\Vhost\PortHttpsVhostCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Vhost\DomainAddVhostCommand;
 use Tollwerk\Admin\Infrastructure\Commands\Vhost\DomainRemoveVhostCommand;
 
+$dispatcher = new EventDispatcher();
+$dispatcher->addListener(ConsoleEvents::TERMINATE, function (/*ConsoleTerminateEvent $event*/) {
+    App::getServiceService()->runSchedule();
+});
+
 $application = new Application();
+$application->setCatchExceptions(true);
+$application->setDispatcher($dispatcher);
 
 // Account commands
 $application->add(new CreateAccountCommand());

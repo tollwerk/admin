@@ -258,7 +258,7 @@ class CliTest extends AbstractDatabaseTest
         $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:https')->addArg('test')->execute());
         $this->assertTrue($this->getAdminCmd()->addArg('vhost:redirect')->addArg('test')->execute());
         $queryTable = $this->getConnection()->createQueryTable('vhost', 'SELECT * FROM vhost');
-        $expectedTable = $this->getFixtureDataSet('vhost_create.xml')->getTable('vhost');
+        $expectedTable = $this->getFixtureDataSet('vhost_reset.xml')->getTable('vhost');
         $this->assertTablesEqual($expectedTable, $queryTable);
 
         // Add a secondary domain
