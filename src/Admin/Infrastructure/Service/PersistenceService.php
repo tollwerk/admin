@@ -67,9 +67,9 @@ class PersistenceService implements PersistenceServiceInterface
     /**
      * PHP-Restart flag
      *
-     * @var bool
+     * @var array
      */
-    protected $reloadPhp = false;
+    protected $reloadPhp = [];
 
     /**
      * Constructor
@@ -283,10 +283,11 @@ class PersistenceService implements PersistenceServiceInterface
      *
      * @param AccountInterface $account Account
      * @param VhostInterface $vhost Virtual host
+     * @param string|null $oldPhpVersion Old PHP version
      * @return void
      * @throws \RuntimeException If the previous PHP configuration cannot be removed
      */
-    public function phpVhost(AccountInterface $account, VhostInterface $vhost)
+    public function phpVhost(AccountInterface $account, VhostInterface $vhost, $oldPhpVersion = null)
     {
         $accountHelper = new AccountHelper($account);
         $availableVhost = $accountHelper->vhostDirectory($vhost, false);
@@ -309,7 +310,18 @@ class PersistenceService implements PersistenceServiceInterface
         $this->registerWebserverReload($vhost->getType());
 
         // Reload PHP
-        $this->registerPhpReload();
+        $newPhpVersion = $vhost->getPhp();
+        if ($oldPhpVersion !== $newPhpVersion) {
+            // If the old PHP version needs to be disabled
+            if ($oldPhpVersion !== null) {
+                $this->registerPhpReload($oldPhpVersion);
+            }
+
+            // If the new PHP version needs to be enabled
+            if ($newPhpVersion !== null) {
+                $this->registerPhpReload($newPhpVersion);
+            }
+        }
     }
 
     /**
@@ -361,9 +373,9 @@ class PersistenceService implements PersistenceServiceInterface
     /**
      * Flag PHP for reloading
      */
-    protected function registerPhpReload()
+    protected function registerPhpReload($version)
     {
-        $this->reloadPhp = true;
+        $this->reloadPhp[$version] = true;
     }
 
     /**

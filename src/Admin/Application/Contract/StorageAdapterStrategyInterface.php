@@ -172,6 +172,15 @@ interface StorageAdapterStrategyInterface
     public function disableDomainWildcard($name);
 
     /**
+     * Load a virtual host
+     *
+     * @param AccountInterface $account Account
+     * @param string $docroot Document root
+     * @return VhostInterface Virtual host
+     */
+    public function loadVhost(AccountInterface $account, $docroot = '');
+
+    /**
      * Create a virtual host
      *
      * @param AccountInterface $account Account name

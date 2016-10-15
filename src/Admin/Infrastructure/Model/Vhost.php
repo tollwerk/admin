@@ -105,14 +105,14 @@ class Vhost
      * @var int|null
      * @Column(type="integer", nullable=true, options={"unsigned":true, "default":80})
      */
-    protected $httpport = 80;
+    protected $httpport = \Tollwerk\Admin\Domain\Vhost\Vhost::PORT_HTTP_DEFAULT;
     /**
      * HTTPS Port
      *
      * @var int|null
-     * @Column(type="integer", nullable=true, options={"unsigned":true, "default":443})
+     * @Column(type="integer", nullable=true, options={"unsigned":true})
      */
-    protected $httpsport = 443;
+    protected $httpsport;
     /**
      * Supported PHP version
      *

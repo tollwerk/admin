@@ -76,6 +76,18 @@ class VirtualHostService extends AbstractService
     }
 
     /**
+     * Load a virtual host
+     *
+     * @param AccountInterface $account Account
+     * @param string $docroot Document root
+     * @return VhostInterface Virtual host
+     */
+    public function load(AccountInterface $account, $docroot = '')
+    {
+        return $this->storageAdapterStrategy->loadVhost($account, $this->validateDocroot($account, $docroot));
+    }
+
+    /**
      * Delete a virtual host
      *
      * @param AccountInterface $account Account
@@ -178,8 +190,12 @@ class VirtualHostService extends AbstractService
             throw new \RuntimeException(sprintf('Invalid PHP version "%s"', $php), 1475937755);
         }
 
-        $vhost = $this->storageAdapterStrategy->phpVhost($account, $this->validateDocroot($account, $docroot), $php);
-        $this->persistenceService->phpVhost($account, $vhost);
+        // Validate the docroot
+        $docroot = $this->validateDocroot($account, $docroot);
+        $oldVhost = $this->load($account, $docroot);
+
+        $vhost = $this->storageAdapterStrategy->phpVhost($account, $docroot, $php);
+        $this->persistenceService->phpVhost($account, $vhost, $oldVhost->getPhp());
         return $vhost;
     }
 

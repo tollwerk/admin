@@ -144,9 +144,10 @@ interface PersistenceServiceInterface
      *
      * @param AccountInterface $account Account
      * @param VhostInterface $vhost Virtual host
+     * @param string|null $oldPhpVersion Old PHP version
      * @return void
      */
-    public function phpVhost(AccountInterface $account, VhostInterface $vhost);
+    public function phpVhost(AccountInterface $account, VhostInterface $vhost, $oldPhpVersion = null);
 
     /**
      * Configure a protocol based port for a virtual host

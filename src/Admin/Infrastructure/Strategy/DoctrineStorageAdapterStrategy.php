@@ -549,6 +549,28 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
     }
 
     /**
+     * Load a virtual host
+     *
+     * @param AccountInterface $account Account
+     * @param string $docroot Document root
+     * @return VhostInterface Virtual host
+     */
+    public function loadVhost(AccountInterface $account, $docroot = '')
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $account->getName()), 1475495500);
+        }
+
+        $doctrineVhost = $this->vhostRepository->findOneBy(['account' => $doctrineAccount, 'docroot' => $docroot]);
+
+        // Create and return a domain virtual host
+        return $this->loadFromDoctrineVhost($doctrineVhost);
+    }
+
+    /**
      * Create a virtual host
      *
      * @param AccountInterface $account Account name
@@ -604,7 +626,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
-        // Create and return a domain domain
+        // Create and return a domain virtual host
         return $this->loadFromDoctrineVhost($doctrineVhost);
     }
 
@@ -641,7 +663,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
-        // Create and return a domain domain
+        // Create and return a domain virtual host
         return $this->loadFromDoctrineVhost($doctrineVhost);
     }
 
@@ -679,7 +701,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
-        // Create and return a domain domain
+        // Create and return a domain virtual host
         return $this->loadFromDoctrineVhost($doctrineVhost);
     }
 
@@ -717,7 +739,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
-        // Create and return a domain domain
+        // Create and return a domain virtual host
         return $this->loadFromDoctrineVhost($doctrineVhost);
     }
 
@@ -758,7 +780,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
-        // Create and return a domain domain
+        // Create and return a domain virtual host
         return $this->loadFromDoctrineVhost($doctrineVhost);
     }
 
@@ -797,7 +819,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
-        // Create and return a domain domain
+        // Create and return a domain virtual host
         return $this->loadFromDoctrineVhost($doctrineVhost);
     }
 
@@ -837,7 +859,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
-        // Create and return a domain domain
+        // Create and return a domain virtual host
         return $this->loadFromDoctrineVhost($doctrineVhost);
     }
 
@@ -895,7 +917,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
-        // Create and return a domain domain
+        // Create and return a domain virtual host
         return $this->loadFromDoctrineVhost($doctrineVhost);
     }
 
@@ -953,7 +975,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
 
-        // Create and return a domain domain
+        // Create and return a domain virtual host
         return $this->loadFromDoctrineVhost($doctrineVhost);
     }
 
