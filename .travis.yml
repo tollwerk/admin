@@ -22,11 +22,8 @@ before_script:
   - sudo apt-get install -y --force-yes apache2 libapache2-mod-fastcgi make
   - sudo apt-get install -y --force-yes php5-dev php-pear php5-mysql php5-curl php5-gd php5-json php5-sqlite php5-pgsql
   # Prepare directories & files
-  - mkdir --parents /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled
-  - cp ./src/Admin/Tests/Fixture/fpm.travis.conf /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled/fpm-$(phpenv version-name).conf
-  - ls -l /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled/fpm-$(phpenv version-name).conf
-  - cat /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled/fpm-$(phpenv version-name).conf
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then ln -s /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled/fpm-$(phpenv version-name).conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/; fi
+  - mkdir --parents /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled/admin.test
+  - cp ./src/Admin/Tests/Fixture/fpm.travis.conf /home/travis/build/tollwerk/admin/tmp/warmup/config/vhosts-enabled/admin.test/fpm-$(phpenv version-name).conf
   - cp ./src/Admin/Tests/Fixture/config.travis.yml config/config.yml
   - sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place config/config.yml
   - sed -e "s?%PHPENV_VERSION_NAME%?$(phpenv version-name)?g" --in-place config/config.yml
