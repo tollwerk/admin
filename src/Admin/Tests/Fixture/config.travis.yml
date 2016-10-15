@@ -7,7 +7,9 @@ doctrine:
     host: "localhost"
 apache:
   group: "apache"
-  reload: "/etc/init.d/apache2 graceful"
+  service: "service apache2"
+  reload: ["graceful"]
+  restart: ["restart"]
 php:
   service: "/etc/init.d/php-fpm-php%s"
   reload: ["restart"]

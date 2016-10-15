@@ -58,7 +58,7 @@ class ApacheService extends AbstractShellService
      */
     public function restart()
     {
-        $output = self::run($this->serviceCommand($this->config['restart']));
+        $output = self::run($this->serviceCommand((array)$this->config['restart']));
         echo trim($output).PHP_EOL;
         return true;
     }
@@ -70,7 +70,7 @@ class ApacheService extends AbstractShellService
      */
     public function reload()
     {
-        $output = self::run($this->serviceCommand($this->config['reload']));
+        $output = self::run($this->serviceCommand((array)$this->config['reload']));
         echo trim($output).PHP_EOL;
         return true;
     }
