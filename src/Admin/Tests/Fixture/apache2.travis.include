@@ -1,1 +1,1 @@
-Include /home/travis/build/tollwerk/admin/tmp/*/config/vhosts-enabled/*/apache_vhost.conf
+IncludeOptional /home/travis/build/tollwerk/admin/tmp/*/config/vhosts-enabled/*/apache_vhost.conf

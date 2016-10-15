@@ -78,6 +78,7 @@ class PhpFpmService extends AbstractShellService
      */
     public function restart()
     {
+        // TODO Enable
 //        echo $this->serviceCommand((array)$this->config['restart'])->getExecCommand().PHP_EOL;
 //        $output = self::run($this->serviceCommand($this->config['restart']));
 //        echo trim($output).PHP_EOL;
@@ -91,6 +92,7 @@ class PhpFpmService extends AbstractShellService
      */
     public function reload()
     {
+        // TODO Enable
 //        echo $this->serviceCommand((array)$this->config['reload'])->getExecCommand().PHP_EOL;
 //        $output = self::run($this->serviceCommand($this->config['reload']));
 //        echo trim($output).PHP_EOL;
