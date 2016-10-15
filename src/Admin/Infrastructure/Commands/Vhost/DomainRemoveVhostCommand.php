@@ -36,10 +36,10 @@
 
 namespace Tollwerk\Admin\Infrastructure\Commands\Vhost;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Tollwerk\Admin\Infrastructure\Commands\AbstractCommand;
 use Tollwerk\Admin\Ports\Facade\Vhost;
 
 /**
@@ -48,7 +48,7 @@ use Tollwerk\Admin\Ports\Facade\Vhost;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class DomainRemoveVhostCommand extends Command
+class DomainRemoveVhostCommand extends AbstractCommand
 {
     /**
      * Configure the command
@@ -92,6 +92,7 @@ class DomainRemoveVhostCommand extends Command
             $output->writeln(
                 sprintf('<info>Domain "%s" successfully removed from virtual host "%s"</info>', $domain, $docroot ?: '/')
             );
+            $this->printMessages($output);
             return 0;
         } catch (\Exception $e) {
             $output->writeln(
@@ -103,6 +104,7 @@ class DomainRemoveVhostCommand extends Command
                     $e->getCode()
                 )
             );
+            $this->printMessages($output);
             return $e->getCode();
         }
     }

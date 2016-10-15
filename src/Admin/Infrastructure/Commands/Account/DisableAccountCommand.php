@@ -36,10 +36,10 @@
 
 namespace Tollwerk\Admin\Infrastructure\Commands\Account;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Tollwerk\Admin\Infrastructure\Commands\AbstractCommand;
 use Tollwerk\Admin\Ports\Facade\Account;
 
 /**
@@ -48,7 +48,7 @@ use Tollwerk\Admin\Ports\Facade\Account;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class DisableAccountCommand extends Command
+class DisableAccountCommand extends AbstractCommand
 {
     /**
      * Configure the command
@@ -79,6 +79,7 @@ class DisableAccountCommand extends Command
         try {
             Account::disable($account);
             $output->writeln(sprintf('<info>Account "%s" disabled successfully</info>', $account));
+            $this->printMessages($output);
             return 0;
         } catch (\Exception $e) {
             $output->writeln(
@@ -89,6 +90,7 @@ class DisableAccountCommand extends Command
                     $e->getCode()
                 )
             );
+            $this->printMessages($output);
             return $e->getCode();
         }
     }

@@ -36,10 +36,10 @@
 
 namespace Tollwerk\Admin\Infrastructure\Commands\Domain;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Tollwerk\Admin\Infrastructure\Commands\AbstractCommand;
 use Tollwerk\Admin\Ports\Facade\Domain;
 
 /**
@@ -48,7 +48,7 @@ use Tollwerk\Admin\Ports\Facade\Domain;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class DisableDomainCommand extends Command
+class DisableDomainCommand extends AbstractCommand
 {
     /**
      * Configure the command
@@ -79,6 +79,7 @@ class DisableDomainCommand extends Command
         try {
             Domain::disable($domain);
             $output->writeln(sprintf('<info>Domain "%s" disabled successfully</info>', $domain));
+            $this->printMessages($output);
             return 0;
         } catch (\Exception $e) {
             $output->writeln(
@@ -89,6 +90,7 @@ class DisableDomainCommand extends Command
                     $e->getCode()
                 )
             );
+            $this->printMessages($output);
             return $e->getCode();
         }
     }

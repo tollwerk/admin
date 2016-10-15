@@ -36,10 +36,10 @@
 
 namespace Tollwerk\Admin\Infrastructure\Commands\Account;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Tollwerk\Admin\Infrastructure\Commands\AbstractCommand;
 use Tollwerk\Admin\Ports\Facade\Account;
 
 /**
@@ -48,7 +48,7 @@ use Tollwerk\Admin\Ports\Facade\Account;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class DeleteAccountCommand extends Command
+class DeleteAccountCommand extends AbstractCommand
 {
     /**
      * Configure the command
@@ -80,6 +80,7 @@ class DeleteAccountCommand extends Command
             Account::delete($account);
             $output->writeln(sprintf('<info>Account "%s" deleted successfully (user data remained untouched)</info>',
                 $account));
+            $this->printMessages($output);
             return 0;
         } catch (\Exception $e) {
             $output->writeln(
@@ -90,6 +91,7 @@ class DeleteAccountCommand extends Command
                     $e->getCode()
                 )
             );
+            $this->printMessages($output);
             return $e->getCode();
         }
     }

@@ -36,10 +36,10 @@
 
 namespace Tollwerk\Admin\Infrastructure\Commands\Domain;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Tollwerk\Admin\Infrastructure\Commands\AbstractCommand;
 use Tollwerk\Admin\Ports\Facade\Domain;
 
 /**
@@ -48,7 +48,7 @@ use Tollwerk\Admin\Ports\Facade\Domain;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class CreateDomainCommand extends Command
+class CreateDomainCommand extends AbstractCommand
 {
     /**
      * Configure the command
@@ -86,6 +86,7 @@ class CreateDomainCommand extends Command
         try {
             Domain::create($account, $domain);
             $output->writeln(sprintf('<info>Domain "%s" created successfully</info>', $domain));
+            $this->printMessages($output);
             return 0;
         } catch (\Exception $e) {
             $output->writeln(
@@ -96,6 +97,7 @@ class CreateDomainCommand extends Command
                     $e->getCode()
                 )
             );
+            $this->printMessages($output);
             return $e->getCode();
         }
     }

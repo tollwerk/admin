@@ -36,10 +36,10 @@
 
 namespace Tollwerk\Admin\Infrastructure\Commands\Vhost;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Tollwerk\Admin\Infrastructure\Commands\AbstractCommand;
 use Tollwerk\Admin\Ports\Facade\Vhost;
 
 /**
@@ -48,7 +48,7 @@ use Tollwerk\Admin\Ports\Facade\Vhost;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class DeleteVhostCommand extends Command
+class DeleteVhostCommand extends AbstractCommand
 {
     /**
      * Configure the command
@@ -87,6 +87,7 @@ class DeleteVhostCommand extends Command
         try {
             Vhost::delete($account, $docroot);
             $output->writeln(sprintf('<info>Virtual host "%s" deleted successfully</info>', $docroot ?: '/'));
+            $this->printMessages($output);
             return 0;
         } catch (\Exception $e) {
             $output->writeln(
@@ -97,6 +98,7 @@ class DeleteVhostCommand extends Command
                     $e->getCode()
                 )
             );
+            $this->printMessages($output);
             return $e->getCode();
         }
     }

@@ -36,10 +36,10 @@
 
 namespace Tollwerk\Admin\Infrastructure\Commands\Vhost;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Tollwerk\Admin\Infrastructure\Commands\AbstractCommand;
 use Tollwerk\Admin\Ports\Facade\Vhost;
 
 /**
@@ -48,7 +48,7 @@ use Tollwerk\Admin\Ports\Facade\Vhost;
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class PortHttpsVhostCommand extends Command
+class PortHttpsVhostCommand extends AbstractCommand
 {
     /**
      * Configure the command
@@ -97,6 +97,7 @@ class PortHttpsVhostCommand extends Command
             $output->writeln(
                 sprintf('<info>Virtual host "%s" HTTPS port configured successfully</info>', $docroot ?: '/')
             );
+            $this->printMessages($output);
             return 0;
         } catch (\Exception $e) {
             $output->writeln(
@@ -107,6 +108,7 @@ class PortHttpsVhostCommand extends Command
                     $e->getCode()
                 )
             );
+            $this->printMessages($output);
             return $e->getCode();
         }
     }
