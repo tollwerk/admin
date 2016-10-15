@@ -87,7 +87,7 @@ class PersistenceService implements PersistenceServiceInterface
     public function __construct(
         PersistenceAdapterFactoryInterface $persistenceAdapterFactory,
         ServiceServiceInterface $serviceService
-    ){
+    ) {
         $this->persistenceAdapterFactory = $persistenceAdapterFactory;
         $this->serviceService = $serviceService;
     }
@@ -344,10 +344,22 @@ class PersistenceService implements PersistenceServiceInterface
      */
     public function portVhost(AccountInterface $account, VhostInterface $vhost)
     {
+        $accountHelper = new AccountHelper($account);
+        $availableVhost = $accountHelper->vhostDirectory($vhost, false);
+
+        // Find all existing PHP configurations
+        foreach (glob($availableVhost.DIRECTORY_SEPARATOR.'{certbot.ini,*_ssl.include}', GLOB_BRACE) as $sslConfig) {
+            // If the previous SSL configuration cannot be removed
+            if (!unlink($sslConfig)) {
+                throw new \RuntimeException(
+                    sprintf('Cannot remove SSL configuration "%s"', basename($sslConfig)),
+                    1476545093
+                );
+            }
+        }
+
         // Re-persist the virtual host
         $this->persistVhost($account, $vhost);
-
-        // TODO: Issue SSL certificate if needed
 
         // Reload apache
         $this->serviceService->reloadWebserver($vhost->getType());
@@ -364,8 +376,6 @@ class PersistenceService implements PersistenceServiceInterface
     {
         // Re-persist the virtual host
         $this->persistVhost($account, $vhost);
-
-        // TODO: Re-issue SSL certificate in case of domain changes
 
         // Reload apache
         $this->serviceService->reloadWebserver($vhost->getType());

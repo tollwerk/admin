@@ -149,6 +149,7 @@ class Apache
                 TemplateService::render('certbot.ini', $variables));
 
             // Output a hint if the primary domain isn't certified
+            var_dump($primaryDomainIsCertified);
             if (!$primaryDomainIsCertified) {
                 App::addMessage(
                     sprintf(
