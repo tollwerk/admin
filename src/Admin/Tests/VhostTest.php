@@ -58,7 +58,7 @@ class VhostTests extends TestCase
         $this->assertInstanceOf(Vhost::class, $vhost);
         $this->assertEquals($domain, $vhost->getPrimaryDomain());
         $this->assertEquals(__DIR__, $vhost->getDocroot());
-        $this->assertNull($vhost->getPort(Vhost::PROTOCOL_HTTP));
+        $this->assertNull($vhost->getPorts(Vhost::PROTOCOL_HTTP));
     }
 
     /**
@@ -106,40 +106,38 @@ class VhostTests extends TestCase
 
     /**
      * Test the retrieval of the port for an invalid protocol
-     *
-     * @expectedException \RuntimeException
-     * @expectedExceptionCode 1475484081
      */
-    public function testVirtualHostInvalidPort()
+    public function testVirtualHostPorts()
     {
         $domain = DomainFactory::parseString('example.com');
         $vhost = new Vhost($domain, __DIR__);
         $this->assertInstanceOf(Vhost::class, $vhost);
 
-        $vhost->enableProtocol(Vhost::PROTOCOL_HTTP);
-        $this->assertEquals([Vhost::PROTOCOL_HTTP => Vhost::PORT_HTTP_DEFAULT], $vhost->getPorts());
-        $vhost->getPort(4);
+        $vhost->enablePort(Vhost::PROTOCOL_HTTP);
+        $this->assertEquals([Vhost::PROTOCOL_HTTP => [Vhost::PORT_HTTP_DEFAULT]], $vhost->getPorts());
+        $this->assertEquals([Vhost::PORT_HTTP_DEFAULT], $vhost->getPorts(Vhost::PROTOCOL_HTTP));
+        $this->assertNull($vhost->getPorts(Vhost::PROTOCOL_HTTPS));
+        $vhost->enablePort(Vhost::PROTOCOL_HTTP, 81);
+        $vhost->disablePort(80);
+        $this->assertEquals([81], $vhost->getPorts(Vhost::PROTOCOL_HTTP));
+        $vhost->enablePort(Vhost::PROTOCOL_HTTPS);
+        $vhost->disableProtocol(Vhost::PROTOCOL_HTTP);
+        $this->assertEquals([Vhost::PROTOCOL_HTTPS => [Vhost::PORT_HTTPS_DEFAULT]], $vhost->getPorts());
     }
 
     /**
-     * Test the enabling / disabling of protocols
+     * Test the retrieval of the port for an invalid protocol
      *
      * @expectedException \RuntimeException
      * @expectedExceptionCode 1475484081
      */
-    public function testVirtualHostProtocol()
+    public function testVirtualHostInvalidProtocol()
     {
         $domain = DomainFactory::parseString('example.com');
         $vhost = new Vhost($domain, __DIR__);
         $this->assertInstanceOf(Vhost::class, $vhost);
 
-        $vhost->enableProtocol(Vhost::PROTOCOL_HTTP);
-        $this->assertEquals(Vhost::PORT_HTTP_DEFAULT, $vhost->getPort(Vhost::PROTOCOL_HTTP));
-        $vhost->enableProtocol(Vhost::PROTOCOL_HTTP, 81);
-        $this->assertEquals(81, $vhost->getPort(Vhost::PROTOCOL_HTTP));
-        $vhost->disableProtocol(Vhost::PROTOCOL_HTTP);
-        $this->assertNull($vhost->getPort(Vhost::PROTOCOL_HTTP));
-        $vhost->enableProtocol(4);
+        $vhost->getPorts(4);
     }
 
     /**
@@ -154,7 +152,7 @@ class VhostTests extends TestCase
         $vhost = new Vhost($domain, __DIR__);
         $this->assertInstanceOf(Vhost::class, $vhost);
 
-        $vhost->enableProtocol(Vhost::PROTOCOL_HTTP, -1);
+        $vhost->enablePort(Vhost::PROTOCOL_HTTP, -1);
     }
 
     /**

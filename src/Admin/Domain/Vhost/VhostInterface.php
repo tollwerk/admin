@@ -93,12 +93,13 @@ interface VhostInterface
     public function getType();
 
     /**
-     * Return the port
+     * Return a ports list
      *
-     * @param int $protocol Protocol
-     * @return int|null Port
+     * @param int|null $protocol Optional Protocol
+     * @return array|null Ports list
+     * @throws \RuntimeException If the requested protocol is unsupported
      */
-    public function getPort($protocol);
+    public function getPorts($protocol = null);
 
     /**
      * Return the secondary domains
@@ -149,13 +150,24 @@ interface VhostInterface
     public function setPhp($php);
 
     /**
-     * Enable a supported protocol
+     * Enable a port
      *
      * @param int $protocol Protocol
+     * @param int $port Optional: Port (defaults to protocol specific port)
      * @return Vhost Self reference
      * @throws \RuntimeException If the protocol is unsupported
+     * @throws \RuntimeException If the port is invalid
      */
-    public function enableProtocol($protocol);
+    public function enablePort($protocol, $port = null);
+
+    /**
+     * Disable a port
+     *
+     * @param int $port Port
+     * @return Vhost Self reference
+     * @throws \RuntimeException If the port is invalid
+     */
+    public function disablePort($port);
 
     /**
      * Disable a supported protocol

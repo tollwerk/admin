@@ -151,8 +151,8 @@ class Vhost implements VhostInterface
      * @var array
      */
     public static $defaultProtocolPorts = [
-        self::PROTOCOL_HTTP => 80,
-        self::PROTOCOL_HTTPS => 443,
+        self::PROTOCOL_HTTP => self::PORT_HTTP_DEFAULT,
+        self::PROTOCOL_HTTPS => self::PORT_HTTPS_DEFAULT,
     ];
 
     /**
@@ -223,31 +223,25 @@ class Vhost implements VhostInterface
     }
 
     /**
-     * Return the port
+     * Return a ports list
      *
-     * @param int $protocol Protocol
-     * @return int|null Port
-     * @throws \RuntimeException If the protocol is unsupported
+     * @param int|null $protocol Optional Protocol
+     * @return array|null Ports list
+     * @throws \RuntimeException If the requested protocol is unsupported
      */
-    public function getPort($protocol)
+    public function getPorts($protocol = null)
     {
-        $protocol = intval($protocol);
+        if ($protocol !== null) {
+            $protocol = intval($protocol);
 
-        // If the protocol is unsupported
-        if (empty(self::$supportedProtocols[$protocol])) {
-            throw new \RuntimeException(sprintf('Invalid protocol "%s"', $protocol), 1475484081);
+            // If the protocol is unsupported
+            if (empty(self::$supportedProtocols[$protocol])) {
+                throw new \RuntimeException(sprintf('Invalid protocol "%s"', $protocol), 1475484081);
+            }
+
+            return empty($this->ports[$protocol]) ? null : $this->ports[$protocol];
         }
 
-        return empty($this->ports[$protocol]) ? null : $this->ports[$protocol];
-    }
-
-    /**
-     * Return all supported protocols and corresponding ports
-     *
-     * @return array Protocols and ports
-     */
-    public function getPorts()
-    {
         return $this->ports;
     }
 
@@ -346,15 +340,15 @@ class Vhost implements VhostInterface
     }
 
     /**
-     * Enable a supported protocol
+     * Enable a port
      *
      * @param int $protocol Protocol
-     * @param int $port Port
+     * @param int $port Optional: Port (defaults to protocol specific port)
      * @return Vhost Self reference
      * @throws \RuntimeException If the protocol is unsupported
-     * @throws \RuntimeException If the protocol port is invalid
+     * @throws \RuntimeException If the port is invalid
      */
-    public function enableProtocol($protocol, $port = null)
+    public function enablePort($protocol, $port = null)
     {
         $protocol = intval($protocol);
 
@@ -363,13 +357,42 @@ class Vhost implements VhostInterface
             throw new \RuntimeException(sprintf('Invalid protocol "%s"', $protocol), 1475484081);
         }
 
-        // If the protocol port is invalid
+        // If the port is invalid
         $port = ($port === null) ? self::$defaultProtocolPorts[$protocol] : intval($port);
         if ($port <= 0) {
-            throw new \RuntimeException(sprintf('Invalid protocol port "%s"', $port), 1475502412);
+            throw new \RuntimeException(sprintf('Invalid port "%s"', $port), 1475502412);
         }
 
-        $this->ports[$protocol] = $port;
+        // Create the protocol specific port list if necessary
+        if (empty($this->ports[$protocol])) {
+            $this->ports[$protocol] = [];
+        }
+
+        // Register the port
+        $this->ports[$protocol] = array_unique(array_merge($this->ports[$protocol], [$port]));
+        return $this;
+    }
+
+    /**
+     * Disable a port
+     *
+     * @param int $port Port
+     * @return Vhost Self reference
+     * @throws \RuntimeException If the port is invalid
+     */
+    public function disablePort($port)
+    {
+        $port = intval($port);
+
+        // If the port is invalid
+        if ($port <= 0) {
+            throw new \RuntimeException(sprintf('Invalid port "%s"', $port), 1475502412);
+        }
+
+        // Run through all protocols and delete the port
+        foreach ($this->ports as $protocol => $ports) {
+            $this->ports[$protocol] = array_values(array_diff($ports, [$port]));
+        }
         return $this;
     }
 
