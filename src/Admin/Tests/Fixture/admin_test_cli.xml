@@ -7,5 +7,7 @@
 	</table_data>
 	<table_data name="vhost">
 	</table_data>
+	<table_data name="port">
+	</table_data>
 </database>
 </mysqldump>

@@ -1,4 +1,4 @@
 <?xml version="1.0" ?>
 <dataset>
-    <vhost id="1" account_id="1" active="1" type="apache" docroot="" httpport="80" httpsport="##NULL##" php="##NULL##" redirecturl="##NULL##" redirectstatus="301"/>
+    <vhost id="1" account_id="1" active="1" type="apache" docroot="" php="##NULL##" redirecturl="##NULL##" redirectstatus="301"/>
 </dataset>

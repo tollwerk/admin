@@ -1,4 +1,6 @@
 <?xml version="1.0" ?>
 <dataset>
-    <vhost id="1" account_id="1" active="0" type="apache" docroot="" httpport="81" httpsport="444" php="7.0" redirecturl="http://test.com" redirectstatus="302"/>
+    <vhost id="1" account_id="1" active="0" type="apache" docroot="" php="7.0" redirecturl="http://test.com" redirectstatus="302"/>
+    <port id="1" vhost_id="1" port="81" protocol="1"/>
+    <port id="2" vhost_id="1" port="444" protocol="2"/>
 </dataset>

@@ -242,24 +242,30 @@ class CliTest extends AbstractDatabaseTest
         // Configure PHP, the HTTP and the HTTPS ports, the redirect URL and status
         $this->assertTrue($this->getAdminCmd()->addArg('vhost:php')->addArg('test')->addArg('/')->addArg('7.0')
             ->execute());
-        $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:http')->addArg('test')->addArg('/')->addArg('81')
-            ->execute());
-        $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:https')->addArg('test')->addArg('/')->addArg('444')
-            ->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:add')->addArg('test')->addArg('/')->addArg('http')
+            ->addArg('81')->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:add')->addArg('test')->addArg('/')->addArg('https')
+            ->addArg('444')->execute());
         $this->assertTrue($this->getAdminCmd()->addArg('vhost:redirect')->addArg('test')->addArg('/')
             ->addArg('http://test.com')->addArg('302')->execute());
         $queryTable = $this->getConnection()->createQueryTable('vhost', 'SELECT * FROM vhost');
         $expectedTable = $this->getFixtureDataSet('vhost_php_ports_redirect.xml')->getTable('vhost');
         $this->assertTablesEqual($expectedTable, $queryTable);
+        $queryTable = $this->getConnection()->createQueryTable('port', 'SELECT * FROM port');
+        $expectedTable = $this->getFixtureDataSet('vhost_php_ports_redirect.xml')->getTable('port');
+        $this->assertTablesEqual($expectedTable, $queryTable);
 
         // Reset PHP, the HTTP and the HTTPS ports, the redirect URL and status
         $this->assertTrue($this->getAdminCmd()->addArg('vhost:php')->addArg('test')->execute());
-        $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:http')->addArg('test')->execute());
-        $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:https')->addArg('test')->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:remove')->addArg('test')->addArg('/')
+            ->addArg('http')->addArg('81')->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:port:remove')->addArg('test')->addArg('/')
+            ->addArg('https')->addArg('444')->execute());
         $this->assertTrue($this->getAdminCmd()->addArg('vhost:redirect')->addArg('test')->execute());
         $queryTable = $this->getConnection()->createQueryTable('vhost', 'SELECT * FROM vhost');
         $expectedTable = $this->getFixtureDataSet('vhost_reset.xml')->getTable('vhost');
         $this->assertTablesEqual($expectedTable, $queryTable);
+        $this->assertEquals(0, $this->getConnection()->getRowCount('port'));
 
         // Add a secondary domain
         $this->assertTrue($this->getAdminCmd()->addArg('vhost:domain:add')->addArg('test')->addArg('test.com')
