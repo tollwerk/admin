@@ -200,7 +200,7 @@ class VirtualHostService extends AbstractService
     }
 
     /**
-     * Configure a protocol based port for a virtual host
+     * Add a protocol port to a virtual host
      *
      * @param AccountInterface $account Account
      * @param string $docroot Document root
@@ -210,7 +210,7 @@ class VirtualHostService extends AbstractService
      * @throws \RuntimeException If the protocol is invalid
      * @throws \RuntimeException If the protocol port is invalid
      */
-    public function port(
+    public function addPort(
         AccountInterface $account,
         $docroot = '',
         $protocol = \Tollwerk\Admin\Domain\Vhost\Vhost::PROTOCOL_HTTP,
@@ -223,11 +223,49 @@ class VirtualHostService extends AbstractService
 
         // If the protocol port is invalid
         $port = ($port === null) ? Vhost::$defaultProtocolPorts[$protocol] : (intval($port) ?: null);
-        if (($port !== null) && ($port <= 0)) {
+        if (($port === null) || ($port <= 0)) {
             throw new \RuntimeException(sprintf('Invalid protocol port "%s"', $port), 1475502412);
         }
 
-        $vhost = $this->storageAdapterStrategy->portVhost(
+        $vhost = $this->storageAdapterStrategy->addVhostPort(
+            $account,
+            $this->validateDocroot($account, $docroot),
+            $protocol,
+            $port
+        );
+        $this->persistenceService->portVhost($account, $vhost);
+        return $vhost;
+    }
+
+    /**
+     * Remove a protocol port from a virtual host
+     *
+     * @param AccountInterface $account Account
+     * @param string $docroot Document root
+     * @param int $protocol Protocol
+     * @param int|null $port Port
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the protocol is invalid
+     * @throws \RuntimeException If the protocol port is invalid
+     */
+    public function removePort(
+        AccountInterface $account,
+        $docroot = '',
+        $protocol = \Tollwerk\Admin\Domain\Vhost\Vhost::PROTOCOL_HTTP,
+        $port = null
+    ) {
+        // If the protocol is unsupported
+        if (empty(Vhost::$supportedProtocols[$protocol])) {
+            throw new \RuntimeException(sprintf('Invalid protocol "%s"', $protocol), 1475484081);
+        }
+
+        // If the protocol port is invalid
+        $port = ($port === null) ? Vhost::$defaultProtocolPorts[$protocol] : (intval($port) ?: null);
+        if (($port === null) || ($port <= 0)) {
+            throw new \RuntimeException(sprintf('Invalid protocol port "%s"', $port), 1475502412);
+        }
+
+        $vhost = $this->storageAdapterStrategy->removeVhostPort(
             $account,
             $this->validateDocroot($account, $docroot),
             $protocol,

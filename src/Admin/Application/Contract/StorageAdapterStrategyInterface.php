@@ -252,7 +252,7 @@ interface StorageAdapterStrategyInterface
     public function phpVhost(AccountInterface $account, $docroot, $php);
 
     /**
-     * Configure a protocol based port for a virtual host
+     * Add a protocol port to a virtual host
      *
      * @param string $account Account name
      * @param string $docroot Document root
@@ -262,7 +262,20 @@ interface StorageAdapterStrategyInterface
      * @throws \RuntimeException If the account is unknown
      * @throws \RuntimeException If the virtual host is unknown
      */
-    public function portVhost(AccountInterface $account, $docroot, $protocol, $port);
+    public function addVhostPort(AccountInterface $account, $docroot, $protocol, $port);
+
+    /**
+     * Remove a protocol port from a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @param int $protocol Protocol
+     * @param int $port Port
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function removeVhostPort(AccountInterface $account, $docroot, $protocol, $port);
 
     /**
      * Add a secondary domain to a virtual host

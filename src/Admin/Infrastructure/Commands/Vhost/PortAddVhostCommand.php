@@ -43,12 +43,12 @@ use Tollwerk\Admin\Infrastructure\Commands\AbstractCommand;
 use Tollwerk\Admin\Ports\Facade\Vhost;
 
 /**
- * vhost:port:http command
+ * vhost:port:add command
  *
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class PortHttpVhostCommand extends AbstractCommand
+class PortAddVhostCommand extends AbstractCommand
 {
     /**
      * Configure the command
@@ -57,12 +57,12 @@ class PortHttpVhostCommand extends AbstractCommand
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('vhost:port:http')
+            ->setName('vhost:port:add')
             // the short description shown while running "php bin/console list"
-            ->setDescription('Configure the HTTP port')
+            ->setDescription('Add a protocol / port')
             // the full command description shown when running the command with
             // the "--help" option
-            ->setHelp("This command allows you to configure the HTTP port of a virtual host")
+            ->setHelp("This command allows you to add a protocol / port combination to a virtual host")
             // configure the virtual host account name
             ->addArgument(
                 'account',
@@ -71,12 +71,19 @@ class PortHttpVhostCommand extends AbstractCommand
             )
             // configure the virtual host document root
             ->addArgument('docroot', InputArgument::OPTIONAL, 'The virtual hosts\'s document root', '')
-            // configure the PHP version supported by the virtual host
+            // configure the protocol
+            ->addArgument(
+                'protocol',
+                InputArgument::OPTIONAL,
+                'The protocol ("http" (default) or "https")',
+                \Tollwerk\Admin\Domain\Vhost\Vhost::PROTOCOL_HTTP
+            )
+            // configure the port
             ->addArgument(
                 'port',
                 InputArgument::OPTIONAL,
-                'The HTTP port (default 80)',
-                \Tollwerk\Admin\Domain\Vhost\Vhost::PORT_HTTP_DEFAULT
+                'The HTTP port (default 80 for HTTP protocol, 443 for HTTPS protocol)',
+                ''
             );
     }
 
@@ -91,18 +98,31 @@ class PortHttpVhostCommand extends AbstractCommand
     {
         $account = $input->getArgument('account');
         $docroot = $input->getArgument('docroot');
+        $protocol = $input->getArgument('protocol');
         $port = $input->getArgument('port');
         try {
-            Vhost::port($account, $docroot, \Tollwerk\Admin\Domain\Vhost\Vhost::PROTOCOL_HTTP, $port);
+            // Determine the protocol
+            if (!array_key_exists($protocol, \Tollwerk\Admin\Domain\Vhost\Vhost::$supportedProtocols)) {
+                $protocolStr = strtolower($protocol);
+                $protocolKey = array_search($protocolStr, \Tollwerk\Admin\Domain\Vhost\Vhost::$supportedProtocols);
+                if ($protocolKey === false) {
+                    throw new \RuntimeException(sprintf('Invalid protocol "%s"', $protocol), 1475484081);
+                }
+                $protocol = $protocolKey;
+            }
+            $protocol = intval($protocol);
+            $port = trim($port) ?: null;
+
+            Vhost::addPort($account, $docroot, $protocol, $port);
             $output->writeln(
-                sprintf('<info>Virtual host "%s" HTTP port configured successfully</info>', $docroot ?: '/')
+                sprintf('<info>Virtual host "%s" protocol port added successfully</info>', $docroot ?: '/')
             );
             $this->printMessages($output);
             return 0;
         } catch (\Exception $e) {
             $output->writeln(
                 sprintf(
-                    '<error>Error configuring HTTP port of virtual host "%s": %s (%s)</error>',
+                    '<error>Error adding protocol port to virtual host "%s": %s (%s)</error>',
                     $docroot ?: '/',
                     $e->getMessage(),
                     $e->getCode()

@@ -49,6 +49,7 @@ use Tollwerk\Admin\Domain\Vhost\VhostInterface;
 use Tollwerk\Admin\Infrastructure\App;
 use Tollwerk\Admin\Infrastructure\Model\Account as DoctrineAccount;
 use Tollwerk\Admin\Infrastructure\Model\Domain as DoctrineDomain;
+use Tollwerk\Admin\Infrastructure\Model\Port as DoctrinePort;
 use Tollwerk\Admin\Infrastructure\Model\Vhost as DoctrineVhost;
 
 /**
@@ -149,6 +150,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $doctrineAccount->setActive(true);
             $this->entityManager->persist($doctrineAccount);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineAccount);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -177,6 +179,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $doctrineAccount->setActive(false);
             $this->entityManager->persist($doctrineAccount);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineAccount);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -236,6 +239,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $doctrineAccount->setName($newname);
             $this->entityManager->persist($doctrineAccount);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineAccount);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -378,6 +382,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
         try {
             $this->entityManager->persist($doctrineDomain);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineDomain);
         } catch (UniqueConstraintViolationException $e) {
             $doctrineDomain = $this->domainRepository->findOneBy(['name' => $name]);
 
@@ -446,6 +451,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $doctrineDomain->setActive(true);
             $this->entityManager->persist($doctrineDomain);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineDomain);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -474,6 +480,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $doctrineDomain->setActive(false);
             $this->entityManager->persist($doctrineDomain);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineDomain);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -502,6 +509,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $doctrineDomain->setWildcard(true);
             $this->entityManager->persist($doctrineDomain);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineDomain);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -530,6 +538,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $doctrineDomain->setWildcard(false);
             $this->entityManager->persist($doctrineDomain);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineDomain);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -608,6 +617,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
         try {
             $this->entityManager->persist($doctrineVhost);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineVhost);
         } catch (UniqueConstraintViolationException $e) {
             $doctrineVhost = $this->vhostRepository->findOneBy(['docroot' => $docroot]);
         } catch (\Exception $e) {
@@ -697,6 +707,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $doctrineVhost->setActive(true);
             $this->entityManager->persist($doctrineVhost);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineVhost);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -735,6 +746,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $doctrineVhost->setActive(false);
             $this->entityManager->persist($doctrineVhost);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineVhost);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -776,6 +788,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $doctrineVhost->setRedirectstatus($status);
             $this->entityManager->persist($doctrineVhost);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineVhost);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -815,6 +828,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $doctrineVhost->setPhp($php);
             $this->entityManager->persist($doctrineVhost);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineVhost);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -824,7 +838,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
     }
 
     /**
-     * Configure a protocol based port for a virtual host
+     * Add a protocol port to a virtual host
      *
      * @param string $account Account name
      * @param string $docroot Document root
@@ -834,7 +848,63 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
      * @throws \RuntimeException If the account is unknown
      * @throws \RuntimeException If the virtual host is unknown
      */
-    public function portVhost(AccountInterface $account, $docroot, $protocol, $port)
+    public function addVhostPort(AccountInterface $account, $docroot, $protocol, $port)
+    {
+        $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
+
+        // If the account is unknown
+        if (!$doctrineAccount instanceof \Tollwerk\Admin\Infrastructure\Model\Account) {
+            throw new \RuntimeException(sprintf('Unknown account "%s"', $account->getName()), 1475495500);
+        }
+
+        $doctrineVhost = $this->vhostRepository->findOneBy(['account' => $doctrineAccount, 'docroot' => $docroot]);
+
+        // If the virtual host is unknown
+        if (!$doctrineVhost instanceof \Tollwerk\Admin\Infrastructure\Model\Vhost) {
+            throw new \RuntimeException(sprintf('Unknown virtual host "%s"', $docroot), 1475933194);
+        }
+
+        /**
+         * @var int $doctrineVhostPortIndex
+         * @var DoctrinePort $doctrineVhostPort
+         */
+        foreach ($doctrineVhost->getPorts() as $doctrineVhostPortIndex => $doctrineVhostPort) {
+            if (($doctrineVhostPort->getProtocol() == $protocol) && ($doctrineVhostPort->getPort() == $port)) {
+                return $this->loadFromDoctrineVhost($doctrineVhost);
+            }
+        }
+
+        // Update and persist the virtual host
+        try {
+            // Create the new protocol / port
+            $doctrinePort = new DoctrinePort();
+            $doctrinePort->setVhost($doctrineVhost);
+            $doctrinePort->setProtocol($protocol);
+            $doctrinePort->setPort($port);
+            $this->entityManager->persist($doctrinePort);
+            $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineVhost);
+
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
+        }
+
+        // Create and return a domain virtual host
+        return $this->loadFromDoctrineVhost($doctrineVhost);
+    }
+
+    /**
+     * Remove a protocol port from a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @param int $protocol Protocol
+     * @param int $port Port
+     * @return VhostInterface Virtual host
+     * @throws \RuntimeException If the account is unknown
+     * @throws \RuntimeException If the virtual host is unknown
+     */
+    public function removeVhostPort(AccountInterface $account, $docroot, $protocol, $port)
     {
         $doctrineAccount = $this->accountRepository->findOneBy(['name' => $account->getName()]);
 
@@ -852,9 +922,18 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
 
         // Update and persist the virtual host
         try {
-            $doctrineVhost->{'set'.ucfirst(Vhost::$supportedProtocols[$protocol]).'port'}($port);
-            $this->entityManager->persist($doctrineVhost);
-            $this->entityManager->flush();
+            /**
+             * @var int $doctrineVhostPortIndex
+             * @var DoctrinePort $doctrineVhostPort
+             */
+            foreach ($doctrineVhost->getPorts() as $doctrineVhostPortIndex => $doctrineVhostPort) {
+                if (($doctrineVhostPort->getProtocol() == $protocol) && ($doctrineVhostPort->getPort() == $port)) {
+                    $this->entityManager->remove($doctrineVhostPort);
+                    $this->entityManager->flush();
+                    $this->entityManager->refresh($doctrineVhost);
+                    break;
+                }
+            }
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -913,6 +992,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
             $doctrineDomain->setVhost($doctrineVhost);
             $this->entityManager->persist($doctrineDomain);
             $this->entityManager->flush();
+            $this->entityManager->refresh($doctrineVhost);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode() || 1475925451);
         }
@@ -995,11 +1075,11 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
         $vhost->setPhp($doctrineVhost->getPhp());
         $vhost->setRedirectUrl($doctrineVhost->getRedirecturl());
         $vhost->setRedirectStatus($doctrineVhost->getRedirectstatus());
-        if ($doctrineVhost->getHttpport() !== null) {
-            $vhost->enableProtocol(Vhost::PROTOCOL_HTTP, $doctrineVhost->getHttpport());
-        }
-        if ($doctrineVhost->getHttpsport() !== null) {
-            $vhost->enableProtocol(Vhost::PROTOCOL_HTTPS, $doctrineVhost->getHttpsport());
+
+        // Enable protocols / ports
+        /** @var DoctrinePort $port */
+        foreach ($doctrineVhost->getPorts() as $port) {
+            $vhost->enablePort($port->getProtocol(), $port->getPort());
         }
 
         // Add the wilcard version of the primary domain

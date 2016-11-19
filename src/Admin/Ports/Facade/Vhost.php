@@ -149,15 +149,15 @@ class Vhost extends AbstractFacade
     }
 
     /**
-     * Configure a protocol based port for a virtual host
+     * Add a protocol port to a virtual host
      *
      * @param string $account Account name
      * @param string $docroot Document root
      * @param int $protocol Protocol
-     * @param int|null $port Port
+     * @param int $port Port
      * @return bool Success
      */
-    public static function port(
+    public static function addPort(
         $account,
         $docroot = '',
         $protocol = \Tollwerk\Admin\Domain\Vhost\Vhost::PROTOCOL_HTTP,
@@ -166,7 +166,28 @@ class Vhost extends AbstractFacade
         // Get the account to operate on
         $account = self::loadAccount($account);
 
-        return App::getVirtualHostService()->port($account, $docroot, $protocol, $port) instanceof VhostInterface;
+        return App::getVirtualHostService()->addPort($account, $docroot, $protocol, $port) instanceof VhostInterface;
+    }
+
+    /**
+     * Remove a protocol port from a virtual host
+     *
+     * @param string $account Account name
+     * @param string $docroot Document root
+     * @param int $protocol Protocol
+     * @param int $port Port
+     * @return bool Success
+     */
+    public static function removePort(
+        $account,
+        $docroot = '',
+        $protocol = \Tollwerk\Admin\Domain\Vhost\Vhost::PROTOCOL_HTTP,
+        $port = null
+    ) {
+        // Get the account to operate on
+        $account = self::loadAccount($account);
+
+        return App::getVirtualHostService()->removePort($account, $docroot, $protocol, $port) instanceof VhostInterface;
     }
 
     /**

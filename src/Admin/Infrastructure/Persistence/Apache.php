@@ -127,7 +127,8 @@ class Apache
             TemplateService::render('apache_vhost.include', $variables));
 
         // If the HTTPS protocol is supported
-        if ($httpsport = $vhost->getPort(Vhost::PROTOCOL_HTTPS)) {
+        $httpsPorts = $vhost->getPorts(Vhost::PROTOCOL_HTTPS);
+        if (!empty($httpsPorts)) {
             $certbotService = CertbotServiceFactory::create();
             $primaryDomainIsCertified = $certbotService->isCertified($variables['primary_domain']);
 
@@ -138,18 +139,21 @@ class Apache
                 TemplateService::render('apache_ssl.include', $variables, !$primaryDomainIsCertified)
             );
 
-            // Add the HTTPS vhost declaration
-            $variables['port'] = $httpsport;
-            $variables['ssl'] = true;
-            $this->addEntry($files, 'apache_vhost.conf',
-                TemplateService::render('apache_vhost.conf', $variables));
+            // Run through all SSL ports
+            foreach ($httpsPorts as $httpsPort) {
+
+                // Add the HTTPS vhost declaration
+                $variables['port'] = $httpsPort;
+                $variables['ssl'] = true;
+                $this->addEntry($files, 'apache_vhost.conf',
+                    TemplateService::render('apache_vhost.conf', $variables));
+            }
 
             // Add the Certbot configuration
             $this->addEntry($files, 'certbot.ini',
                 TemplateService::render('certbot.ini', $variables));
 
             // Output a hint if the primary domain isn't certified
-            var_dump($primaryDomainIsCertified);
             if (!$primaryDomainIsCertified) {
                 App::addMessage(
                     sprintf(
@@ -161,11 +165,11 @@ class Apache
             }
         }
 
-        // If the HTTP protocol is supported
-        if ($httpport = $vhost->getPort(Vhost::PROTOCOL_HTTP)) {
+        // Run through all non-SSL ports
+        foreach ((array)$vhost->getPorts(Vhost::PROTOCOL_HTTP) as $httpPort) {
 
             // Add the HTTP vhost declaration
-            $variables['port'] = $httpport;
+            $variables['port'] = $httpPort;
             $variables['ssl'] = false;
             $this->addEntry($files, 'apache_vhost.conf',
                 TemplateService::render('apache_vhost.conf', $variables));

@@ -336,7 +336,7 @@ class PersistenceService implements PersistenceServiceInterface
     }
 
     /**
-     * Configure a protocol based port for a virtual host
+     * Configure a protocol port for a virtual host
      *
      * @param AccountInterface $account Account
      * @param VhostInterface $vhost Virtual host

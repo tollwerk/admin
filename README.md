@@ -12,6 +12,32 @@ Please find the [project documentation](doc/index.md) in the `doc` directory. I 
 
 This library requires PHP 5.6 or later. We recommend using the latest available version of PHP as a matter of principle. It has no userland dependencies.
 
+Please install the module by cloning the Github repository and running composer:
+
+```bash
+git clone https://github.com/tollwerk/admin.git
+cd admin
+composer install
+```
+
+### Doctrine initialization
+
+In order to initialize the database, please run the following commands (from the installation directory):
+
+```bash
+# To create the database
+./vendor/bin/doctrine orm:schema-tool:create
+
+# To update the database and preview the SQL queries first
+./vendor/bin/doctrine orm:schema-tool:update --dump-sql
+
+# To update the database
+./vendor/bin/doctrine orm:schema-tool:update --force
+
+# To create the proxie classes
+./vendor/bin/doctrine orm:generate:proxies
+```
+
 ## Quality
 
 [![Build Status](https://secure.travis-ci.org/tollwerk/admin.svg)](https://travis-ci.org/tollwerk/admin)

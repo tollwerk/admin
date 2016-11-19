@@ -43,12 +43,12 @@ use Tollwerk\Admin\Infrastructure\Commands\AbstractCommand;
 use Tollwerk\Admin\Ports\Facade\Vhost;
 
 /**
- * vhost:port:https command
+ * vhost:port:remove command
  *
  * @package Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
-class PortHttpsVhostCommand extends AbstractCommand
+class PortRemoveVhostCommand extends AbstractCommand
 {
     /**
      * Configure the command
@@ -57,12 +57,12 @@ class PortHttpsVhostCommand extends AbstractCommand
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('vhost:port:https')
+            ->setName('vhost:port:remove')
             // the short description shown while running "php bin/console list"
-            ->setDescription('Configure the HTTPS port')
+            ->setDescription('Remove a protocol / port')
             // the full command description shown when running the command with
             // the "--help" option
-            ->setHelp("This command allows you to configure the HTTPS port of a virtual host")
+            ->setHelp("This command allows you to remove a protocol / port combination from a virtual host")
             // configure the virtual host account name
             ->addArgument(
                 'account',
@@ -71,12 +71,19 @@ class PortHttpsVhostCommand extends AbstractCommand
             )
             // configure the virtual host document root
             ->addArgument('docroot', InputArgument::OPTIONAL, 'The virtual hosts\'s document root', '')
-            // configure the PHP version supported by the virtual host
+            // configure the protocol
+            ->addArgument(
+                'protocol',
+                InputArgument::OPTIONAL,
+                'The protocol ("http" (default) or "https")',
+                \Tollwerk\Admin\Domain\Vhost\Vhost::PROTOCOL_HTTP
+            )
+            // configure the port
             ->addArgument(
                 'port',
                 InputArgument::OPTIONAL,
-                'The HTTPS port (default 443)',
-                \Tollwerk\Admin\Domain\Vhost\Vhost::PORT_HTTPS_DEFAULT
+                'The HTTP port (default 80 for HTTP protocol, 443 for HTTPS protocol)',
+                ''
             );
     }
 
@@ -91,18 +98,31 @@ class PortHttpsVhostCommand extends AbstractCommand
     {
         $account = $input->getArgument('account');
         $docroot = $input->getArgument('docroot');
+        $protocol = $input->getArgument('protocol');
         $port = $input->getArgument('port');
         try {
-            Vhost::port($account, $docroot, \Tollwerk\Admin\Domain\Vhost\Vhost::PROTOCOL_HTTPS, $port);
+            // Determine the protocol
+            if (!array_key_exists($protocol, \Tollwerk\Admin\Domain\Vhost\Vhost::$supportedProtocols)) {
+                $protocolStr = strtolower($protocol);
+                $protocolKey = array_search($protocolStr, \Tollwerk\Admin\Domain\Vhost\Vhost::$supportedProtocols);
+                if ($protocolKey === false) {
+                    throw new \RuntimeException(sprintf('Invalid protocol "%s"', $protocol), 1475484081);
+                }
+                $protocol = $protocolKey;
+            }
+            $protocol = intval($protocol);
+            $port = trim($port) ?: null;
+
+            Vhost::removePort($account, $docroot, $protocol, $port);
             $output->writeln(
-                sprintf('<info>Virtual host "%s" HTTPS port configured successfully</info>', $docroot ?: '/')
+                sprintf('<info>Virtual host "%s" protocol port removed successfully</info>', $docroot ?: '/')
             );
             $this->printMessages($output);
             return 0;
         } catch (\Exception $e) {
             $output->writeln(
                 sprintf(
-                    '<error>Error configuring HTTPS port of virtual host "%s": %s (%s)</error>',
+                    '<error>Error removing protocol port from virtual host "%s": %s (%s)</error>',
                     $docroot ?: '/',
                     $e->getMessage(),
                     $e->getCode()

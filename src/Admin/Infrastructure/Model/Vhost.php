@@ -100,19 +100,12 @@ class Vhost
      */
     protected $docroot;
     /**
-     * HTTP Port
+     * List of all associated protocol / port combinations
      *
-     * @var int|null
-     * @Column(type="integer", nullable=true, options={"unsigned":true, "default":80})
+     * @var Port[]
+     * @OneToMany(targetEntity="Tollwerk\Admin\Infrastructure\Model\Port", mappedBy="vhost")
      */
-    protected $httpport = \Tollwerk\Admin\Domain\Vhost\Vhost::PORT_HTTP_DEFAULT;
-    /**
-     * HTTPS Port
-     *
-     * @var int|null
-     * @Column(type="integer", nullable=true, options={"unsigned":true})
-     */
-    protected $httpsport;
+    protected $ports = [];
     /**
      * Supported PHP version
      *
@@ -296,46 +289,24 @@ class Vhost
     }
 
     /**
-     * Return the HTTP port
+     * Return the associated protocols / port
      *
-     * @return int|null HTTP port
+     * @return Port[] Associated protocols / port
      */
-    public function getHttpport()
+    public function getPorts()
     {
-        return $this->httpport;
+        return $this->ports;
     }
 
     /**
-     * Set the HTTP port
+     * Set the associated protocols / port
      *
-     * @param int|null $httpport HTTP port
+     * @param Port[] $ports Associated protocols / port
      * @return Vhost Self reference
      */
-    public function setHttpport($httpport)
+    public function setPorts(array $ports)
     {
-        $this->httpport = $httpport;
-        return $this;
-    }
-
-    /**
-     * Return the HTTPS port
-     *
-     * @return int|null HTTPS port
-     */
-    public function getHttpsport()
-    {
-        return $this->httpsport;
-    }
-
-    /**
-     * Set the HTTPS port
-     *
-     * @param int|null $httpsport HTTPS port
-     * @return Vhost
-     */
-    public function setHttpsport($httpsport)
-    {
-        $this->httpsport = $httpsport;
+        $this->ports = $ports;
         return $this;
     }
 
@@ -410,7 +381,8 @@ class Vhost
      *
      * @PreRemove
      */
-    public function releasePrimaryDomain() {
+    public function releasePrimaryDomain()
+    {
         $this->getPrimarydomain()->setPrimarydomain(false);
         App::getEntityManager()->persist($this->getPrimarydomain());
         App::getEntityManager()->flush();
