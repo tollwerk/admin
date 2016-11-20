@@ -96,7 +96,7 @@ class Vhost
      * Document root directory
      *
      * @var string
-     * @Column(length=128,unique=true)
+     * @Column(length=128)
      */
     protected $docroot;
     /**
