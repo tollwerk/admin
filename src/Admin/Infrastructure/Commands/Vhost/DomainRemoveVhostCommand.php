@@ -69,10 +69,10 @@ class DomainRemoveVhostCommand extends AbstractCommand
                 InputArgument::REQUIRED,
                 'The name of the account the virtual host belongs to'
             )
-            // configure the domain to add to the virtual host
-            ->addArgument('domain', InputArgument::REQUIRED, 'The domain to remove from the virtual host')
             // configure the virtual host document root
-            ->addArgument('docroot', InputArgument::OPTIONAL, 'The virtual hosts\'s document root', '');
+            ->addArgument('docroot', InputArgument::REQUIRED, 'The virtual hosts\'s document root')
+            // configure the domain to remove from the virtual host
+            ->addArgument('domain', InputArgument::REQUIRED, 'The domain to remove from the virtual host');
     }
 
     /**

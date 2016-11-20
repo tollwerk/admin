@@ -66,7 +66,7 @@ class Vhost extends AbstractFacade
         // Load the primary domain
         $domain = App::getDomainService()->loadUnassigned($domain, $account);
 
-        return App::getVirtualHostService()->create($account, $domain, $docroot, $type) instanceof VhostInterface;
+        return App::getVirtualHostService()->create($account, $domain, trim($docroot, '/'), $type) instanceof VhostInterface;
     }
 
     /**
@@ -81,7 +81,7 @@ class Vhost extends AbstractFacade
         // Get the account to operate on
         $account = self::loadAccount($account);
 
-        return App::getVirtualHostService()->delete($account, $docroot) instanceof VhostInterface;
+        return App::getVirtualHostService()->delete($account, trim($docroot, '/')) instanceof VhostInterface;
     }
 
     /**
@@ -96,7 +96,7 @@ class Vhost extends AbstractFacade
         // Get the account to operate on
         $account = self::loadAccount($account);
 
-        return App::getVirtualHostService()->enable($account, $docroot) instanceof VhostInterface;
+        return App::getVirtualHostService()->enable($account, trim($docroot, '/')) instanceof VhostInterface;
     }
 
     /**
@@ -111,7 +111,7 @@ class Vhost extends AbstractFacade
         // Get the account to operate on
         $account = self::loadAccount($account);
 
-        return App::getVirtualHostService()->disable($account, $docroot) instanceof VhostInterface;
+        return App::getVirtualHostService()->disable($account, trim($docroot, '/')) instanceof VhostInterface;
     }
 
     /**
@@ -129,7 +129,7 @@ class Vhost extends AbstractFacade
         $account = self::loadAccount($account);
 
         return App::getVirtualHostService()
-            ->redirect($account, $docroot, $url, intval($status)) instanceof VhostInterface;
+            ->redirect($account, trim($docroot, '/'), $url, intval($status)) instanceof VhostInterface;
     }
 
     /**
@@ -145,7 +145,7 @@ class Vhost extends AbstractFacade
         // Get the account to operate on
         $account = self::loadAccount($account);
 
-        return App::getVirtualHostService()->php($account, $docroot, $php) instanceof VhostInterface;
+        return App::getVirtualHostService()->php($account, trim($docroot, '/'), $php) instanceof VhostInterface;
     }
 
     /**
@@ -166,7 +166,7 @@ class Vhost extends AbstractFacade
         // Get the account to operate on
         $account = self::loadAccount($account);
 
-        return App::getVirtualHostService()->addPort($account, $docroot, $protocol, $port) instanceof VhostInterface;
+        return App::getVirtualHostService()->addPort($account, trim($docroot, '/'), $protocol, $port) instanceof VhostInterface;
     }
 
     /**
@@ -187,7 +187,7 @@ class Vhost extends AbstractFacade
         // Get the account to operate on
         $account = self::loadAccount($account);
 
-        return App::getVirtualHostService()->removePort($account, $docroot, $protocol, $port) instanceof VhostInterface;
+        return App::getVirtualHostService()->removePort($account, trim($docroot, '/'), $protocol, $port) instanceof VhostInterface;
     }
 
     /**
@@ -206,7 +206,7 @@ class Vhost extends AbstractFacade
         // Load the primary domain
         $domain = App::getDomainService()->loadUnassigned($domain, $account);
 
-        return App::getVirtualHostService()->addDomain($account, $domain, $docroot) instanceof VhostInterface;
+        return App::getVirtualHostService()->addDomain($account, $domain, trim($docroot, '/')) instanceof VhostInterface;
     }
 
     /**
@@ -223,9 +223,9 @@ class Vhost extends AbstractFacade
         $account = self::loadAccount($account);
 
         // Load the primary domain
-        $domain = App::getDomainService()->loadAssigned($domain, $account, $docroot);
+        $domain = App::getDomainService()->loadAssigned($domain, $account, trim($docroot, '/'));
 
-        return App::getVirtualHostService()->removeDomain($account, $domain, $docroot) instanceof VhostInterface;
+        return App::getVirtualHostService()->removeDomain($account, $domain, trim($docroot, '/')) instanceof VhostInterface;
     }
 
     /**
@@ -240,6 +240,6 @@ class Vhost extends AbstractFacade
         // Get the account to operate on
         $account = self::loadAccount($account);
 
-        return App::getVirtualHostService()->certify($account, $docroot) instanceof VhostInterface;
+        return App::getVirtualHostService()->certify($account, trim($docroot, '/')) instanceof VhostInterface;
     }
 }

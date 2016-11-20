@@ -332,7 +332,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
 
             // If the domain is already assigned to another virtual host
             if ($doctrineVhost instanceof DoctrineVhost) {
-                // If only an uassigned domain should be returned
+                // If only an unassigned domain should be returned
                 if ($vhostDocroot === null) {
                     throw new \RuntimeException(
                         sprintf('Domain "%s" is already assigned to a virtual host', $name),
@@ -343,7 +343,7 @@ class DoctrineStorageAdapterStrategy implements StorageAdapterStrategyInterface
                 // If the document route doesn't match the requested one
                 if ($doctrineVhost->getDocroot() !== $vhostDocroot) {
                     throw new \RuntimeException(
-                        sprintf('Domain "%s" is assigned to another virtual host', $name),
+                        sprintf('Domain "%s" is assigned to another virtual host1', $name),
                         1475942759
                     );
                 }

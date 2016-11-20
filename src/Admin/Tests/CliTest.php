@@ -268,15 +268,15 @@ class CliTest extends AbstractDatabaseTest
         $this->assertEquals(0, $this->getConnection()->getRowCount('port'));
 
         // Add a secondary domain
-        $this->assertTrue($this->getAdminCmd()->addArg('vhost:domain:add')->addArg('test')->addArg('test.com')
-            ->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:domain:add')->addArg('test')->addArg('/')
+            ->addArg('test.com')->execute());
         $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
         $expectedTable = $this->getFixtureDataSet('vhost_domain_add.xml')->getTable('domain');
         $this->assertTablesEqual($expectedTable, $queryTable);
 
         // Remove a secondary domain
-        $this->assertTrue($this->getAdminCmd()->addArg('vhost:domain:remove')->addArg('test')->addArg('test.com')
-            ->execute());
+        $this->assertTrue($this->getAdminCmd()->addArg('vhost:domain:remove')->addArg('test')->addArg('/')
+            ->addArg('test.com')->execute());
         $queryTable = $this->getConnection()->createQueryTable('domain', 'SELECT * FROM domain');
         $expectedTable = $this->getFixtureDataSet('vhost_create.xml')->getTable('domain');
         $this->assertTablesEqual($expectedTable, $queryTable);
