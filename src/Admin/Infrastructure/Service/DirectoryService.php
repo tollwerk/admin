@@ -92,7 +92,7 @@ class DirectoryService
 
         // If the directory doesn't exist or is otherwise invalid
         if (!$absDataDirectory
-            || !is_dir($absDataDirectory)
+            || (!is_dir($absDataDirectory) && (!is_link($absDataDirectory) || !is_dir(readlink($absDataDirectory))))
             || strncmp($dataBaseDirectory, $absDataDirectory, strlen($dataBaseDirectory))
         ) {
             throw new \RuntimeException(sprintf('Path "%s" doesn\'t exist or is not a valid data directory',
