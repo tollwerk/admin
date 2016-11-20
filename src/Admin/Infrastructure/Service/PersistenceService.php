@@ -244,8 +244,10 @@ class PersistenceService implements PersistenceServiceInterface
             $relativeEnabledVhost = '..'.substr($availableVhost, strlen($accountHelper->directory('config')));
             symlink($relativeEnabledVhost, $enabledVhost);
 
-            // Reload apache
-            $this->serviceService->reloadWebserver($vhost->getType());
+            // Reload the webserver if the account is active
+            if ($account->isActive()) {
+                $this->serviceService->reloadWebserver($vhost->getType());
+            }
         }
     }
 
@@ -269,8 +271,10 @@ class PersistenceService implements PersistenceServiceInterface
             );
         }
 
-        // Reload apache
-        $this->serviceService->reloadWebserver($vhost->getType());
+        // Reload the webserver if the account is active
+        if ($account->isActive()) {
+            $this->serviceService->reloadWebserver($vhost->getType());
+        }
     }
 
     /**
@@ -285,8 +289,10 @@ class PersistenceService implements PersistenceServiceInterface
         // Re-persist the virtual host
         $this->persistVhost($account, $vhost);
 
-        // Reload apache
-        $this->serviceService->reloadWebserver($vhost->getType());
+        // Reload the webserver if the account and virtual host are enabled
+        if ($account->isActive() && $vhost->isActive()) {
+            $this->serviceService->reloadWebserver($vhost->getType());
+        }
     }
 
     /**
@@ -331,8 +337,10 @@ class PersistenceService implements PersistenceServiceInterface
             }
         }
 
-        // Reload apache
-        $this->serviceService->reloadWebserver($vhost->getType());
+        // Reload the webserver if the account and virtual host are enabled
+        if ($account->isActive() && $vhost->isActive()) {
+            $this->serviceService->reloadWebserver($vhost->getType());
+        }
     }
 
     /**
@@ -361,8 +369,10 @@ class PersistenceService implements PersistenceServiceInterface
         // Re-persist the virtual host
         $this->persistVhost($account, $vhost);
 
-        // Reload apache
-        $this->serviceService->reloadWebserver($vhost->getType());
+        // Reload the webserver if the account and virtual host are enabled
+        if ($account->isActive() && $vhost->isActive()) {
+            $this->serviceService->reloadWebserver($vhost->getType());
+        }
     }
 
     /**
@@ -377,8 +387,10 @@ class PersistenceService implements PersistenceServiceInterface
         // Re-persist the virtual host
         $this->persistVhost($account, $vhost);
 
-        // Reload apache
-        $this->serviceService->reloadWebserver($vhost->getType());
+        // Reload the webserver if the account and virtual host are enabled
+        if ($account->isActive() && $vhost->isActive()) {
+            $this->serviceService->reloadWebserver($vhost->getType());
+        }
     }
 
     /**
@@ -388,15 +400,18 @@ class PersistenceService implements PersistenceServiceInterface
      * @param VhostInterface $vhost Virtual host
      * @return void
      */
-    public function certifyVhost(AccountInterface $account, VhostInterface $vhost) {
+    public function certifyVhost(AccountInterface $account, VhostInterface $vhost)
+    {
         // Issue an SSL certificate
         $accountHelper = new AccountHelper($account);
         $certificateConfig = $accountHelper->vhostDirectory($vhost).DIRECTORY_SEPARATOR.'certbot.ini';
 
         $this->serviceService->certify($certificateConfig);
 
-        // Reload apache
-        $this->serviceService->reloadWebserver($vhost->getType());
+        // Reload the webserver if the account and virtual host are enabled
+        if ($account->isActive() && $vhost->isActive()) {
+            $this->serviceService->reloadWebserver($vhost->getType());
+        }
     }
 
     /**
