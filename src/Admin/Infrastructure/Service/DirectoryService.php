@@ -87,12 +87,12 @@ class DirectoryService
             $dataDirectory .= DIRECTORY_SEPARATOR.trim($path, DIRECTORY_SEPARATOR);
         }
 
-        // Resolve all symbolic links etc.
-        $absDataDirectory = realpath($dataDirectory);
+        // Strip all symbolic links etc.
+        $absDataDirectory = $this->normalizeAbsolutePath($dataDirectory);
 
         // If the directory doesn't exist or is otherwise invalid
         if (!$absDataDirectory
-            || (!is_dir($absDataDirectory) && (!is_link($absDataDirectory) || !is_dir(readlink($absDataDirectory))))
+            || !is_dir($absDataDirectory)
             || strncmp($dataBaseDirectory, $absDataDirectory, strlen($dataBaseDirectory))
         ) {
             throw new \RuntimeException(sprintf('Path "%s" doesn\'t exist or is not a valid data directory',
@@ -102,5 +102,57 @@ class DirectoryService
         return $absolute ?
             $absDataDirectory :
             trim(substr($absDataDirectory, strlen($dataBaseDirectory)), DIRECTORY_SEPARATOR);
+    }
+
+    /**
+     * Normalize an absolute path by stripping (but not resolving) symbolic links and multiple directory separators
+     *
+     * @param string $absolutePath Absolute path
+     * @return string Normalized absolute path
+     * @throws \RuntimeException If the path is not absolute
+     * @throws \RuntimeException If there's no parent directory to traverse to
+     */
+    protected function normalizeAbsolutePath($absolutePath)
+    {
+        // If the path isn't absolute
+        if (strncmp(DIRECTORY_SEPARATOR, $absolutePath, strlen(DIRECTORY_SEPARATOR))) {
+            throw new \RuntimeException(sprintf('The path "%s" is not absolute', $absolutePath), 1479636650);
+        }
+
+        // Collapse multiple directory separators
+        $absolutePath = trim($absolutePath, DIRECTORY_SEPARATOR);
+        $absolutePath = preg_replace('%'.preg_quote(DIRECTORY_SEPARATOR).'+%', DIRECTORY_SEPARATOR, $absolutePath);
+
+        // Run through all local paths
+        $normalizedPath = [];
+        foreach (explode(DIRECTORY_SEPARATOR, $absolutePath) as $localPath) {
+            switch ($localPath) {
+                // Skip symlinks to the current directory
+                case '.':
+                    break;
+
+                // Strip parent directory symlinks
+                case '..':
+                    // If there's no parent directory to traverse to
+                    if (!count($normalizedPath)) {
+                        throw new \RuntimeException(
+                            sprintf(
+                                'Cannot traverse to parent directory of "%s"',
+                                implode(DIRECTORY_SEPARATOR, $normalizedPath)
+                            ),
+                            1479636941
+                        );
+                    }
+                    array_pop($normalizedPath);
+                    break;
+
+                // Add local path to result
+                default:
+                    $normalizedPath[] = $localPath;
+                    break;
+            }
+        }
+
+        return DIRECTORY_SEPARATOR.implode(DIRECTORY_SEPARATOR, $normalizedPath);
     }
 }
