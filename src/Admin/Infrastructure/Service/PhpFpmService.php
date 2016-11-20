@@ -68,7 +68,8 @@ class PhpFpmService extends AbstractShellService
         }
 
         $this->php = $php;
-        $this->config['service'] = sprintf($this->config['service'], $this->php);
+        $this->config['service'] = empty($this->config['service'])
+            ? null : sprintf($this->config['service'], $this->php);
     }
 
     /**
@@ -78,10 +79,9 @@ class PhpFpmService extends AbstractShellService
      */
     public function restart()
     {
-        // TODO Enable
-//        echo $this->serviceCommand((array)$this->config['restart'])->getExecCommand().PHP_EOL;
-//        $output = self::run($this->serviceCommand($this->config['restart']));
-//        echo trim($output).PHP_EOL;
+        if ($this->config['service'] !== null) {
+            self::run($this->serviceCommand((array)$this->config['restart']));
+        }
         return true;
     }
 
@@ -92,10 +92,9 @@ class PhpFpmService extends AbstractShellService
      */
     public function reload()
     {
-        // TODO Enable
-//        echo $this->serviceCommand((array)$this->config['reload'])->getExecCommand().PHP_EOL;
-//        $output = self::run($this->serviceCommand($this->config['reload']));
-//        echo trim($output).PHP_EOL;
+        if ($this->config['service'] !== null) {
+            self::run($this->serviceCommand((array)$this->config['reload']));
+        }
         return true;
     }
 }
