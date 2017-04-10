@@ -20,6 +20,50 @@ cd admin
 composer install
 ```
 
+### System setup
+
+Create a user group `account` that all account users will belong to:
+
+```bash
+groupadd account
+```
+
+Configure Apache to run under the newly created `account` group by setting the `Group` directive in `/etc/apache2/httpd.conf` accordingly:
+
+```
+# ...
+Group account
+# ...
+```
+
+Create a directory used for the Certbot challenges:
+
+```bash
+mkdir /www/htdocs/letsencrypt
+```
+
+### Database installation
+
+Run `mysql` with appropriate privileges and run the following commands (replace `system` with your database name / user and `***` with your actual database password):
+
+```
+CREATE USER 'system'@'localhost' IDENTIFIED BY '***';
+GRANT USAGE ON *.* TO 'system'@'localhost' IDENTIFIED BY '***' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
+CREATE DATABASE IF NOT EXISTS `system` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+GRANT ALL PRIVILEGES ON `system`.* TO 'system'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+### Admin configuration
+
+Create the admin configuration by copying the sample file:
+
+```bash
+cp config/config.example.yml config.yml
+```
+
+Edit the configuration file by adding your database credentials and adapting the binary commands accordingly to your server setup.
+
 ### Doctrine initialization
 
 In order to initialize the database, please run the following commands (from the installation directory):
