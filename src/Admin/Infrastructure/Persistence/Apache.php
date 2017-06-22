@@ -129,7 +129,8 @@ class Apache
         // If the HTTPS protocol is supported
         $httpsPorts = $vhost->getPorts(Vhost::PROTOCOL_HTTPS);
         if (!empty($httpsPorts)) {
-            $certbotService = CertbotServiceFactory::create();
+            $certbotConfig = $this->helper->vhostDirectory($vhost).DIRECTORY_SEPARATOR.'certbot.ini';
+            $certbotService = CertbotServiceFactory::create($certbotConfig);
             $primaryDomainIsCertified = $certbotService->isCertified($variables['primary_domain']);
 
             // Add the SSL configuration include
