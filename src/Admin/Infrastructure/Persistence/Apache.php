@@ -102,7 +102,7 @@ class Apache
 
         $variables = $this->config;
         $variables['primary_domain'] = strval($vhost->getPrimaryDomain());
-        $variables['secondary_domains'] = implode(', ', array_map('strval', $vhost->getSecondaryDomains()));
+        $variables['secondary_domains'] = implode(' ', array_map('strval', $vhost->getSecondaryDomains()));
         $variables['secondary_domains_without_wildcards'] =
             implode(', ', array_map('strval', $vhost->getSecondaryDomains(true)));
         $variables['docroot'] =
