@@ -59,7 +59,7 @@ FLUSH PRIVILEGES;
 Create the admin configuration by copying the sample file:
 
 ```bash
-cp config/config.example.yml config.yml
+cp config/config.example.yml config/config.yml
 ```
 
 Edit the configuration file by adding your database credentials and adapting the binary commands accordingly to your server setup.
