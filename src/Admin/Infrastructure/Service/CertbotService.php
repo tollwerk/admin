@@ -108,7 +108,7 @@ class CertbotService extends AbstractShellService
                 DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'.well-known');
         if (file_exists($wellKnownLink)) {
             // If the well-known link exists but is invalid
-            if (!is_link($wellKnownLink) || (readlink($wellKnownLink) != $challengeDir)) {
+            if (!is_link($wellKnownLink) || (realpath(readlink($wellKnownLink)) != realpath($challengeDir))) {
                 throw new \RuntimeException(
                     sprintf('Invalid certbot well-known link "%s" exists', $wellKnownLink, 1510399415)
                 );
