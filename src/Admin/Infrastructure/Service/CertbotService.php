@@ -36,6 +36,9 @@
 
 namespace Tollwerk\Admin\Infrastructure\Service;
 
+use Tollwerk\Admin\Domain\Vhost\VhostInterface;
+use Tollwerk\Admin\Infrastructure\Persistence\AccountHelper;
+
 /**
  * Certbot service
  *
@@ -79,5 +82,45 @@ class CertbotService extends AbstractShellService
     public function isCertified($domain)
     {
         return is_dir(rtrim($this->config['certdir'], DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$domain);
+    }
+
+    /**
+     * Prepare a virtual host
+     *
+     * @param VhostInterface $vhost Virtual host
+     * @param AccountHelper $accountHelper Account helper
+     * @throws \RuntimeException If the Certbot challenge directory is invalid
+     * @throws \RuntimeException If the well-known symlink cannot be created
+     * @throws \RuntimeException If the well-known link exists but is invalid
+     */
+    public function prepare(VhostInterface $vhost, AccountHelper $accountHelper)
+    {
+        // If the Certbot challenge directory is invalid
+        $challengeDir = rtrim($this->config['challenge'], DIRECTORY_SEPARATOR);
+        if (!is_dir($challengeDir)) {
+            throw new \RuntimeException(
+                sprintf('Certbot challenge directory "%s" is invalid', $challengeDir, 1510398571)
+            );
+        }
+
+        // Create the well-known symlink
+        $wellKnownLink = $accountHelper->directory('data'.rtrim(DIRECTORY_SEPARATOR.$vhost->getDocroot(),
+                DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'.well-known');
+        if (file_exists($wellKnownLink)) {
+            // If the well-known link exists but is invalid
+            if (!is_link($wellKnownLink) || (readlink($wellKnownLink) != $challengeDir)) {
+                throw new \RuntimeException(
+                    sprintf('Invalid certbot well-known link "%s" exists', $wellKnownLink, 1510399415)
+                );
+            }
+            return;
+        }
+
+        // If the well-known symlink cannot be created
+        if (!symlink($challengeDir, $wellKnownLink)) {
+            throw new \RuntimeException(
+                sprintf('Certbot well-known link "%s" cannot be created', $wellKnownLink, 1510399241)
+            );
+        }
     }
 }

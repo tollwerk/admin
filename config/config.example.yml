@@ -16,6 +16,7 @@ php:
   restart: ["restart"]
 certbot:
   service: "/usr/bin/certbot"
+  challenge: "/www/htdocs/letsencrypt"
   reload: ["certonly"]
   restart: ["certonly"]
 general:

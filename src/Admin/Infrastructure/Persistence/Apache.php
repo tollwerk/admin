@@ -154,6 +154,9 @@ class Apache
             $this->addEntry($files, 'certbot.ini',
                 TemplateService::render('certbot.ini', $variables));
 
+            // Create the well-known symlink
+            $certbotService->prepare($vhost, $this->helper);
+
             // Output a hint if the primary domain isn't certified
             if (!$primaryDomainIsCertified) {
                 App::addMessage(

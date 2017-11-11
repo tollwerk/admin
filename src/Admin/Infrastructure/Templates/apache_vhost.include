@@ -12,12 +12,6 @@ DocumentRoot "{{docroot}}"
 	Options -Indexes +FollowSymLinks
 	AllowOverride All
 	Require all granted
-</Directory>
-
-<Directory /www/htdocs/letsencrypt>
-    AllowOverride None
-    Require all granted
-</Directory>
-Alias /.well-known/ /www/htdocs/letsencrypt/{{#php_version}}
+</Directory>{{#php_version}}
 
 Include {{configroot}}/apache_fmp.include{{/php_version}}
