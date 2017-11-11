@@ -196,6 +196,9 @@ class Apache
         // Add the FPM configuration
         $this->addEntry($files, 'fpm-'.$vhost->getPhp().'.conf', TemplateService::render('fpm.conf', $variables));
 
+        // Add the FPM custom configuration
+        $this->addEntry($files, 'fpm.include?', TemplateService::render('fpm.include', $variables));
+
         // Add the FPM include
         $this->addEntry($files, 'apache_fmp.include',
             TemplateService::render('apache_fpm.include', $variables));

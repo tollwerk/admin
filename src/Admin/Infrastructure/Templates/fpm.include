@@ -1,0 +1,6 @@
+; PHP-FPM pool configuration
+;request_terminate_timeout = 300
+
+; PHP configuration values
+;php_value[max_execution_time]=240
+;php_value[memory_limit]=256M

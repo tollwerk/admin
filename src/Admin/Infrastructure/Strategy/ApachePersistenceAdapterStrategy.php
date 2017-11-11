@@ -89,6 +89,14 @@ class ApachePersistenceAdapterStrategy implements VhostPersistenceAdapterStrateg
 
         // Persist the file entries
         foreach ($entries as $filename => $filecontent) {
+            // Check whether this file should only be written once
+            if (substr($filename, -1) === '?') {
+                $filename = substr($filename, 0, -1);
+                if (@file_exists($filename)) {
+                    continue;
+                }
+            }
+
             if (!file_put_contents($filename, $filecontent)) {
                 throw new \RuntimeException(sprintf('Couldn\'t write config file "%s"', $filename, 1475507805));
             }
