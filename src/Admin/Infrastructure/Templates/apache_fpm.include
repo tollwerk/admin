@@ -2,5 +2,5 @@
     SetHandler "proxy:unix://{{fpmdir}}/{{account}}-{{primary_domain}}-{{php_version}}.sock|fcgi://{{account}}-{{primary_domain}}/"
 </FilesMatch>
 
-<Proxy fcgi://{{account}}-{{primary_domain}}/ enablereuse=on max=10>
+<Proxy fcgi://{{account}}-{{primary_domain}}/ enablereuse=off max=10>
 </Proxy>
