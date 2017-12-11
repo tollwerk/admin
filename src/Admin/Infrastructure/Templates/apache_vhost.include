@@ -5,7 +5,7 @@ CustomLog {{logdir}}/access_{{primary_domain}}_log combined
 
 DocumentRoot "{{docroot}}"
 <Directory "{{docroot}}">
-    Include {{configroot}}/apache_vhost_directory.include
+    Include {{configroot}}/apache_vhost_custom_directory.include
 </Directory>{{#php_version}}
 
 Include {{configroot}}/apache_fmp.include{{/php_version}}
