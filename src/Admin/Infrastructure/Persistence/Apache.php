@@ -99,7 +99,6 @@ class Apache
     public function __invoke(VhostInterface $vhost)
     {
         $files = [];
-        $httpsPorts = $vhost->getPorts(Vhost::PROTOCOL_HTTPS);
 
         $variables = $this->config;
         $variables['primary_domain'] = strval($vhost->getPrimaryDomain());
@@ -110,8 +109,6 @@ class Apache
             rtrim($this->config['dataroot'].DIRECTORY_SEPARATOR.$vhost->getDocroot(), DIRECTORY_SEPARATOR);
         $variables['configroot'] = $this->config['vhostroot'].DIRECTORY_SEPARATOR.$variables['primary_domain'];
         $variables['php_version'] = $vhost->getPhp();
-        $variables['challenge'] = rtrim(App::getConfig('certbot.challenge'), '/').'/';
-        $variables['ssl'] = !empty($httpsPorts);
 
         // If the virtual host should redirect
         if ($vhost->getRedirectUrl() !== null) {
@@ -130,6 +127,7 @@ class Apache
             TemplateService::render('apache_vhost.include', $variables));
 
         // If the HTTPS protocol is supported
+        $httpsPorts = $vhost->getPorts(Vhost::PROTOCOL_HTTPS);
         if (!empty($httpsPorts)) {
             $certbotConfig = $this->helper->vhostDirectory($vhost).DIRECTORY_SEPARATOR.'certbot.ini';
             $certbotService = CertbotServiceFactory::create($certbotConfig);
@@ -157,8 +155,7 @@ class Apache
                 TemplateService::render('certbot.ini', $variables));
 
             // Create the well-known symlink
-            // 2017-12-11: Disabled again, see deprecation notice
-            // $certbotService->prepare($vhost, $this->helper);
+             $certbotService->prepare($vhost, $this->helper);
 
             // Output a hint if the primary domain isn't certified
             if (!$primaryDomainIsCertified) {

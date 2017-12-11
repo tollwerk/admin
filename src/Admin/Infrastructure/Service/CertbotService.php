@@ -92,7 +92,6 @@ class CertbotService extends AbstractShellService
      * @throws \RuntimeException If the Certbot challenge directory is invalid
      * @throws \RuntimeException If the well-known symlink cannot be created
      * @throws \RuntimeException If the well-known link exists but is invalid
-     * @deprecated There should be no need for a real symlink here, the Apache Alias should cater for this
      */
     public function prepare(VhostInterface $vhost, AccountHelper $accountHelper)
     {

@@ -12,12 +12,6 @@ DocumentRoot "{{docroot}}"
 	Options -Indexes +FollowSymLinks
 	AllowOverride All
 	Require all granted
-</Directory>{{#ssl}}
-
-<Directory {{challenge}}>
-    AllowOverride None
-    Require all granted
-</Directory>
-Alias /.well-known/ {{challenge}}/{{/ssl}}{{#php_version}}
+</Directory>{{#php_version}}
 
 Include {{configroot}}/apache_fmp.include{{/php_version}}
