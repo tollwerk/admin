@@ -97,7 +97,7 @@ class ApachePersistenceAdapterStrategy implements VhostPersistenceAdapterStrateg
                 }
             }
 
-            if (!file_put_contents($filename, $filecontent)) {
+            if (file_put_contents($filename, $filecontent) === false) {
                 throw new \RuntimeException(sprintf('Couldn\'t write config file "%s"', $filename, 1475507805));
             }
         }
