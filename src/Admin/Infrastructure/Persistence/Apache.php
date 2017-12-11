@@ -149,6 +149,7 @@ class Apache
                 $variables['ssl'] = true;
                 $this->addEntry($files, 'apache_vhost.conf',
                     TemplateService::render('apache_vhost.conf', $variables));
+                $this->addEntry($files, 'apache_vhost_custom_'.$httpsPort.'.include?', '');
             }
 
             // Add the Certbot configuration
