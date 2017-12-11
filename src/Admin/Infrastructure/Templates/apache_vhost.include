@@ -5,13 +5,7 @@ CustomLog {{logdir}}/access_{{primary_domain}}_log combined
 
 DocumentRoot "{{docroot}}"
 <Directory "{{docroot}}">
-	RewriteEngine on
-	RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
-	RewriteRule .* - [F]
-
-	Options -Indexes +FollowSymLinks
-	AllowOverride All
-	Require all granted
+    Include {{configroot}}/apache_vhost_directory.include
 </Directory>{{#php_version}}
 
 Include {{configroot}}/apache_fmp.include{{/php_version}}
