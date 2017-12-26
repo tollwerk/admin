@@ -8,7 +8,7 @@ WEBROOT_DIR = /www/vhtdocs
 LOG_DIR = /var/log/apache2
 CERTBOT_EMAIL = info@tollwerk.de
 APACHE_GROUP = apache
-FPM_SOCKETS = /var/run/php-fpm
+FPM_SOCKETS = /run/php-fpm
 PHPMYADMIN_VHOST = /etc/apache2/vhosts.d/default_pma_vhost.include
 ```
 
