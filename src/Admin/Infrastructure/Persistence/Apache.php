@@ -102,6 +102,7 @@ class Apache
 
         $variables = $this->config;
         $variables['primary_domain'] = strval($vhost->getPrimaryDomain());
+        $variables['primary_domain_pcre'] = preg_quote($variables['primary_domain']);
         $variables['secondary_domains'] = implode(' ', array_map('strval', $vhost->getSecondaryDomains()));
         $variables['secondary_domains_without_wildcards'] =
             implode(', ', array_map('strval', $vhost->getSecondaryDomains(true)));
@@ -124,7 +125,10 @@ class Apache
 
         // Add the virtual host include
         $this->addEntry($files, 'apache_vhost.include', TemplateService::render('apache_vhost.include', $variables));
-        $this->addEntry($files, 'apache_vhost_custom_directory.include?', TemplateService::render('apache_vhost_custom_directory.include', $variables));
+        $this->addEntry(
+            $files, 'apache_vhost_custom_directory.include?',
+            TemplateService::render('apache_vhost_custom_directory.include', $variables)
+        );
         $this->addEntry($files, 'apache_vhost_custom_all.include?', '');
 
         // If the HTTPS protocol is supported
@@ -147,17 +151,21 @@ class Apache
                 // Add the HTTPS vhost declaration
                 $variables['port'] = $httpsPort;
                 $variables['ssl'] = true;
-                $this->addEntry($files, 'apache_vhost.conf',
-                    TemplateService::render('apache_vhost.conf', $variables));
+                $this->addEntry(
+                    $files, 'apache_vhost.conf',
+                    TemplateService::render('apache_vhost.conf', $variables)
+                );
                 $this->addEntry($files, 'apache_vhost_custom_'.$httpsPort.'.include?', '');
             }
 
             // Add the Certbot configuration
-            $this->addEntry($files, 'certbot.ini',
-                TemplateService::render('certbot.ini', $variables));
+            $this->addEntry(
+                $files, 'certbot.ini',
+                TemplateService::render('certbot.ini', $variables)
+            );
 
             // Create the well-known symlink
-             $certbotService->prepare($vhost, $this->helper);
+            $certbotService->prepare($vhost, $this->helper);
 
             // Output a hint if the primary domain isn't certified
             if (!$primaryDomainIsCertified) {
@@ -177,9 +185,14 @@ class Apache
             // Add the HTTP vhost declaration
             $variables['port'] = $httpPort;
             $variables['ssl'] = false;
-            $this->addEntry($files, 'apache_vhost.conf',
-                TemplateService::render('apache_vhost.conf', $variables));
-            $this->addEntry($files, 'apache_vhost_custom_'.$httpPort.'.include?', '');
+            $this->addEntry(
+                $files, 'apache_vhost.conf',
+                TemplateService::render('apache_vhost.conf', $variables)
+            );
+            $this->addEntry(
+                $files, 'apache_vhost_custom_'.$httpPort.'.include?',
+                TemplateService::render('apache_vhost_http.include', $variables)
+            );
         }
 
         $absoluteFiles = [];
@@ -206,8 +219,10 @@ class Apache
         $this->addEntry($files, 'fpm.include?', TemplateService::render('fpm.include', $variables));
 
         // Add the FPM include
-        $this->addEntry($files, 'apache_fmp.include',
-            TemplateService::render('apache_fpm.include', $variables));
+        $this->addEntry(
+            $files, 'apache_fmp.include',
+            TemplateService::render('apache_fpm.include', $variables)
+        );
     }
 
     /**

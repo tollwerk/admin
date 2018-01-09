@@ -1,4 +1,0 @@
-SSLEngine on
-SSLVerifyDepth  5
-SSLCertificateKeyFile /etc/ssl/apache2/zeniba.tollwerk.de.key
-SSLCertificateFile /etc/ssl/apache2/zeniba.tollwerk.de.crt

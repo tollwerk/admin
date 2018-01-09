@@ -4,4 +4,4 @@
 .env
 /tmp
 /config/config.yml
-/config/apache_ssl.default
+/config/apache_ssl.include

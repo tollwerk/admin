@@ -1,4 +1,5 @@
 SSLEngine on
 SSLVerifyDepth  5
-SSLCertificateKeyFile /path/to/server.default.key
-SSLCertificateFile /path/to/server.default.crt
+SSLCertificateKeyFile {{certdir}}/{{primary_domain}}/privkey.pem
+SSLCertificateFile {{certdir}}/{{primary_domain}}/cert.pem
+SSLCertificateChainFile {{certdir}}/{{primary_domain}}/chain.pem
