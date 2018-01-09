@@ -86,7 +86,7 @@ class User extends AbstractCommand
         $user = trim($user);
 
         // If the user name is invalid
-        if (!strlen($user) || !preg_match('%^[a-z]+$%', $user)) {
+        if (!strlen($user) || !preg_match('%^[a-z][a-z0-9]+$%', $user)) {
             throw  new \RuntimeException(sprintf('Invalid user name "%s"', $user), 1475514940);
         }
         return $user;
