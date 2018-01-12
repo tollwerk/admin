@@ -7,14 +7,14 @@
  * @package     Tollwerk\Admin
  * @subpackage  Tollwerk\Admin\Infrastructure\Shell
  * @author      Joschi Kuphal <joschi@tollwerk.de> / @jkphl
- * @copyright   Copyright © 2016 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
+ * @copyright   Copyright © 2018 Joschi Kuphal <joschi@tollwerk.de> / @jkphl
  * @license     http://opensource.org/licenses/MIT The MIT License (MIT)
  */
 
 /***********************************************************************************
  *  The MIT License (MIT)
  *
- *  Copyright © 2016 Joschi Kuphal <joschi@kuphal.net> / @jkphl
+ *  Copyright © 2018 Joschi Kuphal <joschi@kuphal.net> / @jkphl
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy of
  *  this software and associated documentation files (the "Software"), to deal in
@@ -86,7 +86,7 @@ class User extends AbstractCommand
         $user = trim($user);
 
         // If the user name is invalid
-        if (!strlen($user) || !preg_match('%^[a-z][a-z0-9]+$%', $user)) {
+        if (!strlen($user) || !preg_match('%^[a-z]+$%', $user)) {
             throw  new \RuntimeException(sprintf('Invalid user name "%s"', $user), 1475514940);
         }
         return $user;
