@@ -212,6 +212,11 @@ class Apache
      */
     protected function createPhpConfig(VhostInterface $vhost, array &$files, array $variables)
     {
+        $variables['pool'] = $variables['account'];
+        if (strlen(trim($vhost->getDocroot()))) {
+            $variables['pool'] .= '/'.$vhost->getDocroot();
+        }
+
         // Add the FPM configuration
         $this->addEntry($files, 'fpm-'.$vhost->getPhp().'.conf', TemplateService::render('fpm.conf', $variables));
 
