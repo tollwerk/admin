@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redirect all traffic to the main domain (if not in development mode)
+    RewriteCond %{ENV:APP_ENV} !development
+    RewriteCond %{HTTP_HOST} !^{{primary_domain_pcre}}$ [NC]
+    RewriteCond %{REQUEST_URI} !^/\.well\-known
+    RewriteRule ^ https://{{primary_domain}}%{REQUEST_URI} [L,R=301]
+
+    # Redirect all non-SSL traffic to SSL (if not in development mode)
+    RewriteCond %{ENV:APP_ENV} !development
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP_HOST} ^{{primary_domain_pcre}}$ [NC]
+    RewriteCond %{REQUEST_URI} !^/\.well\-known
+    RewriteRule ^ https://{{primary_domain}}%{REQUEST_URI} [L,R=301]
+</IfModule>
