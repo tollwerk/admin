@@ -1,7 +1,7 @@
 ServerName {{primary_domain}}{{#secondary_domains}}
 ServerAlias {{secondary_domains}}{{/secondary_domains}}
 
-CustomLog {{logdir}}/access_{{primary_domain}}_log combined
+CustomLog "|{{anonip}} --ipv4mask 16 --ipv6mask 64 --output {{logdir}}/access_{{primary_domain}}_log" combined
 
 DocumentRoot "{{docroot}}"
 <Directory "{{docroot}}">

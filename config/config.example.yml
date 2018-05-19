@@ -10,6 +10,7 @@ apache:
   service: "/etc/init.d/apache2"
   reload: ["graceful"]
   restart: ["restart"]
+  anonip: "/path/to/anonip.py"
 php:
   service: "/etc/init.d/php-fpm-php%s"
   reload: ["restart"]
