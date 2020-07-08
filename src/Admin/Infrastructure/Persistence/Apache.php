@@ -126,10 +126,15 @@ class Apache
         // Add the virtual host include
         $this->addEntry($files, 'apache_vhost.include', TemplateService::render('apache_vhost.include', $variables));
         $this->addEntry(
-            $files, 'apache_vhost_custom_directory.include?',
+            $files,
+            'apache_vhost_custom_directory.include?',
             TemplateService::render('apache_vhost_custom_directory.include', $variables)
         );
-        $this->addEntry($files, 'apache_vhost_custom_all.include?', '');
+        $this->addEntry(
+            $files,
+            'apache_vhost_custom_all.include?',
+            TemplateService::render('apache_vhost_all.include', $variables)
+        );
 
         // If the HTTPS protocol is supported
         $httpsPorts = $vhost->getPorts(Vhost::PROTOCOL_HTTPS);
