@@ -41,7 +41,7 @@ use Tollwerk\Admin\Infrastructure\App;
 /**
  * User related commands
  *
- * @package Tollwerk\Admin
+ * @package    Tollwerk\Admin
  * @subpackage Tollwerk\Admin\Infrastructure
  */
 class User extends AbstractCommand
@@ -50,11 +50,12 @@ class User extends AbstractCommand
      * Create a new system user
      *
      * @param string $user User name
+     *
      * @return string Output
      */
     public static function create($user)
     {
-        $user = self::validateUser($user);
+        $user    = self::validateUser($user);
         $command = Binary::sudo('useradd');
         $command->addArg('--gid', App::getConfig('general.group'));
         $command->addArg('--shell', '/bin/false');
@@ -78,6 +79,7 @@ class User extends AbstractCommand
      * Validate a user name
      *
      * @param string $user User name
+     *
      * @return string Validated user
      * @throws \RuntimeException If the user name is invalid
      */
@@ -86,9 +88,10 @@ class User extends AbstractCommand
         $user = trim($user);
 
         // If the user name is invalid
-        if (!strlen($user) || !preg_match('%^[a-z]+$%', $user)) {
+        if (!strlen($user) || !preg_match('%^[a-z][a-z0-9]{2,}$%', $user)) {
             throw  new \RuntimeException(sprintf('Invalid user name "%s"', $user), 1475514940);
         }
+
         return $user;
     }
 
@@ -118,7 +121,7 @@ class User extends AbstractCommand
      */
     public static function delete($user)
     {
-        $user = self::validateUser($user);
+        $user    = self::validateUser($user);
         $command = Binary::sudo('userdel');
         $command->addArg($user);
 
@@ -128,13 +131,13 @@ class User extends AbstractCommand
     /**
      * Add a system user to a user group
      *
-     * @param string $user User name
+     * @param string $user  User name
      * @param string $group Group name
      */
     public static function addGroup($user, $group)
     {
-        $user = self::validateUser($user);
-        $group = self::validateUser($group);
+        $user    = self::validateUser($user);
+        $group   = self::validateUser($group);
         $command = Binary::sudo('usermod');
         $command->addArg('--append');
         $command->addArg('--groups', $group);
@@ -146,12 +149,12 @@ class User extends AbstractCommand
     /**
      * Delete a system user from a user group
      *
-     * @param string $user User name
+     * @param string $user  User name
      * @param string $group Group name
      */
     public static function deleteGroup($user, $group)
     {
-        $user = self::validateUser($user);
+        $user  = self::validateUser($user);
         $group = self::validateUser($group);
 
         // Get the current user groups
@@ -160,7 +163,7 @@ class User extends AbstractCommand
         $command->addArg('--name');
         $command->addArg($user);
 
-        $groups = preg_split('%[^a-z]+%', self::run($command));
+        $groups    = preg_split('%[^a-z]+%', self::run($command));
         $newgroups = array_diff($groups, [$group]);
 
         $command = Binary::sudo('usermod');
